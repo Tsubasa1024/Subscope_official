@@ -16,7 +16,8 @@ const articles = [
   },
   {
     id: 102,
-    title: "Apple Music、カラオケ機能「Sing」の精度が向上。ボーカル調整がより自然に",
+    title:
+      "Apple Music、カラオケ機能「Sing」の精度が向上。ボーカル調整がより自然に",
     service: "Apple Music",
     description:
       "iOS 17.1アップデートにより、ボーカルキャンセルのアルゴリズムが刷新。微細な息遣いまで消せるように。",
@@ -40,7 +41,8 @@ const articles = [
   },
   {
     id: 104,
-    title: "Notion AIが進化。データベースの自動要約機能がプロジェクト管理を変える",
+    title:
+      "Notion AIが進化。データベースの自動要約機能がプロジェクト管理を変える",
     service: "Notion",
     description:
       "データベース内のテキストプロパティを一括で読み取り、ステータスや要約を自動生成する新機能。",
@@ -52,7 +54,8 @@ const articles = [
   },
   {
     id: 105,
-    title: "YouTube Premium、動画の「続きを見る」がデバイス間でよりシームレスに",
+    title:
+      "YouTube Premium、動画の「続きを見る」がデバイス間でよりシームレスに",
     service: "YouTube",
     description:
       "スマホで見ていた動画の続きをPCで再生する際の同期速度が大幅改善。細かな使い勝手が向上。",
@@ -64,7 +67,8 @@ const articles = [
   },
   {
     id: 106,
-    title: "Adobe Lightroom Web版、ブラウザだけで高度なマスキング編集が可能に",
+    title:
+      "Adobe Lightroom Web版、ブラウザだけで高度なマスキング編集が可能に",
     service: "Adobe CC",
     description:
       "アプリ版に迫る機能をブラウザで実現。外出先での現像作業がiPadなしでも完結するレベルへ。",
@@ -76,7 +80,8 @@ const articles = [
   },
   {
     id: 107,
-    title: "ChatGPT Plus、画像解析機能が全ユーザーに開放。手書きメモもコード化可能",
+    title:
+      "ChatGPT Plus、画像解析機能が全ユーザーに開放。手書きメモもコード化可能",
     service: "OpenAI",
     description:
       "マルチモーダル機能が標準搭載に。ホワイトボードの写真からWebサイトを作る実験を公開。",
@@ -96,6 +101,13 @@ const rankingData = {
 };
 
 // =========================================
+// 記事ページに飛ぶ関数
+// =========================================
+window.openArticle = function (id) {
+  window.location.href = "article.html?id=" + id;
+};
+
+// =========================================
 // 表示用の関数
 // =========================================
 
@@ -106,7 +118,7 @@ function renderMostViewed() {
   const container = document.getElementById("most-viewed-content");
   if (container) {
     container.innerHTML = `
-      <article class="featured-card" style="background-image: url('${topArticle.image}')">
+      <article class="featured-card" style="background-image: url('${topArticle.image}')" onclick="openArticle(${topArticle.id})">
           <div class="featured-content">
               <div class="featured-meta">
                   <span class="tag">${topArticle.tags[0]}</span> ${topArticle.service}
@@ -132,7 +144,7 @@ function renderArticles(items, containerId, showAd = true) {
   } else {
     items.forEach((article) => {
       html += `
-          <article class="article-card">
+          <article class="article-card" onclick="openArticle(${article.id})">
               <div class="card-image" style="background-image: url('${article.image}')"></div>
               <div class="card-body">
                   <span class="card-service">${article.service}</span>
@@ -181,7 +193,7 @@ function renderRanking(type) {
         <img class="rank-thumb" src="${article.image}" alt="${article.title}">
         <div class="rank-content">
             <span class="tag" style="font-size:0.7rem; margin-bottom:4px;">${article.service}</span>
-            <h4 class="rank-title">${article.title}</h4>
+            <h4 class="rank-title" onclick="openArticle(${article.id})">${article.title}</h4>
             <div class="rank-meta">
                 ${article.views.toLocaleString()} views
             </div>
