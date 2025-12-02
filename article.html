@@ -68,6 +68,7 @@
       overflow: hidden;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.18);
       border: 1px solid rgba(255, 255, 255, 0.6);
+      margin-bottom: 28px;
     }
 
     .thumb-wrap {
@@ -112,6 +113,9 @@
 
     .service {
       font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
 
     h1 {
@@ -141,7 +145,12 @@
 
     .divider {
       height: 1px;
-      background: linear-gradient(to right, rgba(210,210,215,0.2), rgba(210,210,215,0.8), rgba(210,210,215,0.2));
+      background: linear-gradient(
+        to right,
+        rgba(210, 210, 215, 0.2),
+        rgba(210, 210, 215, 0.8),
+        rgba(210, 210, 215, 0.2)
+      );
       margin-bottom: 20px;
     }
 
@@ -173,6 +182,109 @@
       font-size: 0.85rem;
     }
 
+    /* 前の記事 / 次の記事 ナビ */
+    .article-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .nav-card {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease,
+        box-shadow 0.2s ease;
+      min-height: 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .nav-card:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-label {
+      font-size: 0.75rem;
+      color: var(--color-text-gray);
+      margin-bottom: 4px;
+    }
+
+    .nav-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .nav-card.empty {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .nav-card.empty:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* 関連記事 */
+    .related-section {
+      margin-top: 8px;
+    }
+
+    .related-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .related-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .related-card:hover {
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .related-service {
+      font-size: 0.75rem;
+      color: var(--color-text-gray);
+      margin-bottom: 2px;
+    }
+
+    .related-title-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+
+    .related-meta {
+      font-size: 0.75rem;
+      color: var(--color-text-gray);
+    }
+
     @media (max-width: 768px) {
       .article-body {
         padding: 22px 18px 26px;
@@ -184,6 +296,10 @@
 
       .thumb-wrap {
         max-height: 240px;
+      }
+
+      .article-nav {
+        flex-direction: column;
       }
     }
   </style>
@@ -201,6 +317,15 @@
   </div>
 
   <script>
+    function openArticle(id) {
+      window.location.href = "article.html?id=" + id;
+    }
+
+    function openService(service) {
+      const encoded = encodeURIComponent(service);
+      window.location.href = "service.html?service=" + encoded;
+    }
+
     async function loadArticle() {
       const root = document.getElementById("article-root");
       const params = new URLSearchParams(window.location.search);
@@ -218,7 +343,8 @@
       try {
         const res = await fetch("./data/articles.json");
         const list = await res.json();
-        const article = list.find((a) => a.id === id);
+        const index = list.findIndex((a) => a.id === id);
+        const article = list[index];
 
         if (!article) {
           if (root) {
@@ -228,6 +354,7 @@
           return;
         }
 
+        // タイトル変更
         document.title = article.title + " | SUBSCOPE";
 
         const viewsText =
@@ -244,6 +371,67 @@
             ? article.tags[0]
             : "";
 
+        // 前後の記事
+        const prevArticle = index > 0 ? list[index - 1] : null;
+        const nextArticle = index < list.length - 1 ? list[index + 1] : null;
+
+        // 同じサービスの関連記事（自分以外から最大3件）
+        const related = list
+          .filter(
+            (a) => a.service === article.service && a.id !== article.id
+          )
+          .slice(0, 3);
+
+        const relatedHtml =
+          related.length === 0
+            ? ""
+            : `
+          <section class="related-section">
+            <div class="related-title">同じサービスの関連記事</div>
+            <div class="related-grid">
+              ${related
+                .map(
+                  (r) => `
+                <article class="related-card" onclick="openArticle(${r.id})">
+                  <div class="related-service">${r.service}</div>
+                  <div class="related-title-text">${r.title}</div>
+                  <div class="related-meta">${r.date.replace(
+                    /-/g,
+                    "."
+                  )} ・ ${
+                    typeof r.views === "number"
+                      ? r.views.toLocaleString() + " views"
+                      : ""
+                  }</div>
+                </article>
+              `
+                )
+                .join("")}
+            </div>
+          </section>
+        `;
+
+        const navHtml = `
+          <div class="article-nav">
+            <div class="nav-card ${
+              prevArticle ? "" : "empty"
+            }" ${prevArticle ? `onclick="openArticle(${prevArticle.id})"` : ""}>
+              <div class="nav-label">← 前の記事</div>
+              <div class="nav-title">${
+                prevArticle ? prevArticle.title : "これより前の記事はありません"
+              }</div>
+            </div>
+            <div class="nav-card ${
+              nextArticle ? "" : "empty"
+            }" ${nextArticle ? `onclick="openArticle(${nextArticle.id})"` : ""}>
+              <div class="nav-label">次の記事 →</div>
+              <div class="nav-title">${
+                nextArticle ? nextArticle.title : "これより後の記事はありません"
+              }</div>
+            </div>
+          </div>
+        `;
+
         root.innerHTML = `
           <article class="article-card">
             <div class="thumb-wrap">
@@ -252,7 +440,7 @@
             <div class="article-body">
               <div class="tag-row">
                 <span class="tag">${firstTag}</span>
-                <span class="service">${article.service}</span>
+                <span class="service" onclick="openService('${article.service}')">${article.service}</span>
               </div>
               <h1>${article.title}</h1>
               <div class="meta">
@@ -263,6 +451,10 @@
               <div class="divider"></div>
               <div class="content">
                 ${contentHtml}
+              </div>
+              <div style="margin-top:24px;">
+                ${navHtml}
+                ${relatedHtml}
               </div>
             </div>
           </article>
