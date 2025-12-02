@@ -146,63 +146,78 @@
 
 <script>
   async function init() {
+    // 🔹 記事データ読み込み
     const res = await fetch("./data/articles.json");
     const all = await res.json();
 
+    // 現在のタブ
     const url = new URLSearchParams(window.location.search);
-    const tabParam = url.get("tab");
+    const currentTab = url.get("tab") || "すべて";
 
     const tabsEl = document.getElementById("tabs");
     const gridEl = document.getElementById("grid");
 
-    // タグ一覧を抽出
-    const tagSet = new Set(["すべて"]);
-
+    // 🔹 ジャンル一覧を自動生成（すべての記事の a.genre から抽出）
+    const genreSet = new Set(["すべて"]);
     all.forEach(a => {
-      a.tags.forEach(t => tagSet.add(t.replace("#", "")));
+      if (a.genre) genreSet.add(a.genre);
     });
 
-    const tags = [...tagSet];
+    const genres = [...genreSet];
 
-    // タブ生成
-    tabsEl.innerHTML = tags.map(t => `
-      <div class="tab ${t === (tabParam || "すべて") ? "active" : ""}"
-           onclick="changeTab('${t}')">${t}</div>
-    `).join("");
+    // 🔹 タブ描画（ミュージック / 動画 / AI / …）
+    tabsEl.innerHTML = genres
+      .map(g => `
+        <div 
+          class="tab ${g === currentTab ? "active" : ""}"
+          onclick="changeTab('${g}')"
+        >
+          ${g}
+        </div>
+      `)
+      .join("");
 
-    // フィルタ
+    // 🔹 記事フィルタ（ジャンルで絞り込み）
     let filtered = all;
-    if (tabParam && tabParam !== "すべて") {
-      filtered = all.filter(a =>
-        a.tags.some(t => t.replace("#", "") === tabParam)
-      );
+    if (currentTab !== "すべて") {
+      filtered = all.filter(a => a.genre === currentTab);
     }
 
-    // グリッド
-    gridEl.innerHTML = filtered.map(a => `
-      <div class="card" onclick="openArticle(${a.id})">
-        <img class="thumb" src="${a.image}">
-        <div class="card-body">
-          <div class="service">${a.service}</div>
-          <div class="title">${a.title}</div>
-          <div class="desc">${a.description}</div>
-          <div class="date">${a.date.replace(/-/g, ".")}</div>
+    // 🔹 新しい順に並べる
+    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // 🔹 記事をカードとして描画
+    gridEl.innerHTML = filtered
+      .map(
+        a => `
+        <div class="card" onclick="openArticle(${a.id})">
+          <img class="thumb" src="${a.image}" alt="${a.title}">
+          <div class="card-body">
+            <div class="service">${a.service}</div>
+            <div class="title">${a.title}</div>
+            <div class="desc">${a.description}</div>
+            <div class="date">${a.date.replace(/-/g, ".")}</div>
+          </div>
         </div>
-      </div>
-    `).join("");
+      `
+      )
+      .join("");
   }
 
+  // 🔹 タブクリック → URLを切り替えてページ再読み込み
   function changeTab(tag) {
     const encoded = encodeURIComponent(tag);
     window.location.href = "all.html?tab=" + encoded;
   }
 
+  // 🔹 記事ページへ飛ぶ
   function openArticle(id) {
     window.location.href = "article.html?id=" + id;
   }
 
   init();
 </script>
+
 
 </body>
 </html>
