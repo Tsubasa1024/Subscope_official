@@ -9,7 +9,7 @@
     "date": "2023-10-25",
     "tags": ["#Spotify", "#新機能", "#AI"],
     "image": "https://images.unsplash.com/photo-1611339555312-e607c8352fd7?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   },
   {
     "id": 102,
@@ -21,7 +21,7 @@
     "date": "2023-10-28",
     "tags": ["#AppleMusic", "#アップデート", "#iOS"],
     "image": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   },
   {
     "id": 103,
@@ -33,7 +33,7 @@
     "date": "2023-10-26",
     "tags": ["#Netflix", "#ニュース", "#プラン変更"],
     "image": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   },
   {
     "id": 104,
@@ -45,7 +45,7 @@
     "date": "2023-10-29",
     "tags": ["#Notion", "#機能解説", "#仕事効率化"],
     "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   },
   {
     "id": 105,
@@ -57,7 +57,7 @@
     "date": "2023-10-27",
     "tags": ["#YouTube", "#アップデート", "#UX改善"],
     "image": "https://images.unsplash.com/photo-1526045612212-70caf35c14df?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   },
   {
     "id": 106,
@@ -69,7 +69,7 @@
     "date": "2023-10-24",
     "tags": ["#Adobe", "#Web版", "#新機能"],
     "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   },
   {
     "id": 107,
@@ -81,6 +81,6 @@
     "date": "2023-10-29",
     "tags": ["#OpenAI", "#AI", "#検証"],
     "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop",
-    "content": [...]
+    "content": []
   }
 ]
