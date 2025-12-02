@@ -156,31 +156,36 @@
     const tabsEl = document.getElementById("tabs");
     const gridEl = document.getElementById("grid");
 
-    // 🔹 genre一覧を抽出
+    // ⭐ genre だけをタブにする（← これが重要）
     const genreSet = new Set(["すべて"]);
-    articles.forEach(a => genreSet.add(a.genre));
+    articles.forEach(a => {
+      if (a.genre) genreSet.add(a.genre);
+    });
+
     const genres = [...genreSet];
 
-    // 🔹 タブ描画
+    // ⭐ タブを genre だけで表示
     tabsEl.innerHTML = genres
       .map(g => `
         <div 
           class="tab ${g === current ? "active" : ""}" 
           onclick="selectTab('${g}')"
-        >${g}</div>
+        >
+          ${g}
+        </div>
       `)
       .join("");
 
-    // 🔹 フィルタリング
+    // ⭐ ジャンル別フィルタ（tags は使わない）
     let filtered = articles;
     if (current !== "すべて") {
       filtered = articles.filter(a => a.genre === current);
     }
 
-    // 🔹 新しい順
+    // 新しい順
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // 🔹 グリッド描画
+    // 記事レンダリング
     gridEl.innerHTML = filtered
       .map(
         a => `
@@ -208,6 +213,7 @@
 
   init();
 </script>
+
 
 </body>
 </html>
