@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUBSCOPE | すべての記事</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: #000;
+    }
+
+    .back-link {
+      font-size: 0.9rem;
+      color: #666;
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    /* タブ */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #e9e9ee;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .tab.active {
+      background: #000;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+    }
+
+    .thumb {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 12px 16px 16px;
+    }
+
+    .service {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .desc {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .date {
+      font-size: 0.75rem;
+      color: #777;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <header>
+    <a href="index.html" class="logo">SUBSCOPE</a>
+    <a href="index.html" class="back-link">← トップへ戻る</a>
+  </header>
+
+  <h1>すべての記事</h1>
+
+  <!-- タブ（カテゴリ） -->
+  <div class="tabs" id="tabs"></div>
+
+  <!-- 記事一覧 -->
+  <div class="grid" id="grid">読み込み中…</div>
+
+</div>
+
+<script>
+  async function init() {
+    const res = await fetch("./data/articles.json");
+    const all = await res.json();
+
+    const url = new URLSearchParams(window.location.search);
+    const tabParam = url.get("tab");
+
+    const tabsEl = document.getElementById("tabs");
+    const gridEl = document.getElementById("grid");
+
+    // タグ一覧を抽出
+    const tagSet = new Set(["すべて"]);
+
+    all.forEach(a => {
+      a.tags.forEach(t => tagSet.add(t.replace("#", "")));
+    });
+
+    const tags = [...tagSet];
+
+    // タブ生成
+    tabsEl.innerHTML = tags.map(t => `
+      <div class="tab ${t === (tabParam || "すべて") ? "active" : ""}"
+           onclick="changeTab('${t}')">${t}</div>
+    `).join("");
+
+    // フィルタ
+    let filtered = all;
+    if (tabParam && tabParam !== "すべて") {
+      filtered = all.filter(a =>
+        a.tags.some(t => t.replace("#", "") === tabParam)
+      );
+    }
+
+    // グリッド
+    gridEl.innerHTML = filtered.map(a => `
+      <div class="card" onclick="openArticle(${a.id})">
+        <img class="thumb" src="${a.image}">
+        <div class="card-body">
+          <div class="service">${a.service}</div>
+          <div class="title">${a.title}</div>
+          <div class="desc">${a.description}</div>
+          <div class="date">${a.date.replace(/-/g, ".")}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function changeTab(tag) {
+    const encoded = encodeURIComponent(tag);
+    window.location.href = "all.html?tab=" + encoded;
+  }
+
+  function openArticle(id) {
+    window.location.href = "article.html?id=" + id;
+  }
+
+  init();
+</script>
+
+</body>
+</html>
