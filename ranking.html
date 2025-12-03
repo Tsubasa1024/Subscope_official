@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUBSCOPE | ランキング</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: #000;
+    }
+
+    .back-link {
+      font-size: 0.9rem;
+      color: #666;
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    /* タブ */
+    .tabs {
+      display: inline-flex;
+      border-radius: 999px;
+      background: #e9e9ee;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #555;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      color: #000;
+      font-weight: 600;
+    }
+
+    /* ランキングリスト */
+    .ranking-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #ddd;
+      gap: 16px;
+    }
+
+    .rank-number {
+      font-size: 1.6rem;
+      font-weight: 700;
+      width: 36px;
+      text-align: center;
+      color: #d0d0d5;
+    }
+
+    .thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      object-fit: cover;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .service {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+
+    .meta {
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      .item {
+        align-items: flex-start;
+      }
+      .thumb {
+        width: 64px;
+        height: 64px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="index.html" class="logo">SUBSCOPE</a>
+    <a href="index.html" class="back-link">← トップへ戻る</a>
+  </header>
+
+  <h1>ランキング</h1>
+  <p class="subtitle">※ 今はサンプルデータの閲覧数で並べています。</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('daily')">デイリー</button>
+    <button class="tab-btn" onclick="switchTab('weekly')">ウィークリー</button>
+    <button class="tab-btn" onclick="switchTab('monthly')">マンスリー</button>
+    <button class="tab-btn" onclick="switchTab('allTime')">全期間</button>
+  </div>
+
+  <ul class="ranking-list" id="ranking-list">
+    読み込み中…
+  </ul>
+
+</div>
+
+<script>
+  // ランキング用のID順（今はサンプル）
+  const rankingData = {
+    daily:   [102, 107, 104, 101, 106],
+    weekly:  [102, 101, 107, 103, 105],
+    monthly: [105, 103, 102, 104, 106],
+    allTime: [102, 107, 101, 105, 103]
+  };
+
+  let articlesCache = [];
+  let currentTab = 'daily';
+
+  function formatViews(views) {
+    if (views >= 10000) {
+      const man = (views / 10000).toFixed(1).replace(/\.0$/, '');
+      return `${man}万回表示`;
+    }
+    return `${views.toLocaleString()}回表示`;
+  }
+
+  async function init() {
+    const res = await fetch('./data/articles.json');
+    articlesCache = await res.json();
+    renderRanking('daily');
+  }
+
+  function renderRanking(type) {
+    currentTab = type;
+    const list = document.getElementById('ranking-list');
+    const ids = rankingData[type];
+    const items = [];
+
+    ids.forEach((id, index) => {
+      const article = articlesCache.find(a => a.id === id);
+      if (!article) return;
+      items.push(`
+        <li class="item">
+          <div class="rank-number">${index + 1}</div>
+          <img class="thumb" src="${article.image}" alt="${article.title}">
+          <div class="content">
+            <div class="service">${article.service}</div>
+            <div class="title" onclick="openArticle(${article.id})">
+              ${article.title}
+            </div>
+            <div class="meta">
+              ${formatViews(article.views)}・${article.date.replace(/-/g, '.')}
+            </div>
+          </div>
+        </li>
+      `);
+    });
+
+    list.innerHTML = items.join('');
+    updateTabUI();
+  }
+
+  function updateTabUI() {
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('active');
+      const text = btn.textContent.trim();
+      if (
+        (currentTab === 'daily'   && text === 'デイリー') ||
+        (currentTab === 'weekly'  && text === 'ウィークリー') ||
+        (currentTab === 'monthly' && text === 'マンスリー') ||
+        (currentTab === 'allTime' && text === '全期間')
+      ) {
+        btn.classList.add('active');
+      }
+    });
+  }
+
+  function switchTab(type) {
+    renderRanking(type);
+  }
+
+  function openArticle(id) {
+    window.location.href = 'article.html?id=' + id;
+  }
+
+  init();
+</script>
+</body>
+</html>
