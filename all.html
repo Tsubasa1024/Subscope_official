@@ -315,6 +315,12 @@ body {
   }
 
   init();
+   function toggleMenu() {
+    const menu = document.getElementById('nav-overlay');
+    if (menu) {
+      menu.classList.toggle('open');
+    }
+  }
 </script>
 
 
