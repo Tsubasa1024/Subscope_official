@@ -1,264 +1,342 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SUBSCOPE</title>
 
   <style>
     :root {
-      --bg: #fff;
+      --bg: #ffffff;
       --bg2: #f5f5f7;
       --text: #1d1d1f;
       --text-gray: #86868b;
       --border: #d2d2d7;
-      --accent: #000;
       --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --container: 1080px;
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: var(--font); background: var(--bg); color: var(--text); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      padding-top: 72px; /* 固定ヘッダーの高さぶん余白 */
+    }
+    a { text-decoration: none; color: inherit; }
 
-    /* ======= 固定ヘッダー ======= */
+    /* ========= 共通 固定ヘッダー ========= */
     .global-header {
       position: fixed;
-      top:0; left:0; width:100%; height:72px;
+      top: 0; left: 0; right: 0;
+      height: 72px;
       background: rgba(255,255,255,0.82);
       backdrop-filter: blur(20px);
-      display:flex; justify-content:space-between; align-items:center;
-      padding:0 32px;
-      z-index:200;
-      border-bottom:1px solid rgba(0,0,0,0.05);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px;
+      z-index: 200;
     }
     .gh-logo {
-      font-size:1.4rem;
-      font-weight:700;
-      letter-spacing:-0.03em;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
     }
     .menu-btn {
-      padding:10px 20px;
-      border-radius:50px;
-      background:rgba(255,255,255,0.8);
-      border:1px solid rgba(0,0,0,0.1);
-      cursor:pointer;
-      font-weight:600;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
     }
 
-    /* ======= メニュー overlay ======= */
+    /* ナビオーバーレイ */
     .nav-overlay {
       position: fixed;
-      top: 90px;
+      top: 88px;
       right: 32px;
-      padding:20px;
-      width:220px;
-      background:rgba(255,255,255,0.95);
-      backdrop-filter:blur(20px);
-      border-radius:16px;
-      box-shadow:0 20px 60px rgba(0,0,0,0.15);
-      opacity:0; visibility:hidden;
-      transform:translateY(-10px);
-      transition:0.25s;
-      z-index:150;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(20px);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: 0.25s;
+      z-index: 150;
+      min-width: 200px;
     }
-    .nav-overlay.open { opacity:1; visibility:visible; transform:translateY(0); }
-    .nav-list li { list-style:none; margin-bottom:8px; }
+    .nav-overlay.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .nav-list { list-style: none; }
+    .nav-list li { margin-bottom: 8px; }
+    .nav-list li:last-child { margin-bottom: 0; }
     .nav-link {
-      display:block;
-      padding:10px 16px;
-      border-radius:12px;
+      display: block;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
     }
-    .nav-link:hover { background:#f5f5f7; }
+    .nav-link:hover { background: #f5f5f7; }
 
-
-    /* ======= HERO レイアウト ======= */
-    .hero-wrapper {
-      margin-top:140px; /* 固定ヘッダー分 */
-      text-align:center;
-      padding-bottom:40px;
-    }
-
-    .hero-title {
-      font-size:3rem;
-      font-weight:700;
-      letter-spacing:-0.03em;
+    /* ========= HERO 部分 ========= */
+    .hero-section {
+      max-width: var(--container);
+      margin: 40px auto 40px;
+      padding: 0 24px;
     }
 
-    /* 検索バー */
-    .search-box {
-      max-width:var(--container);
-      margin:20px auto 0;
-      padding:0 24px;
-      display:flex;
-      justify-content:flex-start;
+    .hero-title-center {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
+    /* 検索バー（左寄せ） */
+    .search-row {
+      display: flex;
+      justify-content: flex-start; /* 左寄せ */
+      margin-bottom: 24px;
+    }
+    .search-wrapper {
+      position: relative;
+      width: 320px;
     }
     .search-input {
-      width:300px;
-      padding:10px 20px 10px 44px;
-      border-radius:50px;
-      border:1px solid rgba(0,0,0,0.1);
-      background:rgba(255,255,255,0.8);
-      backdrop-filter:blur(20px);
-      box-shadow:0 4px 20px rgba(0,0,0,0.05);
+      width: 100%;
+      padding: 10px 20px 10px 44px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      font-size: 0.9rem;
+      outline: none;
     }
     .search-icon {
-      position:absolute;
-      margin-left:16px;
-      margin-top:12px;
-      opacity:0.6;
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      opacity: 0.6;
+      pointer-events: none;
     }
 
+    /* HERO 記事カード（JS が #most-viewed-content に入れる） */
     .hero-card-wrapper {
-      max-width:var(--container);
-      margin:20px auto 0;
-      padding:0 24px;
+      margin-top: 8px;
     }
-
-    .hero-card {
-      width:100%;
-      min-height:60vh;
-      border-radius:32px;
-      background-size:cover;
-      background-position:center;
-      padding:40px;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-end;
-      color:white;
-      position:relative;
-      box-shadow:0 30px 60px rgba(0,0,0,0.15);
-      overflow:hidden;
+    .featured-card {
+      width: 100%;
+      min-height: 60vh;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+      color: #fff;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
     }
-    .hero-card::before {
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(to top, rgba(0,0,0,0.85), transparent 50%);
+    .featured-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), transparent);
     }
-    .hero-content { position:relative; z-index:2; text-align:left; max-width:700px; }
-    .hero-tag {
-      display:inline-block;
-      padding:4px 12px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.3);
-      margin-bottom:12px;
+    .featured-content {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
     }
-    .hero-text-title {
-      font-size:2.2rem;
-      font-weight:700;
-      margin-bottom:10px;
+    .featured-meta {
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      opacity: 0.9;
     }
-    .hero-desc { font-size:1.1rem; opacity:0.9; margin-bottom:18px; }
+    .featured-title {
+      font-size: 2.3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .featured-desc {
+      font-size: 1rem;
+      margin-bottom: 18px;
+      opacity: 0.9;
+    }
     .btn-read {
-      background:#fff;
-      color:#000;
-      padding:12px 28px;
-      border-radius:30px;
-      border:none;
-      font-weight:700;
-      cursor:pointer;
+      display: inline-block;
+      padding: 12px 26px;
+      border-radius: 999px;
+      border: none;
+      background: #fff;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
     }
 
-
-    /* ======= 最新記事 3×3 ======= */
-    .section { padding:80px 0; }
+    /* ========= 最新の記事 3×3 ========= */
+    .section {
+      padding: 60px 0 80px;
+    }
     .container {
-      max-width:var(--container);
-      margin:0 auto;
-      padding:0 24px;
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 24px;
     }
     .section-title {
-      font-size:2rem;
-      font-weight:700;
-      margin-bottom:24px;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
     }
-
     .grid-layout {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:32px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 32px;
     }
     .article-card {
-      background:white;
-      border-radius:24px;
-      box-shadow:0 10px 20px rgba(0,0,0,0.08);
-      overflow:hidden;
-      cursor:pointer;
-      transition:0.2s;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
     }
     .article-card:hover {
-      transform:translateY(-6px);
-      box-shadow:0 18px 30px rgba(0,0,0,0.12);
+      transform: translateY(-6px);
+      box-shadow: 0 18px 32px rgba(0,0,0,0.12);
     }
-    .card-img {
-      width:100%; height:200px; object-fit:cover;
+    .card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
     }
-    .card-body { padding:16px; }
+    .card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
     .card-service {
-      font-size:0.75rem;
-      color:var(--text-gray);
-      margin-bottom:6px;
+      font-size: 0.75rem;
+      color: var(--text-gray);
+      margin-bottom: 6px;
     }
-    .card-title { font-size:1.2rem; font-weight:700; margin-bottom:8px; }
-    .card-desc { font-size:0.9rem; color:#555; }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card-date {
+      font-size: 0.8rem;
+      color: var(--text-gray);
+      margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      color: #555;
+      flex: 1;
+    }
 
+    footer {
+      background:#000;
+      color:#fff;
+      text-align:center;
+      padding:40px 0;
+      margin-top:40px;
+    }
+
+    @media (max-width: 900px) {
+      .hero-title-center { font-size: 2.4rem; }
+      .grid-layout { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 640px) {
+      .grid-layout { grid-template-columns: 1fr; }
+      .hero-section { margin-top: 24px; }
+      .search-wrapper { width: 100%; }
+    }
   </style>
 </head>
-
 <body>
 
-<!-- 共有ヘッダー -->
-<header class="global-header">
-  <div class="gh-logo">SUBSCOPE</div>
-  <button class="menu-btn" onclick="toggleMenu()">Menu</button>
-</header>
+  <!-- 固定ヘッダー -->
+  <header class="global-header">
+    <div class="gh-logo">SUBSCOPE</div>
+    <button class="menu-btn" onclick="toggleMenu()">Menu</button>
+  </header>
 
-<!-- メニュー -->
-<div class="nav-overlay" id="nav-overlay">
-  <ul class="nav-list">
-    <li><a href="index.html" class="nav-link">トップ</a></li>
-    <li><a href="all.html" class="nav-link">すべての記事</a></li>
-    <li><a href="ranking.html" class="nav-link">ランキング</a></li>
-  </ul>
-</div>
-
-<!-- HERO アウトライン -->
-<section class="hero-wrapper">
-
-  <h1 class="hero-title">SUBSCOPE</h1>
-
-  <!-- 検索 -->
-  <div class="search-box">
-    <input type="text" class="search-input" id="search-input" placeholder="検索">
+  <!-- メニュー -->
+  <div class="nav-overlay" id="nav-overlay">
+    <ul class="nav-list">
+      <li><a href="index.html"   class="nav-link">トップ</a></li>
+      <li><a href="all.html"     class="nav-link">すべての記事</a></li>
+      <li><a href="ranking.html" class="nav-link">ランキング</a></li>
+    </ul>
   </div>
 
-  <!-- 注目記事 -->
-  <div class="hero-card-wrapper">
-    <div id="hero-card"></div>
-  </div>
+  <!-- HERO 部 -->
+  <section class="hero-section">
+    <!-- 中央 SUBSCOPE -->
+    <h1 class="hero-title-center">SUBSCOPE</h1>
 
-</section>
-
-<!-- 最新記事 3×3 -->
-<section class="section">
-  <div class="container">
-    <h2 class="section-title">最新の記事</h2>
-    <div class="grid-layout" id="latest-grid"></div>
-
-    <div style="text-align:center; margin-top:20px;">
-      <a href="all.html" style="padding:10px 22px; background:black; color:white; border-radius:999px;">
-        すべての記事を見る →
-      </a>
+    <!-- 左の検索バー -->
+    <div class="search-row">
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input id="search-input" class="search-input" type="text" placeholder="検索">
+      </div>
     </div>
-  </div>
-</section>
 
-<script src="index.js"></script>
-<script>
-function toggleMenu() {
-  document.getElementById("nav-overlay").classList.toggle("open");
-}
-</script>
+    <!-- 人気記事カード（index.js の renderHero がここに入れる） -->
+    <div class="hero-card-wrapper" id="most-viewed-content"></div>
+  </section>
 
+  <!-- 最新記事 3×3 -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">最新の記事</h2>
+      <div class="grid-layout" id="latest-grid"></div>
+
+      <div style="text-align:center; margin-top:20px;">
+        <a href="all.html"
+           style="padding:10px 22px; background:#000; color:#fff; border-radius:999px; font-size:0.9rem;">
+          すべての記事を見る →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2023 SUBSCOPE. All rights reserved.</p>
+  </footer>
+
+  <!-- JS（そのまま今の index.js を使う） -->
+  <script src="index.js"></script>
+  <script>
+    function toggleMenu() {
+      document.getElementById("nav-overlay").classList.toggle("open");
+    }
+  </script>
 </body>
 </html>
