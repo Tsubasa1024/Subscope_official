@@ -1,6 +1,119 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  /* ======== 固定ヘッダー ======== */
+.global-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 72px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  z-index: 200;
+}
+
+.gh-logo a {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #1D1D1F;
+  text-decoration: none;
+}
+
+.menu-btn {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.menu-btn:hover {
+  background: #fff;
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.menu-icon-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-line {
+  width: 16px;
+  height: 2px;
+  background-color: #000;
+  border-radius: 2px;
+}
+
+/* メニュー展開 */
+.nav-overlay {
+  position: fixed;
+  top: 80px;
+  right: 32px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: 0.25s;
+  z-index: 199;
+}
+
+.nav-overlay.open {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-list li {
+  margin-bottom: 8px;
+}
+
+.nav-link {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 12px;
+  color: #1D1D1F;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.nav-link:hover {
+  background: #F5F5F7;
+  transform: translateY(-1px);
+}
+
+/* 全ページに必要：固定ヘッダーぶん下げる */
+body {
+  padding-top: 92px;
+}
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SUBSCOPE | すべての記事</title>
