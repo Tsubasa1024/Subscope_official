@@ -1,163 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-   <!-- 共通 固定ヘッダー -->
-  <header class="global-header">
-    <div class="global-header-inner">
-      <a href="index.html" class="gh-logo">SUBSCOPE</a>
-
-      <button class="menu-btn" onclick="toggleMenu()">
-        <div class="menu-icon-lines">
-          <span class="menu-line"></span>
-          <span class="menu-line"></span>
-        </div>
-        <span>Menu</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- 共通ナビ（オーバーレイ） -->
-  <div class="nav-overlay" id="nav-overlay">
-    <ul class="nav-list">
-      <li>
-        <a href="index.html" class="nav-link" onclick="toggleMenu()">
-          トップ
-        </a>
-      </li>
-      <li>
-        <a href="all.html" class="nav-link" onclick="toggleMenu()">
-          すべての記事
-        </a>
-      </li>
-      <li>
-        <a href="ranking.html" class="nav-link" onclick="toggleMenu()">
-          ランキング
-        </a>
-      </li>
-    </ul>
-  </div>
-
-  /* ======== 共通 固定ヘッダー ======== */
-.global-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  padding: 12px 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  backdrop-filter: blur(20px);
-  background: rgba(255,255,255,0.82);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-}
-
-/* 中身のレイアウト */
-.global-header-inner {
-  max-width: 1080px;
-  margin: 0 auto;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* ロゴ */
-.gh-logo {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-/* 既存の .menu-btn をそのまま使う前提（index.html にあるやつ） */
-/* 他ページにない場合は同じCSSをコピペでOK */
-
-/* ナビのオーバーレイ位置だけちょっと調整 */
-.nav-overlay {
-  position: fixed;
-  top: 68px;      /* ヘッダーのちょい下 */
-  right: 32px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  padding: 20px;
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-  border: 1px solid rgba(0,0,0,0.05);
-  transform: translateY(-10px);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 199;
-  min-width: 200px;
-}
-
-.nav-overlay.open {
-  transform: translateY(0);
-  opacity: 1;
-  visibility: visible;
-}
-
-.nav-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-list li {
-  margin-bottom: 8px;
-}
-
-.nav-list li:last-child {
-  margin-bottom: 0;
-}
-
-.nav-link {
-  display: block;
-  padding: 10px 16px;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #1D1D1F;
-  text-decoration: none;
-  transition: background 0.2s, transform 0.15s;
-}
-
-.nav-link:hover {
-  background: #F5F5F7;
-  transform: translateY(-1px);
-}
-
-/* ヘッダーぶん下げる余白（各ページで必要） */
-body {
-  padding-top: 72px;  /* ヘッダーの高さぶん */
-}
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SUBSCOPE | 記事詳細</title>
+  <title>SUBSCOPE | 記事</title>
+
   <style>
     :root {
-      --color-bg: #f5f5f7;
-      --color-surface: #ffffff;
+      --color-bg: #ffffff;
+      --color-bg-secondary: #f5f5f7;
       --color-text-main: #1d1d1f;
       --color-text-gray: #86868b;
       --color-border: #d2d2d7;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        Helvetica, Arial, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --container-width: 800px;
     }
 
     body {
+      margin: 0;
+      background: var(--color-bg);
       font-family: var(--font-family);
-      background: radial-gradient(circle at top, #f0f0ff 0, #f5f5f7 40%, #f5f5f7 100%);
       color: var(--color-text-main);
-      -webkit-font-smoothing: antialiased;
+      padding-top: 76px; /* 固定ヘッダー余白 */
+      line-height: 1.7;
     }
 
     a {
@@ -165,448 +30,229 @@ body {
       text-decoration: none;
     }
 
-    .page {
-      max-width: 960px;
+    /* ====== 共通ヘッダー ====== */
+    .global-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 14px 32px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .global-header-inner {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-
-    header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
+      align-items: center;
     }
-
-    .logo {
+    .gh-logo {
       font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.03em;
     }
-
-    .back-link {
-      font-size: 0.85rem;
-      color: var(--color-text-gray);
-      padding: 6px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--color-border);
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(12px);
+    .menu-btn {
+      background: rgba(255,255,255,0.8);
+      padding: 8px 18px;
+      border-radius: 100px;
+      border: 1px solid rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: 0.2s;
     }
-
-    .article-card {
-      background: var(--color-surface);
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.18);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      margin-bottom: 28px;
+    .menu-btn:hover {
+      background: #fff;
+      transform: translateY(-2px);
     }
+    .nav-overlay {
+      position: fixed;
+      top: 76px;
+      right: 32px;
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: 0.3s;
+      min-width: 200px;
+      z-index: 150;
+    }
+    .nav-overlay.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .nav-list { list-style: none; padding: 0; margin: 0; }
+    .nav-list li { margin-bottom: 10px; }
+    .nav-link { display: block; padding: 10px 16px; border-radius: 10px; }
+    .nav-link:hover { background: #f5f5f7; }
 
-    .thumb-wrap {
-      position: relative;
-      overflow: hidden;
-      max-height: 320px;
+    /* ===== ページデザイン ===== */
+    .page {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 32px 24px 80px;
     }
 
     .thumb {
       width: 100%;
-      height: 100%;
-      max-height: 320px;
+      height: 330px;
       object-fit: cover;
-      display: block;
-      transform: scale(1.02);
+      border-radius: 18px;
+      margin-bottom: 20px;
+      background: #eee;
     }
 
-    .article-body {
-      padding: 28px 28px 32px;
-    }
-
-    .tag-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      font-size: 0.8rem;
-      color: var(--color-text-gray);
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--color-border);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .service {
-      font-size: 0.85rem;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 4px;
-    }
-
-    h1 {
+    h1.title {
       font-size: 2rem;
-      line-height: 1.35;
+      font-weight: 700;
       margin-bottom: 14px;
       letter-spacing: -0.02em;
     }
 
     .meta {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--color-text-gray);
-      margin-bottom: 22px;
+      margin-bottom: 28px;
     }
 
-    .meta span + span::before {
-      content: "・";
-      margin: 0 4px;
+    .content {
+      font-size: 1.05rem;
+      margin-bottom: 40px;
+      white-space: pre-line;
     }
 
-    .lead {
-      font-size: 1rem;
-      line-height: 1.8;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .divider {
-      height: 1px;
-      background: linear-gradient(
-        to right,
-        rgba(210, 210, 215, 0.2),
-        rgba(210, 210, 215, 0.8),
-        rgba(210, 210, 215, 0.2)
-      );
-      margin-bottom: 20px;
-    }
-
-    .content p {
-      font-size: 0.98rem;
-      line-height: 1.9;
-      margin-bottom: 14px;
-      color: #333;
-    }
-
-    .content p:last-child {
-      margin-bottom: 0;
-    }
-
-    .not-found {
-      padding: 60px 0;
-      text-align: center;
-      color: var(--color-text-gray);
-      font-size: 0.95rem;
-    }
-
-    .not-found a {
+    .back-btn {
       display: inline-block;
-      margin-top: 16px;
-      padding: 8px 16px;
+      padding: 10px 22px;
+      background: #000;
+      color: #fff;
       border-radius: 999px;
-      border: 1px solid var(--color-border);
-      background: #fff;
-      font-size: 0.85rem;
-    }
-
-    /* 前の記事 / 次の記事 ナビ */
-    .article-nav {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .nav-card {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid var(--color-border);
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease,
-        box-shadow 0.2s ease;
-      min-height: 64px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .nav-card:hover {
-      background: #ffffff;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-    }
-
-    .nav-label {
-      font-size: 0.75rem;
-      color: var(--color-text-gray);
-      margin-bottom: 4px;
-    }
-
-    .nav-title {
       font-size: 0.9rem;
-      font-weight: 600;
-      line-height: 1.4;
+      transition: 0.2s;
+    }
+    .back-btn:hover {
+      opacity: 0.8;
+      transform: translateY(-2px);
     }
 
-    .nav-card.empty {
-      opacity: 0.4;
-      cursor: default;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .nav-card.empty:hover {
-      transform: none;
-      box-shadow: none;
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    /* 関連記事 */
-    .related-section {
-      margin-top: 8px;
-    }
-
+    /* Related */
     .related-title {
-      font-size: 1rem;
+      font-size: 1.4rem;
       font-weight: 600;
-      margin-bottom: 10px;
+      margin: 40px 0 20px;
     }
-
-    .related-grid {
+    .related-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
+      gap: 18px;
     }
-
-    .related-card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 10px 12px;
-      border: 1px solid var(--color-border);
+    .related-item {
+      padding: 14px 18px;
+      background: var(--color-bg-secondary);
+      border-radius: 14px;
       cursor: pointer;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      transition: 0.2s;
     }
-
-    .related-card:hover {
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
-    }
-
-    .related-service {
-      font-size: 0.75rem;
-      color: var(--color-text-gray);
-      margin-bottom: 2px;
-    }
-
-    .related-title-text {
-      font-size: 0.9rem;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-bottom: 2px;
-    }
-
-    .related-meta {
-      font-size: 0.75rem;
-      color: var(--color-text-gray);
-    }
-
-    @media (max-width: 768px) {
-      .article-body {
-        padding: 22px 18px 26px;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .thumb-wrap {
-        max-height: 240px;
-      }
-
-      .article-nav {
-        flex-direction: column;
-      }
+    .related-item:hover {
+      background: #e5e5e8;
     }
   </style>
 </head>
-<body>
-  <div class="page">
-    <header>
-      <a href="index.html" class="logo">SUBSCOPE</a>
-      <a href="index.html" class="back-link">← トップに戻る</a>
-    </header>
 
-    <main id="article-root">
-      <div class="not-found">記事を読み込んでいます…</div>
-    </main>
+<body>
+
+  <!-- 共通ヘッダー -->
+  <header class="global-header">
+    <div class="global-header-inner">
+      <a href="index.html" class="gh-logo">SUBSCOPE</a>
+
+      <button class="menu-btn" onclick="toggleMenu()">Menu</button>
+
+      <div class="nav-overlay" id="nav-overlay">
+        <ul class="nav-list">
+          <li><a href="index.html" class="nav-link">トップ</a></li>
+          <li><a href="all.html" class="nav-link">すべての記事</a></li>
+          <li><a href="ranking.html" class="nav-link">ランキング</a></li>
+          <li><a href="service.html" class="nav-link">ジャンル</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <img id="thumb" class="thumb" />
+
+    <h1 class="title" id="title">読み込み中…</h1>
+
+    <div class="meta" id="meta"></div>
+
+    <div class="content" id="content"></div>
+
+    <a class="back-btn" href="all.html">← 記事一覧に戻る</a>
+
+    <h2 class="related-title">関連する記事</h2>
+    <div class="related-list" id="related"></div>
   </div>
 
   <script>
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      const res = await fetch("./data/articles.json");
+      const articles = await res.json();
+      const article = articles.find(a => a.id == id);
+
+      if (!article) {
+        document.getElementById("title").innerText = "記事が見つかりませんでした";
+        return;
+      }
+
+      // ---- 表示 ----
+      document.getElementById("thumb").src = article.image;
+      document.getElementById("title").innerText = article.title;
+      document.getElementById("meta").innerText =
+        `${article.service}｜${article.date.replace(/-/g, ".")}`;
+
+      document.getElementById("content").innerText =
+        article.body || article.description;
+
+      // ---- 関連記事（同じジャンル） ----
+      const related = articles
+        .filter(a => a.genre === article.genre && a.id != article.id)
+        .slice(0, 5);
+
+      document.getElementById("related").innerHTML =
+        related
+          .map(
+            a => `
+          <div class="related-item" onclick="openArticle(${a.id})">
+            ${a.title}
+          </div>
+        `
+          )
+          .join("");
+    }
+
     function openArticle(id) {
       window.location.href = "article.html?id=" + id;
     }
 
-    function openService(service) {
-      const encoded = encodeURIComponent(service);
-      window.location.href = "service.html?service=" + encoded;
+    function toggleMenu() {
+      const nav = document.getElementById("nav-overlay");
+      nav.classList.toggle("open");
     }
 
-    async function loadArticle() {
-      const root = document.getElementById("article-root");
-      const params = new URLSearchParams(window.location.search);
-      const idParam = params.get("id");
-      const id = Number(idParam);
-
-      if (!idParam || !id) {
-        if (root) {
-          root.innerHTML =
-            '<div class="not-found">記事が指定されていません。<br><a href="index.html">トップに戻る</a></div>';
-        }
-        return;
-      }
-
-      try {
-        const res = await fetch("./data/articles.json");
-        const list = await res.json();
-        const index = list.findIndex((a) => a.id === id);
-        const article = list[index];
-
-        if (!article) {
-          if (root) {
-            root.innerHTML =
-              '<div class="not-found">記事が見つかりませんでした。<br><a href="index.html">トップに戻る</a></div>';
-          }
-          return;
-        }
-
-        // タイトル変更
-        document.title = article.title + " | SUBSCOPE";
-
-        const viewsText =
-          typeof article.views === "number"
-            ? article.views.toLocaleString() + " views"
-            : "";
-
-        const contentHtml = (article.content || [])
-          .map((p) => `<p>${p}</p>`)
-          .join("");
-
-        const firstTag =
-          Array.isArray(article.tags) && article.tags.length > 0
-            ? article.tags[0]
-            : "";
-
-        // 前後の記事
-        const prevArticle = index > 0 ? list[index - 1] : null;
-        const nextArticle = index < list.length - 1 ? list[index + 1] : null;
-
-        // 同じサービスの関連記事（自分以外から最大3件）
-        const related = list
-          .filter(
-            (a) => a.service === article.service && a.id !== article.id
-          )
-          .slice(0, 3);
-
-        const relatedHtml =
-          related.length === 0
-            ? ""
-            : `
-          <section class="related-section">
-            <div class="related-title">同じサービスの関連記事</div>
-            <div class="related-grid">
-              ${related
-                .map(
-                  (r) => `
-                <article class="related-card" onclick="openArticle(${r.id})">
-                  <div class="related-service">${r.service}</div>
-                  <div class="related-title-text">${r.title}</div>
-                  <div class="related-meta">${r.date.replace(
-                    /-/g,
-                    "."
-                  )} ・ ${
-                    typeof r.views === "number"
-                      ? r.views.toLocaleString() + " views"
-                      : ""
-                  }</div>
-                </article>
-              `
-                )
-                .join("")}
-            </div>
-          </section>
-        `;
-
-        const navHtml = `
-          <div class="article-nav">
-            <div class="nav-card ${
-              prevArticle ? "" : "empty"
-            }" ${prevArticle ? `onclick="openArticle(${prevArticle.id})"` : ""}>
-              <div class="nav-label">← 前の記事</div>
-              <div class="nav-title">${
-                prevArticle ? prevArticle.title : "これより前の記事はありません"
-              }</div>
-            </div>
-            <div class="nav-card ${
-              nextArticle ? "" : "empty"
-            }" ${nextArticle ? `onclick="openArticle(${nextArticle.id})"` : ""}>
-              <div class="nav-label">次の記事 →</div>
-              <div class="nav-title">${
-                nextArticle ? nextArticle.title : "これより後の記事はありません"
-              }</div>
-            </div>
-          </div>
-        `;
-
-        root.innerHTML = `
-          <article class="article-card">
-            <div class="thumb-wrap">
-              <img class="thumb" src="${article.image}" alt="${article.title}">
-            </div>
-            <div class="article-body">
-              <div class="tag-row">
-                <span class="tag">${firstTag}</span>
-                <span class="service" onclick="openService('${article.service}')">${article.service}</span>
-              </div>
-              <h1>${article.title}</h1>
-              <div class="meta">
-                <span>${article.date.replace(/-/g, ".")}</span>
-                <span>${viewsText}</span>
-              </div>
-              <p class="lead">${article.description}</p>
-              <div class="divider"></div>
-              <div class="content">
-                ${contentHtml}
-              </div>
-              <div style="margin-top:24px;">
-                ${navHtml}
-                ${relatedHtml}
-              </div>
-            </div>
-          </article>
-        `;
-      } catch (e) {
-        console.error(e);
-        if (root) {
-          root.innerHTML =
-            '<div class="not-found">記事の読み込みに失敗しました。<br><a href="index.html">トップに戻る</a></div>';
-        }
-      }
-    }
-
-    window.addEventListener("DOMContentLoaded", loadArticle);
-     function toggleMenu() {
-    const menu = document.getElementById('nav-overlay');
-    if (menu) {
-      menu.classList.toggle('open');
-    }
-  }
+    init();
   </script>
+
 </body>
 </html>
