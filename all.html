@@ -1,303 +1,207 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>すべての記事 - SUBSCOPE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUBSCOPE | すべての記事</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    <!-- ===== 固定ヘッダーのCSS（indexと同じ） ===== -->
-    <style>
-        /* ======== 固定ヘッダー ======== */
-        .global-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 72px;
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 32px;
-            z-index: 200;
-        }
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-        .gh-logo a {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            color: #1D1D1F;
-            text-decoration: none;
-        }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-        .menu-btn {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-        .menu-btn:hover {
-            background: #fff;
-            transform: scale(1.02);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-        .menu-icon-lines {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .menu-line {
-            width: 16px;
-            height: 2px;
-            background: #000;
-            border-radius: 2px;
-        }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: #000;
+    }
 
-        /* メニュー展開 */
-        .nav-overlay {
-            position: fixed;
-            top: 80px;
-            right: 32px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0px 20px 60px rgba(0, 0, 0, 0.25);
-            visibility: hidden;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: 0.25s;
-            z-index: 199;
-        }
-        .nav-overlay.open {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .back-link {
+      font-size: 0.9rem;
+      color: #666;
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+    }
 
-        .nav-list {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-        .nav-list li {
-            margin-bottom: 8px;
-        }
-        .nav-link {
-            display: block;
-            padding: 10px 16px;
-            border-radius: 12px;
-            color: #1D1D1F;
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: 0.2s;
-        }
-        .nav-link:hover {
-            background: #F5F5F7;
-            transform: translateY(-1px);
-        }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
 
-        /* 本文にヘッダー分の余白 */
-        body {
-            padding-top: 92px;
-            background: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+    /* タブ */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
 
-        /* ===== 記事一覧 ===== */
-        .container {
-            max-width: 1040px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    .tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: #e9e9ee;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            font-weight: 700;
-            color: #1D1D1F;
-        }
+    .tab.active {
+      background: #000;
+      color: #fff;
+      font-weight: 600;
+    }
 
-        /* ジャンルタブ */
-        .genre-tabs {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-        .genre-tab {
-            padding: 10px 18px;
-            background: #F5F5F7;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.2s;
-        }
-        .genre-tab.active {
-            background: #000;
-            color: #fff;
-        }
-        .genre-tab:hover {
-            background: #e7e7e7;
-        }
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
 
-        /* 記事のグリッド */
-        .article-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
+    .card {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: 0.2s;
+    }
 
-        .article-card {
-            padding: 20px;
-            border-radius: 20px;
-            background: #fff;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            transition: 0.2s;
-            cursor: pointer;
-        }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+    }
 
-        .article-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 24px rgba(0,0,0,0.1);
-        }
+    .thumb {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+    }
 
-        .service-tag {
-            font-size: 0.8rem;
-            color: #555;
-            margin-bottom: 4px;
-        }
-        .title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #111;
-        }
-        .desc {
-            font-size: 0.9rem;
-            color: #555;
-            margin-bottom: 10px;
-        }
-        .date {
-            font-size: 0.8rem;
-            color: #777;
-        }
-    </style>
+    .card-body {
+      padding: 12px 16px 16px;
+    }
+
+    .service {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .desc {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .date {
+      font-size: 0.75rem;
+      color: #777;
+    }
+
+  </style>
 </head>
-
 <body>
 
-<!-- ========================================================= -->
-<!-- 固定ヘッダー（index.html と完全同じ） -->
-<!-- ========================================================= -->
-<header class="global-header">
-    <div class="gh-logo">
-        <a href="index.html">SUBSCOPE</a>
-    </div>
+<div class="page">
 
-    <button class="menu-btn" onclick="toggleMenu()">
-        <div class="menu-icon-lines">
-            <span class="menu-line"></span>
-            <span class="menu-line"></span>
-        </div>
-        <span>Menu</span>
-    </button>
+  <header>
+    <a href="index.html" class="logo">SUBSCOPE</a>
+    <a href="index.html" class="back-link">← トップへ戻る</a>
+  </header>
 
-    <div class="nav-overlay" id="nav-overlay">
-        <ul class="nav-list">
-            <li><a href="index.html" class="nav-link">トップ</a></li>
-            <li><a href="all.html" class="nav-link">すべての記事</a></li>
-            <li><a href="ranking.html" class="nav-link">ランキング</a></li>
-        </ul>
-    </div>
-</header>
+  <h1>すべての記事</h1>
 
-<!-- ========================================================= -->
-<!-- コンテンツ -->
-<!-- ========================================================= -->
-<div class="container">
+  <!-- タブ（カテゴリ） -->
+  <div class="tabs" id="tabs"></div>
 
-    <h1>すべての記事</h1>
-
-    <!-- ジャンルタブ -->
-    <div class="genre-tabs" id="genre-tabs">
-        <div class="genre-tab active" data-genre="ALL">すべて</div>
-        <div class="genre-tab" data-genre="Music">ミュージック</div>
-        <div class="genre-tab" data-genre="AI">AI</div>
-        <div class="genre-tab" data-genre="Fitness">フィットネス</div>
-        <div class="genre-tab" data-genre="Video">動画</div>
-    </div>
-
-    <!-- 記事リスト -->
-    <div class="article-grid" id="all-articles"></div>
+  <!-- 記事一覧 -->
+  <div class="grid" id="grid">読み込み中…</div>
 
 </div>
 
-<!-- ========================================================= -->
-<!-- JS（記事読み込み + ジャンルフィルタ + Menu動作） -->
-<!-- ========================================================= -->
 <script>
-function toggleMenu() {
-    const nav = document.getElementById("nav-overlay");
-    nav.classList.toggle("open");
-}
-
-/* 記事ロード */
-async function loadArticles() {
+  async function init() {
     const res = await fetch("./data/articles.json");
-    return await res.json();
-}
+    const all = await res.json();
 
-function renderArticles(list) {
-    const container = document.getElementById("all-articles");
-    container.innerHTML = list.map(a => `
-        <div class="article-card" onclick="location.href='article.html?id=${a.id}'">
-            <div class="service-tag">${a.service}</div>
-            <div class="title">${a.title}</div>
-            <div class="desc">${a.desc}</div>
-            <div class="date">${a.date.replace(/-/g, '/')}</div>
-        </div>
-    `).join("");
-}
+    const url = new URLSearchParams(window.location.search);
+    const tabParam = url.get("tab");
 
-async function init() {
-    const all = await loadArticles();
-    let current = [...all];
+    const tabsEl = document.getElementById("tabs");
+    const gridEl = document.getElementById("grid");
 
-    renderArticles(current);
+    // タグ一覧を抽出
+    const tagSet = new Set(["すべて"]);
 
-    // タブ操作
-    document.querySelectorAll(".genre-tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-            document.querySelectorAll(".genre-tab").forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-
-            const genre = tab.dataset.genre;
-
-            if (genre === "ALL") {
-                current = [...all];
-            } else {
-                current = all.filter(a => a.category === genre || a.service === genre);
-            }
-
-            renderArticles(current);
-        });
+    all.forEach(a => {
+      a.tags.forEach(t => tagSet.add(t.replace("#", "")));
     });
-}
 
-init();
+    const tags = [...tagSet];
+
+    // タブ生成
+    tabsEl.innerHTML = tags.map(t => `
+      <div class="tab ${t === (tabParam || "すべて") ? "active" : ""}"
+           onclick="changeTab('${t}')">${t}</div>
+    `).join("");
+
+    // フィルタ
+    let filtered = all;
+    if (tabParam && tabParam !== "すべて") {
+      filtered = all.filter(a =>
+        a.tags.some(t => t.replace("#", "") === tabParam)
+      );
+    }
+
+    // グリッド
+    gridEl.innerHTML = filtered.map(a => `
+      <div class="card" onclick="openArticle(${a.id})">
+        <img class="thumb" src="${a.image}">
+        <div class="card-body">
+          <div class="service">${a.service}</div>
+          <div class="title">${a.title}</div>
+          <div class="desc">${a.description}</div>
+          <div class="date">${a.date.replace(/-/g, ".")}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function changeTab(tag) {
+    const encoded = encodeURIComponent(tag);
+    window.location.href = "all.html?tab=" + encoded;
+  }
+
+  function openArticle(id) {
+    window.location.href = "article.html?id=" + id;
+  }
+
+  init();
 </script>
 
 </body>
