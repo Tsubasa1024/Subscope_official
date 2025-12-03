@@ -44,7 +44,7 @@ function renderMostViewed() {
               <button class="btn-read">続きを読む</button>
           </div>
       </article>
-  `;
+    `;
   }
 }
 
@@ -59,25 +59,24 @@ function renderArticles(items, containerId, showAd = true) {
       '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #86868B;">該当する記事が見つかりませんでした。</div>';
   } else {
     items.forEach((article) => {
-      // サービス名クリックでサービス別ページへ
       html += `
-          <article class="article-card" onclick="openArticle(${article.id})">
-              <div class="card-image" style="background-image: url('${article.image}')"></div>
-              <div class="card-body">
-                  <span class="card-service" onclick="event.stopPropagation(); openService('${article.service}')">${article.service}</span>
-                  <h3 class="card-title">${article.title}</h3>
-                  <p class="card-desc">${article.description}</p>
-                  <span class="card-date">${article.date.replace(/-/g, ".")}</span>
-              </div>
-          </article>
+        <article class="article-card" onclick="openArticle(${article.id})">
+            <div class="card-image" style="background-image: url('${article.image}')"></div>
+            <div class="card-body">
+                <span class="card-service" onclick="event.stopPropagation(); openService('${article.service}')">${article.service}</span>
+                <h3 class="card-title">${article.title}</h3>
+                <p class="card-desc">${article.description}</p>
+                <span class="card-date">${article.date.replace(/-/g, ".")}</span>
+            </div>
+        </article>
       `;
     });
 
     if (showAd) {
       html += `
-          <div class="article-card placeholder-card">
-              <div>Advertisement<br><span style="font-size:0.8em; opacity:0.6;">(Placeholder)</span></div>
-          </div>
+        <div class="article-card placeholder-card">
+            <div>Advertisement<br><span style="font-size:0.8em; opacity:0.6;">(Placeholder)</span></div>
+        </div>
       `;
     }
   }
@@ -152,7 +151,7 @@ window.toggleMenu = function () {
 };
 
 // =========================================
-– 検索
+// 検索
 // =========================================
 
 function initSearch() {
