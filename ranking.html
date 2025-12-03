@@ -182,6 +182,29 @@
 </head>
 
 <body>
+<!-- 固定ヘッダー（トップページと同じ） -->
+<header class="global-header">
+  <div class="gh-logo">
+    <a href="index.html">SUBSCOPE</a>
+  </div>
+
+  <button class="menu-btn" onclick="toggleMenu()">
+    <div class="menu-icon-lines">
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+    </div>
+    <span>Menu</span>
+  </button>
+
+  <!-- メニュー展開 -->
+  <div class="nav-overlay" id="nav-overlay">
+    <ul class="nav-list">
+      <li><a href="index.html" class="nav-link">トップ</a></li>
+      <li><a href="all.html" class="nav-link">すべての記事</a></li>
+      <li><a href="ranking.html" class="nav-link">ランキング</a></li>
+    </ul>
+  </div>
+</header>
 
   <!-- 固定ヘッダー -->
   <header class="global-header">
