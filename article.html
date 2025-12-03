@@ -6,8 +6,8 @@
   <title>SUBSCOPE | 記事詳細</title>
   <style>
     :root {
-      --color-bg: #ffffff;
-      --color-bg-secondary: #f5f5f7;
+      --color-bg: #f5f5f7;
+      --color-surface: #ffffff;
       --color-text-main: #1d1d1f;
       --color-text-gray: #86868b;
       --color-border: #d2d2d7;
@@ -23,7 +23,7 @@
 
     body {
       font-family: var(--font-family);
-      background: var(--color-bg-secondary);
+      background: radial-gradient(circle at top, #f0f0ff 0, #f5f5f7 40%, #f5f5f7 100%);
       color: var(--color-text-main);
       -webkit-font-smoothing: antialiased;
     }
@@ -34,7 +34,7 @@
     }
 
     .page {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 24px 16px 40px;
     }
@@ -53,58 +53,78 @@
     }
 
     .back-link {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--color-text-gray);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 999px;
       border: 1px solid var(--color-border);
-      background: #fff;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
     }
 
     .article-card {
-      background: #fff;
-      border-radius: 24px;
+      background: var(--color-surface);
+      border-radius: 28px;
       overflow: hidden;
-      box-shadow: 0 24px 40px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .thumb-wrap {
+      position: relative;
+      overflow: hidden;
+      max-height: 320px;
     }
 
     .thumb {
       width: 100%;
-      height: 260px;
+      height: 100%;
+      max-height: 320px;
       object-fit: cover;
       display: block;
+      transform: scale(1.02);
     }
 
     .article-body {
-      padding: 24px 24px 28px;
+      padding: 28px 28px 32px;
+    }
+
+    .tag-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: var(--color-text-gray);
     }
 
     .tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--color-text-gray);
-      margin-bottom: 6px;
     }
 
     .service {
       font-size: 0.85rem;
-      color: var(--color-text-gray);
-      margin-bottom: 4px;
     }
 
     h1 {
-      font-size: 1.8rem;
-      line-height: 1.3;
-      margin-bottom: 12px;
+      font-size: 2rem;
+      line-height: 1.35;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
     }
 
     .meta {
       font-size: 0.85rem;
       color: var(--color-text-gray);
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
     .meta span + span::before {
@@ -114,7 +134,14 @@
 
     .lead {
       font-size: 1rem;
-      line-height: 1.7;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, rgba(210,210,215,0.2), rgba(210,210,215,0.8), rgba(210,210,215,0.2));
       margin-bottom: 20px;
     }
 
@@ -122,6 +149,7 @@
       font-size: 0.98rem;
       line-height: 1.9;
       margin-bottom: 14px;
+      color: #333;
     }
 
     .content p:last-child {
@@ -132,19 +160,30 @@
       padding: 60px 0;
       text-align: center;
       color: var(--color-text-gray);
+      font-size: 0.95rem;
+    }
+
+    .not-found a {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: #fff;
+      font-size: 0.85rem;
     }
 
     @media (max-width: 768px) {
       .article-body {
-        padding: 20px 16px 24px;
+        padding: 22px 18px 26px;
       }
 
       h1 {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
       }
 
-      .thumb {
-        height: 210px;
+      .thumb-wrap {
+        max-height: 240px;
       }
     }
   </style>
@@ -157,150 +196,87 @@
     </header>
 
     <main id="article-root">
-      <!-- JS で中身を差し込む -->
-      <div class="not-found">読み込み中です…</div>
+      <div class="not-found">記事を読み込んでいます…</div>
     </main>
   </div>
 
   <script>
-    // index.js と同じ記事データ
-    const articles = [
-      {
-        id: 101,
-        title: "Spotifyの「AI DJ」機能が日本でも解禁。まるでラジオDJ",
-        service: "Spotify",
-        description:
-          "ユーザーの好みを学習し、曲解説までしてくれる革新的なAI機能がついに日本上陸。使用感を徹底レビュー。",
-        views: 12500,
-        date: "2023-10-25",
-        tags: ["#新機能", "#AI"],
-        image:
-          "https://images.unsplash.com/photo-1611339555312-e607c8352fd7?q=80&w=1000&auto=format&fit=crop",
-      },
-      {
-        id: 102,
-        title:
-          "Apple Music、カラオケ機能「Sing」の精度が向上。ボーカル調整がより自然に",
-        service: "Apple Music",
-        description:
-          "iOS 17.1アップデートにより、ボーカルキャンセルのアルゴリズムが刷新。微細な息遣いまで消せるように。",
-        views: 45000,
-        date: "2023-10-28",
-        tags: ["#アップデート", "#iOS"],
-        image:
-          "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop",
-      },
-      {
-        id: 103,
-        title:
-          "Netflix、プラン改定を発表。広告付きプランでも画質が1080p対応へ",
-        service: "Netflix",
-        description:
-          "これまで720pだった広告付きベーシックプランがアップグレード。コスパ最強の選択肢となるか？",
-        views: 8900,
-        date: "2023-10-26",
-        tags: ["#ニュース", "#プラン変更"],
-        image:
-          "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=1000&auto=format&fit=crop",
-      },
-      {
-        id: 104,
-        title:
-          "Notion AIが進化。データベースの自動要約機能がプロジェクト管理を変える",
-        service: "Notion",
-        description:
-          "データベース内のテキストプロパティを一括で読み取り、ステータスや要約を自動生成する新機能。",
-        views: 32000,
-        date: "2023-10-29",
-        tags: ["#機能解説", "#仕事効率化"],
-        image:
-          "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1000&auto=format&fit=crop",
-      },
-      {
-        id: 105,
-        title:
-          "YouTube Premium、動画の「続きを見る」がデバイス間でよりシームレスに",
-        service: "YouTube",
-        description:
-          "スマホで見ていた動画の続きをPCで再生する際の同期速度が大幅改善。細かな使い勝手が向上。",
-        views: 15000,
-        date: "2023-10-27",
-        tags: ["#アップデート", "#UX改善"],
-        image:
-          "https://images.unsplash.com/photo-1526045612212-70caf35c14df?q=80&w=1000&auto=format&fit=crop",
-      },
-      {
-        id: 106,
-        title:
-          "Adobe Lightroom Web版、ブラウザだけで高度なマスキング編集が可能に",
-        service: "Adobe CC",
-        description:
-          "アプリ版に迫る機能をブラウザで実現。外出先での現像作業がiPadなしでも完結するレベルへ。",
-        views: 5600,
-        date: "2023-10-24",
-        tags: ["#Web版", "#新機能"],
-        image:
-          "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop",
-      },
-      {
-        id: 107,
-        title:
-          "ChatGPT Plus、画像解析機能が全ユーザーに開放。手書きメモもコード化可能",
-        service: "OpenAI",
-        description:
-          "マルチモーダル機能が標準搭載に。ホワイトボードの写真からWebサイトを作る実験を公開。",
-        views: 41000,
-        date: "2023-10-29",
-        tags: ["#AI", "#検証"],
-        image:
-          "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop",
-      },
-    ];
-
-    function getArticleFromQuery() {
-      const params = new URLSearchParams(window.location.search);
-      const id = Number(params.get("id"));
-      if (!id) return null;
-      return articles.find((a) => a.id === id) || null;
-    }
-
-    function renderArticle() {
+    async function loadArticle() {
       const root = document.getElementById("article-root");
-      const article = getArticleFromQuery();
+      const params = new URLSearchParams(window.location.search);
+      const idParam = params.get("id");
+      const id = Number(idParam);
 
-      if (!root) return;
-
-      if (!article) {
-        root.innerHTML =
-          '<div class="not-found">記事が見つかりませんでした。<br><br><a href="index.html">トップに戻る</a></div>';
+      if (!idParam || !id) {
+        if (root) {
+          root.innerHTML =
+            '<div class="not-found">記事が指定されていません。<br><a href="index.html">トップに戻る</a></div>';
+        }
         return;
       }
 
-      document.title = article.title + " | SUBSCOPE";
+      try {
+        const res = await fetch("./data/articles.json");
+        const list = await res.json();
+        const article = list.find((a) => a.id === id);
 
-      root.innerHTML = `
-        <article class="article-card">
-          <img class="thumb" src="${article.image}" alt="${article.title}">
-          <div class="article-body">
-            <div class="tag">${article.tags[0] || ""}</div>
-            <div class="service">${article.service}</div>
-            <h1>${article.title}</h1>
-            <div class="meta">
-              <span>${article.date.replace(/-/g, ".")}</span>
-              <span>${article.views.toLocaleString()} views</span>
+        if (!article) {
+          if (root) {
+            root.innerHTML =
+              '<div class="not-found">記事が見つかりませんでした。<br><a href="index.html">トップに戻る</a></div>';
+          }
+          return;
+        }
+
+        document.title = article.title + " | SUBSCOPE";
+
+        const viewsText =
+          typeof article.views === "number"
+            ? article.views.toLocaleString() + " views"
+            : "";
+
+        const contentHtml = (article.content || [])
+          .map((p) => `<p>${p}</p>`)
+          .join("");
+
+        const firstTag =
+          Array.isArray(article.tags) && article.tags.length > 0
+            ? article.tags[0]
+            : "";
+
+        root.innerHTML = `
+          <article class="article-card">
+            <div class="thumb-wrap">
+              <img class="thumb" src="${article.image}" alt="${article.title}">
             </div>
-            <p class="lead">${article.description}</p>
-            <div class="content">
-              <p>この記事では、実際の使用感や他サービスとの違い、どんな人に向いているかをSUBSCOPE目線で整理していきます。</p>
-              <p>まずは機能の概要と、最近のアップデートで何が変わったのかをチェック。そのうえで、実際の操作感や細かい使い勝手を「良いところ / 気になるところ」に分けてレビューしていきます。</p>
-              <p>最終的には、「今このサブスクに課金する価値があるのか？」「どのプランを選べばコスパがいいのか？」という視点で、判断のヒントになる情報をまとめます。</p>
+            <div class="article-body">
+              <div class="tag-row">
+                <span class="tag">${firstTag}</span>
+                <span class="service">${article.service}</span>
+              </div>
+              <h1>${article.title}</h1>
+              <div class="meta">
+                <span>${article.date.replace(/-/g, ".")}</span>
+                <span>${viewsText}</span>
+              </div>
+              <p class="lead">${article.description}</p>
+              <div class="divider"></div>
+              <div class="content">
+                ${contentHtml}
+              </div>
             </div>
-          </div>
-        </article>
-      `;
+          </article>
+        `;
+      } catch (e) {
+        console.error(e);
+        if (root) {
+          root.innerHTML =
+            '<div class="not-found">記事の読み込みに失敗しました。<br><a href="index.html">トップに戻る</a></div>';
+        }
+      }
     }
 
-    window.addEventListener("DOMContentLoaded", renderArticle);
+    window.addEventListener("DOMContentLoaded", loadArticle);
   </script>
 </body>
 </html>
