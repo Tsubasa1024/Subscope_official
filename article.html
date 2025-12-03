@@ -1,6 +1,102 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  /* ======== 共通 固定ヘッダー ======== */
+.global-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 12px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.82);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+/* 中身のレイアウト */
+.global-header-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ロゴ */
+.gh-logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* 既存の .menu-btn をそのまま使う前提（index.html にあるやつ） */
+/* 他ページにない場合は同じCSSをコピペでOK */
+
+/* ナビのオーバーレイ位置だけちょっと調整 */
+.nav-overlay {
+  position: fixed;
+  top: 68px;      /* ヘッダーのちょい下 */
+  right: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 20px;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  border: 1px solid rgba(0,0,0,0.05);
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 199;
+  min-width: 200px;
+}
+
+.nav-overlay.open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-list li {
+  margin-bottom: 8px;
+}
+
+.nav-list li:last-child {
+  margin-bottom: 0;
+}
+
+.nav-link {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1D1D1F;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.nav-link:hover {
+  background: #F5F5F7;
+  transform: translateY(-1px);
+}
+
+/* ヘッダーぶん下げる余白（各ページで必要） */
+body {
+  padding-top: 72px;  /* ヘッダーの高さぶん */
+}
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SUBSCOPE | 記事詳細</title>
