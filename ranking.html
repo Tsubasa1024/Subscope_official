@@ -4,286 +4,251 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SUBSCOPE | ランキング</title>
-
   <style>
-    :root {
-      --color-bg: #ffffff;
-      --color-bg-secondary: #f5f5f7;
-      --color-text-main: #1d1d1f;
-      --color-text-gray: #86868b;
-      --color-border: #d2d2d7;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --container-width: 900px;
-    }
-
     body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
       margin: 0;
-      background: var(--color-bg);
-      font-family: var(--font-family);
-      color: var(--color-text-main);
-      padding-top: 76px;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
 
-    a { text-decoration: none; color: inherit; }
-
-    /* ====== 固定ヘッダー ====== */
-    .global-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 200;
-      padding: 14px 32px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .global-header-inner {
-      max-width: 1200px;
+    .page {
+      max-width: 1080px;
       margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 24px;
     }
-    .gh-logo {
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-    .menu-btn {
-      background: rgba(255,255,255,0.8);
-      padding: 8px 18px;
-      border-radius: 100px;
-      border: 1px solid rgba(0,0,0,0.1);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-    .menu-btn:hover {
-      background: #fff;
-      transform: translateY(-2px);
-    }
-    .nav-overlay {
-      position: fixed;
-      top: 76px;
-      right: 32px;
-      background: rgba(255,255,255,0.95);
-      padding: 20px;
-      border-radius: 18px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: 0.3s;
-      min-width: 200px;
-      z-index: 150;
-    }
-    .nav-overlay.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-    .nav-list { list-style: none; padding: 0; margin: 0; }
-    .nav-list li { margin-bottom: 10px; }
-    .nav-link { display: block; padding: 10px 16px; border-radius: 10px; }
-    .nav-link:hover { background: #f5f5f7; }
 
-    /* ===== Page ===== */
-    .page {
-      max-width: var(--container-width);
-      margin: 0 auto;
-      padding: 20px 24px 80px;
+    .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: #000;
+    }
+
+    .back-link {
+      font-size: 0.9rem;
+      color: #666;
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
     }
 
     h1 {
-      font-size: 2rem;
-      letter-spacing: -0.02em;
-      font-weight: 700;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    /* タブ */
+    .tabs {
+      display: inline-flex;
+      border-radius: 999px;
+      background: #e9e9ee;
+      padding: 4px;
       margin-bottom: 20px;
     }
 
-    /* ランキングのタブ */
-    .tabs {
-      display: inline-flex;
-      background: var(--color-bg-secondary);
-      padding: 6px;
-      border-radius: 16px;
-      gap: 6px;
-      margin-bottom: 30px;
-    }
-
     .tab-btn {
-      padding: 10px 20px;
-      border-radius: 12px;
-      background: transparent;
       border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
       cursor: pointer;
-      font-size: 0.95rem;
-      color: var(--color-text-gray);
-      font-weight: 500;
-      transition: 0.2s;
+      color: #555;
     }
 
     .tab-btn.active {
       background: #fff;
-      color: var(--color-text-main);
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      color: #000;
+      font-weight: 600;
     }
 
     /* ランキングリスト */
-    .rank-item {
+    .ranking-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .item {
       display: flex;
       align-items: center;
-      padding: 18px 0;
-      border-bottom: 1px solid var(--color-border);
+      padding: 16px 0;
+      border-bottom: 1px solid #ddd;
+      gap: 16px;
+    }
+
+    .rank-number {
+      font-size: 1.6rem;
+      font-weight: 700;
+      width: 36px;
+      text-align: center;
+      color: #d0d0d5;
+    }
+
+    .thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      object-fit: cover;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .service {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
       cursor: pointer;
     }
 
-    .rank-num {
-      font-size: 2.6rem;
-      font-weight: 800;
-      width: 60px;
-      color: #d2d2d7;
-      text-align: center;
+    .meta {
+      font-size: 0.8rem;
+      color: #777;
     }
 
-    .thumbnail {
-      width: 80px;
-      height: 80px;
-      border-radius: 16px;
-      object-fit: cover;
-      margin-right: 18px;
-    }
-
-    .rank-info {
-      flex: 1;
-    }
-
-    .rank-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .rank-meta {
-      color: var(--color-text-gray);
-      font-size: 0.9rem;
-    }
-
-    @media(max-width: 700px) {
-      .rank-item { flex-direction: column; align-items: flex-start; }
-      .thumbnail { width: 100%; height: 160px; margin: 10px 0; }
-      .rank-num { width: auto; font-size: 2rem; }
+    @media (max-width: 600px) {
+      .item {
+        align-items: flex-start;
+      }
+      .thumb {
+        width: 64px;
+        height: 64px;
+      }
     }
   </style>
 </head>
-
 <body>
-<!-- 固定ヘッダー（トップページと同じ） -->
-<header class="global-header">
-  <div class="gh-logo">
-    <a href="index.html">SUBSCOPE</a>
-  </div>
+<div class="page">
 
-  <button class="menu-btn" onclick="toggleMenu()">
-    <div class="menu-icon-lines">
-      <span class="menu-line"></span>
-      <span class="menu-line"></span>
-    </div>
-    <span>Menu</span>
-  </button>
-
-  <!-- メニュー展開 -->
-  <div class="nav-overlay" id="nav-overlay">
-    <ul class="nav-list">
-      <li><a href="index.html" class="nav-link">トップ</a></li>
-      <li><a href="all.html" class="nav-link">すべての記事</a></li>
-      <li><a href="ranking.html" class="nav-link">ランキング</a></li>
-    </ul>
-  </div>
-</header>
-
-  <!-- 固定ヘッダー -->
-  <header class="global-header">
-    <div class="global-header-inner">
-      <a href="index.html" class="gh-logo">SUBSCOPE</a>
-      <button class="menu-btn" onclick="toggleMenu()">Menu</button>
-
-      <div class="nav-overlay" id="nav-overlay">
-        <ul class="nav-list">
-          <li><a class="nav-link" href="index.html">トップ</a></li>
-          <li><a class="nav-link" href="all.html">すべての記事</a></li>
-          <li><a class="nav-link" href="ranking.html">ランキング</a></li>
-          <li><a class="nav-link" href="service.html">ジャンル</a></li>
-        </ul>
-      </div>
-    </div>
+  <header>
+    <a href="index.html" class="logo">SUBSCOPE</a>
+    <a href="index.html" class="back-link">← トップへ戻る</a>
   </header>
 
-  <div class="page">
-    <h1>人気ランキング</h1>
+  <h1>ランキング</h1>
+  <p class="subtitle">※ 今はサンプルデータの閲覧数で並べています。</p>
 
-    <!-- タブ -->
-    <div class="tabs">
-      <button class="tab-btn active" onclick="changeTab('all')">総合</button>
-      <button class="tab-btn" onclick="changeTab('week')">週間</button>
-      <button class="tab-btn" onclick="changeTab('month')">月間</button>
-    </div>
-
-    <!-- ランキング一覧 -->
-    <div id="ranking-list">読み込み中...</div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('daily')">デイリー</button>
+    <button class="tab-btn" onclick="switchTab('weekly')">ウィークリー</button>
+    <button class="tab-btn" onclick="switchTab('monthly')">マンスリー</button>
+    <button class="tab-btn" onclick="switchTab('allTime')">全期間</button>
   </div>
 
-  <script>
-    let articles = [];
+  <ul class="ranking-list" id="ranking-list">
+    読み込み中…
+  </ul>
 
-    async function loadArticles() {
-      const res = await fetch("./data/articles.json");
-      articles = await res.json();
-      render("all");
+</div>
+
+<script>
+  // ランキング用のID順（今はサンプル）
+  const rankingData = {
+    daily:   [102, 107, 104, 101, 106],
+    weekly:  [102, 101, 107, 103, 105],
+    monthly: [105, 103, 102, 104, 106],
+    allTime: [102, 107, 101, 105, 103]
+  };
+
+  let articlesCache = [];
+  let currentTab = 'daily';
+
+  function formatViews(views) {
+    if (views >= 10000) {
+      const man = (views / 10000).toFixed(1).replace(/\.0$/, '');
+      return `${man}万回表示`;
     }
+    return `${views.toLocaleString()}回表示`;
+  }
 
-    function render(type) {
-      const container = document.getElementById("ranking-list");
+  async function init() {
+    const res = await fetch('./data/articles.json');
+    articlesCache = await res.json();
+    renderRanking('daily');
+  }
 
-      let list = [...articles];
+  function renderRanking(type) {
+    currentTab = type;
+    const list = document.getElementById('ranking-list');
+    const ids = rankingData[type];
+    const items = [];
 
-      // ここは後で週間・月間用に切り替え可能
-      list.sort((a, b) => (b.views || 0) - (a.views || 0));
-
-      container.innerHTML = list
-        .map(
-          (a, i) => `
-        <div class="rank-item" onclick="openArticle(${a.id})">
-          <div class="rank-num">${i + 1}</div>
-          <img src="${a.image}" class="thumbnail" />
-          <div class="rank-info">
-            <div class="rank-title">${a.title}</div>
-            <div class="rank-meta">${a.service} ｜ ${a.views || 0} views</div>
+    ids.forEach((id, index) => {
+      const article = articlesCache.find(a => a.id === id);
+      if (!article) return;
+      items.push(`
+        <li class="item">
+          <div class="rank-number">${index + 1}</div>
+          <img class="thumb" src="${article.image}" alt="${article.title}">
+          <div class="content">
+            <div class="service">${article.service}</div>
+            <div class="title" onclick="openArticle(${article.id})">
+              ${article.title}
+            </div>
+            <div class="meta">
+              ${formatViews(article.views)}・${article.date.replace(/-/g, '.')}
+            </div>
           </div>
-        </div>`
-        )
-        .join("");
-    }
+        </li>
+      `);
+    });
 
-    function changeTab(type) {
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      event.target.classList.add("active");
-      render(type);
-    }
+    list.innerHTML = items.join('');
+    updateTabUI();
+  }
 
-    function openArticle(id) {
-      window.location.href = "article.html?id=" + id;
-    }
+  function updateTabUI() {
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('active');
+      const text = btn.textContent.trim();
+      if (
+        (currentTab === 'daily'   && text === 'デイリー') ||
+        (currentTab === 'weekly'  && text === 'ウィークリー') ||
+        (currentTab === 'monthly' && text === 'マンスリー') ||
+        (currentTab === 'allTime' && text === '全期間')
+      ) {
+        btn.classList.add('active');
+      }
+    });
+  }
 
-    function toggleMenu() {
-      document.getElementById("nav-overlay").classList.toggle("open");
-    }
+  function switchTab(type) {
+    renderRanking(type);
+  }
 
-    loadArticles();
-  </script>
+  function openArticle(id) {
+    window.location.href = 'article.html?id=' + id;
+  }
+
+  init();
+</script>
 </body>
 </html>
