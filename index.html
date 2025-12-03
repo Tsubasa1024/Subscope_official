@@ -1,273 +1,225 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SUBSCOPE</title>
+/* =========================================
+   SUBSCOPE index.js 完全版
+   - localStorage でビュー数記録
+   - 1番人気を HERO に表示
+   - 最新記事 3×3 の9件表示（広告1つ含む）
+   - 全ページ共通で動作
+========================================= */
 
-    <style>
-        :root {
-            --color-bg: #ffffff;
-            --color-bg-secondary: #f5f5f7;
-            --color-text-main: #1d1d1f;
-            --color-text-gray: #86868b;
-            --color-border: #d2d2d7;
-            --color-accent: #000;
-            --container-width: 1080px;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
+/* -------------------------
+   ① 記事データ読み込み
+------------------------- */
+async function loadArticles() {
+  const res = await fetch("./data/articles.json");
+  const data = await res.json();
+  return data;
+}
 
-        body {
-            margin: 0;
-            font-family: var(--font-family);
-            background: var(--color-bg);
-            color: var(--color-text-main);
-        }
+/* -------------------------
+   ② ビュー数を localStorage 管理
+------------------------- */
+function getViews(id) {
+  return Number(localStorage.getItem("views_" + id) || 0);
+}
 
-        a { text-decoration: none; color: inherit; }
+function addView(id) {
+  const current = getViews(id);
+  localStorage.setItem("views_" + id, current + 1);
+}
 
-        /* ====== 固定ヘッダー ====== */
-        .global-header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 200;
-            padding: 14px 32px;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .global-header-inner {
-            max-width: 1080px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .gh-logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-        }
+/* -------------------------
+   ③ HERO：最も見られた記事を表示
+------------------------- */
+async function renderHero() {
+  const container = document.getElementById("most-viewed-content");
+  if (!container) return;
 
-        /* Menu */
-        .menu-btn {
-            background: rgba(255,255,255,0.8);
-            padding: 8px 18px;
-            border-radius: 100px;
-            border: 1px solid rgba(0,0,0,0.1);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-        .menu-btn:hover {
-            background: #fff;
-            transform: translateY(-2px);
-        }
+  const articles = await loadArticles();
 
-        /* Menu Overlay */
-        .nav-overlay {
-            position: fixed;
-            top: 76px;
-            right: 32px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            opacity: 0; visibility: hidden; transform: translateY(-10px);
-            transition: all .25s cubic-bezier(.2,.8,.2,1);
-            min-width: 200px;
-            z-index: 150;
-        }
-        .nav-overlay.open {
-            opacity: 1; visibility: visible; transform: translateY(0);
-        }
-        .nav-list { list-style: none; margin: 0; padding: 0; }
-        .nav-list li { margin-bottom: 8px; }
-        .nav-link {
-            display: block;
-            padding: 10px 16px;
-            border-radius: 10px;
-            transition: 0.15s;
-            font-size: 0.95rem;
-        }
-        .nav-link:hover {
-            background: #f5f5f7;
-        }
+  // localStorage のビュー数をマージ
+  articles.forEach(a => (a.localViews = getViews(a.id)));
 
-        /* 余白（固定ヘッダー分） */
-        body { padding-top: 76px; }
+  // 一番見られてる記事
+  const top = [...articles].sort((a, b) => b.localViews - a.localViews)[0];
 
-        /* ===== HERO エリア ===== */
-        .hero {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-        .hero-card {
-            border-radius: 28px;
-            min-height: 60vh;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            padding: 40px;
-            display: flex;
-            align-items: flex-end;
-            overflow: hidden;
-        }
-        .hero-card::before {
-            content:"";
-            position:absolute;
-            inset:0;
-            background:linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%);
-        }
-        .hero-content {
-            position:relative;
-            color:#fff;
-            max-width: 650px;
-        }
-        .hero-title {
-            font-size: 2.6rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-        .hero-desc {
-            font-size: 1.05rem;
-            opacity: .9;
-            margin-bottom: 20px;
-        }
-        .btn-read {
-            background:#fff;
-            color:#000;
-            padding:12px 26px;
-            border-radius:40px;
-            font-weight:600;
-            font-size:1rem;
-            border:none;
-            cursor:pointer;
-            transition:.2s;
-        }
-        .btn-read:hover { background:#f5f5f7; }
+  container.innerHTML = `
+    <div class="featured-card" style="background-image: url('${top.image}')" onclick="openArticle(${top.id})">
+      <div class="featured-content">
+        <div class="featured-meta">
+          <span class="tag">${top.genre}</span>
+        </div>
+        <h2 class="featured-title">${top.title}</h2>
+        <p class="featured-desc">${top.description}</p>
+        <button class="btn-read">続きを読む</button>
+      </div>
+    </div>
+  `;
+}
 
-        /* ===== 最新記事 3×3 ===== */
-        .section {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 60px 24px;
-        }
-        .section-title {
-            font-size:2rem;
-            font-weight:700;
-            margin-bottom:24px;
-        }
-        .grid {
-            display:grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap:28px;
-        }
-        .card {
-            background:#fff;
-            border-radius:22px;
-            overflow:hidden;
-            cursor:pointer;
-            transition:.2s;
-        }
-        .card:hover {
-            transform:translateY(-4px);
-            box-shadow:0 10px 30px rgba(0,0,0,.08);
-        }
-        .card-img {
-            width:100%;
-            height:180px;
-            background-size:cover;
-            background-position:center;
-        }
-        .card-body { padding:16px; }
-        .card-service {
-            font-size:.75rem;
-            color:var(--color-text-gray);
-            margin-bottom:6px;
-        }
-        .card-title {
-            font-size:1.1rem;
-            font-weight:700;
-            margin-bottom:6px;
-        }
-        .card-date {
-            font-size:.75rem;
-            color:var(--color-text-gray);
-            margin-bottom:10px;
-        }
-        .card-desc {
-            font-size:.9rem;
-            color:#555;
-            line-height:1.45;
-        }
+/* -------------------------
+   ④ 最新記事 3×3（広告含む）
+------------------------- */
+async function renderLatest() {
+  const grid = document.getElementById("latest-grid");
+  if (!grid) return;
 
-        .view-all-btn {
-            display:inline-block;
-            margin-top:20px;
-            padding:10px 22px;
-            background:#000;
-            color:#fff;
-            border-radius:999px;
-            font-size:.9rem;
-        }
+  const articles = await loadArticles();
 
-        footer {
-            background:#000;
-            color:#fff;
-            padding:40px 0;
-            text-align:center;
-            margin-top:60px;
-        }
+  // 新しい順
+  const latest = [...articles]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 8); // 8記事まで
 
-    </style>
-</head>
-<body>
+  // ★ 9マス目は広告（差し替え可能）
+  const AD = {
+    isAd: true,
+    image: "https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1000&auto=format&fit=crop",
+    title: "AD — SUBSCOPE パートナー募集中",
+    desc: "あなたのサービスをここに掲載しませんか？",
+  };
 
-    <!-- 🔥 全ページ共通：固定ヘッダー -->
-    <header class="global-header">
-        <div class="global-header-inner">
-            <a href="index.html" class="gh-logo">SUBSCOPE</a>
+  const cards = [...latest, AD];
 
-            <button class="menu-btn" onclick="toggleMenu()">Menu</button>
-
-            <div class="nav-overlay" id="nav-overlay">
-                <ul class="nav-list">
-                    <li><a href="index.html" class="nav-link">トップ</a></li>
-                    <li><a href="all.html" class="nav-link">すべての記事</a></li>
-                    <li><a href="ranking.html" class="nav-link">ランキング</a></li>
-                    <li><a href="service.html" class="nav-link">ジャンル</a></li>
-                </ul>
+  grid.innerHTML = cards
+    .map(item => {
+      if (item.isAd) {
+        return `
+          <div class="article-card">
+            <div class="card-image" style="background-image:url('${item.image}')"></div>
+            <div class="card-body">
+              <div class="card-title">${item.title}</div>
+              <div class="card-desc">${item.desc}</div>
             </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="article-card" onclick="openArticle(${item.id})">
+          <div class="card-image" style="background-image:url('${item.image}')"></div>
+          <div class="card-body">
+            <div class="card-service">${item.service}</div>
+            <div class="card-title">${item.title}</div>
+            <div class="card-date">${item.date.replace(/-/g, ".")}</div>
+            <div class="card-desc">${item.description}</div>
+          </div>
         </div>
-    </header>
+      `;
+    })
+    .join("");
+}
 
-    <!-- 🔥 HERO（最新・アクセス最多の記事） -->
-    <section class="hero">
-        <div id="hero-featured" class="hero-card"></div>
-    </section>
+/* -------------------------
+   ⑤ ランキングページ（ranking.html）
+------------------------- */
+async function renderRanking() {
+  const wrapper = document.getElementById("ranking-list");
+  if (!wrapper) return;
 
-    <!-- 🔥 最新の記事（3×3） -->
-    <section class="section">
-        <h2 class="section-title">最新の記事</h2>
-        <div id="latest-grid" class="grid"></div>
+  const articles = await loadArticles();
 
-        <div style="text-align:center;">
-            <a href="all.html" class="view-all-btn">すべての記事を見る →</a>
+  articles.forEach(a => (a.localViews = getViews(a.id)));
+
+  const sorted = [...articles].sort((a, b) => b.localViews - a.localViews);
+
+  wrapper.innerHTML = sorted
+    .map((a, i) => {
+      return `
+        <div class="ranking-item">
+          <div class="rank-number">${i + 1}</div>
+          <img class="rank-thumb" src="${a.image}" />
+          <div class="rank-content">
+            <div class="rank-title" onclick="openArticle(${a.id})">${a.title}</div>
+            <div class="rank-meta">${a.localViews} views ｜ ${a.service}</div>
+          </div>
         </div>
-    </section>
+      `;
+    })
+    .join("");
+}
 
-    <footer>
-        © 2025 SUBSCOPE
-    </footer>
+/* -------------------------
+   ⑥ 記事ページ（article.html）
+------------------------- */
+async function renderArticlePage() {
+  const container = document.getElementById("article-body");
+  if (!container) return;
 
-    <script src="index.js"></script>
+  const params = new URLSearchParams(window.location.search);
+  const id = Number(params.get("id"));
 
-</body>
-</html>
+  const articles = await loadArticles();
+  const article = articles.find(a => a.id === id);
+
+  if (!article) {
+    container.innerHTML = "<p>記事が見つかりませんでした。</p>";
+    return;
+  }
+
+  // ビュー数を追加
+  addView(id);
+
+  container.innerHTML = `
+    <h1>${article.title}</h1>
+    <p style="color:#888; margin-bottom:20px;">${article.date}</p>
+    <img src="${article.image}" style="width:100%; border-radius:16px; margin-bottom:20px;">
+    <p style="font-size:1.05rem; line-height:1.7;">
+      ${article.description}
+    </p>
+  `;
+}
+
+/* -------------------------
+   ⑦ ジャンル一覧ページ（service.html）
+------------------------- */
+async function renderGenreList() {
+  const grid = document.getElementById("genre-grid");
+  if (!grid) return;
+
+  const articles = await loadArticles();
+
+  const map = {};
+
+  articles.forEach(a => {
+    if (!map[a.genre]) map[a.genre] = 0;
+    map[a.genre]++;
+  });
+
+  grid.innerHTML = Object.keys(map)
+    .map(
+      g => `
+      <div class="genre-card" onclick="location.href='all.html?tab=${encodeURIComponent(
+        g
+      )}'">
+        <div class="genre-title">${g}</div>
+        <div class="genre-count">${map[g]} 件</div>
+      </div>
+    `
+    )
+    .join("");
+}
+
+/* -------------------------
+   ⑧ ナビ（Menu）開閉
+------------------------- */
+function toggleMenu() {
+  document.getElementById("nav-overlay").classList.toggle("open");
+}
+
+/* -------------------------
+   ⑨ 記事移動ショートカット
+------------------------- */
+function openArticle(id) {
+  window.location.href = "article.html?id=" + id;
+}
+
+/* -------------------------
+   ⑩ ページごとに初期化
+------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  renderHero();
+  renderLatest();
+  renderRanking();
+  renderArticlePage();
+  renderGenreList();
+});
