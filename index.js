@@ -11,10 +11,15 @@ const rankingData = {
 };
 
 // =========================================
-// 記事ページに飛ぶ関数
+// グローバル関数（記事ページ・サービスページに飛ぶ）
 // =========================================
 window.openArticle = function (id) {
   window.location.href = "article.html?id=" + id;
+};
+
+window.openService = function (service) {
+  const encoded = encodeURIComponent(service);
+  window.location.href = "service.html?service=" + encoded;
 };
 
 // =========================================
@@ -54,11 +59,12 @@ function renderArticles(items, containerId, showAd = true) {
       '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #86868B;">該当する記事が見つかりませんでした。</div>';
   } else {
     items.forEach((article) => {
+      // サービス名クリックでサービス別ページへ
       html += `
           <article class="article-card" onclick="openArticle(${article.id})">
               <div class="card-image" style="background-image: url('${article.image}')"></div>
               <div class="card-body">
-                  <span class="card-service">${article.service}</span>
+                  <span class="card-service" onclick="event.stopPropagation(); openService('${article.service}')">${article.service}</span>
                   <h3 class="card-title">${article.title}</h3>
                   <p class="card-desc">${article.description}</p>
                   <span class="card-date">${article.date.replace(/-/g, ".")}</span>
@@ -104,7 +110,7 @@ function renderRanking(type) {
         <span class="rank-number">${index + 1}</span>
         <img class="rank-thumb" src="${article.image}" alt="${article.title}">
         <div class="rank-content">
-            <span class="tag" style="font-size:0.7rem; margin-bottom:4px;">${article.service}</span>
+            <span class="tag" style="font-size:0.7rem; margin-bottom:4px; cursor:pointer;" onclick="openService('${article.service}')">${article.service}</span>
             <h4 class="rank-title" onclick="openArticle(${article.id})">${article.title}</h4>
             <div class="rank-meta">
                 ${article.views.toLocaleString()} views
@@ -146,7 +152,7 @@ window.toggleMenu = function () {
 };
 
 // =========================================
-// 検索
+– 検索
 // =========================================
 
 function initSearch() {
