@@ -3,236 +3,250 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SUBSCOPE | ジャンル一覧</title>
-
+  <title>SUBSCOPE | サービス別記事一覧</title>
   <style>
     :root {
-      --color-bg: #ffffff;
-      --color-bg-secondary: #f5f5f7;
+      --color-bg: #f5f5f7;
+      --color-surface: #ffffff;
       --color-text-main: #1d1d1f;
       --color-text-gray: #86868b;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --container-width: 1100px;
+      --color-border: #d2d2d7;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      background: var(--color-bg);
-      color: var(--color-text-main);
       font-family: var(--font-family);
-      padding-top: 76px;
+      background: radial-gradient(circle at top, #f0f0ff 0, #f5f5f7 40%, #f5f5f7 100%);
+      color: var(--color-text-main);
+      -webkit-font-smoothing: antialiased;
     }
 
-    a { text-decoration: none; color: inherit; }
-
-    /* ===== 固定ヘッダー ===== */
-    .global-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      padding: 14px 32px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      z-index: 200;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
-    .global-header-inner {
-      max-width: 1200px;
+
+    .page {
+      max-width: 1080px;
       margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 24px 16px 40px;
     }
-    .gh-logo {
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .logo {
       font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-    .menu-btn {
-      background: rgba(255,255,255,0.8);
-      padding: 8px 18px;
-      border-radius: 50px;
-      border: 1px solid rgba(0,0,0,0.1);
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.2s;
-    }
-    .menu-btn:hover {
-      background: #fff;
-      transform: translateY(-2px);
+      letter-spacing: -0.04em;
     }
 
-    .nav-overlay {
-      position: fixed;
-      top: 76px;
-      right: 32px;
-      background: rgba(255,255,255,0.95);
-      padding: 20px;
-      border-radius: 18px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: 0.3s;
-      min-width: 200px;
-      z-index: 150;
-    }
-    .nav-overlay.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-    .nav-list { list-style: none; margin: 0; padding: 0; }
-    .nav-list li { margin-bottom: 10px; }
-    .nav-link { display: block; padding: 10px 16px; border-radius: 10px; }
-    .nav-link:hover { background: var(--color-bg-secondary); }
-
-    /* ===== Page ===== */
-    .page {
-      max-width: var(--container-width);
-      margin: 0 auto;
-      padding: 20px 24px 80px;
+    .back-link {
+      font-size: 0.85rem;
+      color: var(--color-text-gray);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.7rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--color-text-gray);
       margin-bottom: 20px;
     }
 
-    /* ===== Grid ===== */
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
     }
 
-    .genre-card {
-      background: #fff;
+    .article-card {
+      display: flex;
+      flex-direction: column;
       border-radius: 22px;
-      padding: 24px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      overflow: hidden;
+      background: var(--color-surface);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.7);
       cursor: pointer;
-      transition: 0.25s;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .article-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .thumb-wrap {
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+    }
+
+    .thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.02);
+    }
+
+    .body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .service-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-gray);
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .desc {
+      font-size: 0.85rem;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .meta {
+      font-size: 0.8rem;
+      color: var(--color-text-gray);
+      margin-top: 4px;
+    }
+
+    .empty {
+      padding: 40px 0;
       text-align: center;
-    }
-
-    .genre-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-
-    .genre-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .genre-count {
       color: var(--color-text-gray);
       font-size: 0.9rem;
     }
 
-    /* SP */
-    @media(max-width: 768px){
-      .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.4rem;
       }
     }
   </style>
 </head>
-
 <body>
-<!-- 固定ヘッダー（トップページと同じ） -->
-<header class="global-header">
-  <div class="gh-logo">
-    <a href="index.html">SUBSCOPE</a>
-  </div>
-
-  <button class="menu-btn" onclick="toggleMenu()">
-    <div class="menu-icon-lines">
-      <span class="menu-line"></span>
-      <span class="menu-line"></span>
-    </div>
-    <span>Menu</span>
-  </button>
-
-  <!-- メニュー展開 -->
-  <div class="nav-overlay" id="nav-overlay">
-    <ul class="nav-list">
-      <li><a href="index.html" class="nav-link">トップ</a></li>
-      <li><a href="all.html" class="nav-link">すべての記事</a></li>
-      <li><a href="ranking.html" class="nav-link">ランキング</a></li>
-    </ul>
-  </div>
-</header>
-
-  <!-- ===== 固定ヘッダー ===== -->
-  <header class="global-header">
-    <div class="global-header-inner">
-      <a href="index.html" class="gh-logo">SUBSCOPE</a>
-
-      <button class="menu-btn" onclick="toggleMenu()">Menu</button>
-
-      <div class="nav-overlay" id="nav-overlay">
-        <ul class="nav-list">
-          <li><a href="index.html" class="nav-link">トップ</a></li>
-          <li><a href="all.html" class="nav-link">すべての記事</a></li>
-          <li><a href="ranking.html" class="nav-link">ランキング</a></li>
-          <li><a href="service.html" class="nav-link">ジャンル</a></li>
-        </ul>
-      </div>
-    </div>
-  </header>
-
-  <!-- ===== Main ===== -->
   <div class="page">
-    <h1>ジャンル一覧</h1>
+    <header>
+      <a href="index.html" class="logo">SUBSCOPE</a>
+      <a href="index.html" class="back-link">← トップに戻る</a>
+    </header>
 
-    <div id="genre-grid" class="grid">読み込み中...</div>
+    <main>
+      <h1 id="service-title">サービス別記事</h1>
+      <p class="subtitle" id="service-subtitle"></p>
+
+      <div id="service-list-root">
+        <div class="empty">記事を読み込んでいます…</div>
+      </div>
+    </main>
   </div>
 
-  <!-- ===== JS ===== -->
   <script>
-    async function loadGenres() {
-      const res = await fetch("./data/articles.json");
-      const articles = await res.json();
-
-      // ⭐ genre を自動抽出
-      const map = {};
-
-      articles.forEach(a => {
-        if (!map[a.genre]) map[a.genre] = 0;
-        map[a.genre]++;
-      });
-
-      const grid = document.getElementById("genre-grid");
-
-      grid.innerHTML = Object.keys(map)
-        .map(
-          g => `
-        <div class="genre-card" onclick="openGenre('${g}')">
-          <div class="genre-title">${g}</div>
-          <div class="genre-count">${map[g]} 件の記事</div>
-        </div>
-      `
-        )
-        .join("");
+    function openArticle(id) {
+      window.location.href = "article.html?id=" + id;
     }
 
-    function openGenre(g) {
-      window.location.href = "all.html?tab=" + encodeURIComponent(g);
+    async function loadServiceArticles() {
+      const root = document.getElementById("service-list-root");
+      const titleEl = document.getElementById("service-title");
+      const subtitleEl = document.getElementById("service-subtitle");
+
+      const params = new URLSearchParams(window.location.search);
+      const serviceParam = params.get("service");
+
+      const serviceName = serviceParam ? decodeURIComponent(serviceParam) : null;
+
+      if (serviceName && titleEl) {
+        titleEl.textContent = serviceName + " の記事一覧";
+        subtitleEl.textContent = serviceName + " に関する最新のアップデートや機能解説をまとめています。";
+      } else {
+        titleEl.textContent = "サービス別記事";
+        subtitleEl.textContent = "特定のサービスが指定されていないため、すべての記事を表示します。";
+      }
+
+      try {
+        const res = await fetch("./data/articles.json");
+        const list = await res.json();
+
+        let filtered = list;
+        if (serviceName) {
+          filtered = list.filter((a) => a.service === serviceName);
+        }
+
+        if (!filtered || filtered.length === 0) {
+          root.innerHTML =
+            '<div class="empty">該当する記事がまだありません。<br><a href="index.html">トップに戻る</a></div>';
+          return;
+        }
+
+        const html = `
+          <div class="grid">
+            ${filtered
+              .map(
+                (article) => `
+              <article class="article-card" onclick="openArticle(${article.id})">
+                <div class="thumb-wrap">
+                  <img class="thumb" src="${article.image}" alt="${article.title}">
+                </div>
+                <div class="body">
+                  <div class="service-label">${article.service}</div>
+                  <div class="title">${article.title}</div>
+                  <div class="desc">${article.description}</div>
+                  <div class="meta">${article.date.replace(/-/g, ".")} ・ ${
+                  typeof article.views === "number"
+                    ? article.views.toLocaleString() + " views"
+                    : ""
+                }</div>
+                </div>
+              </article>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+
+        root.innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        root.innerHTML =
+          '<div class="empty">記事の読み込みに失敗しました。<br><a href="index.html">トップに戻る</a></div>';
+      }
     }
 
-    function toggleMenu() {
-      document.getElementById("nav-overlay").classList.toggle("open");
-    }
-
-    loadGenres();
+    window.addEventListener("DOMContentLoaded", loadServiceArticles);
   </script>
-
 </body>
 </html>
