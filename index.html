@@ -174,6 +174,53 @@
             pointer-events: auto;
         }
 
+        /* 検索結果エリア */
+        .search-results-container {
+            max-width: var(--container-width);
+            margin: 72px auto 0; /* ヘッダーの下にくるように */
+            padding: 0 24px;
+        }
+
+        #searchResults {
+            margin-top: 8px;
+        }
+
+        .search-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: #fff;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .search-item:hover {
+            background: #f5f5f7;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+        }
+
+        .search-item img {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .search-item h3 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .search-item p {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
         /* Menu Button */
         .menu-btn {
             background: rgba(255,255,255,0.8);
@@ -392,49 +439,48 @@
         /* =========================================
            3D Carousel (おすすめ記事)
            ========================================= */
-        /* カルーセル左右ナビボタン */
-.carousel3d-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-    width: 36px;
-    height: 36px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: 600;
-    color: #222;
-    z-index: 10;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-}
+        .carousel3d-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+            z-index: 10;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
 
-.carousel3d-nav:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.22);
-    background: #fff;
-}
+        .carousel3d-nav:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+            background: #fff;
+        }
 
-.carousel3d-nav-prev {
-    left: 0;
-}
+        .carousel3d-nav-prev {
+            left: 0;
+        }
 
-.carousel3d-nav-next {
-    right: 0;
-}
+        .carousel3d-nav-next {
+            right: 0;
+        }
 
-@media (max-width: 768px) {
-    .carousel3d-nav {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
-    }
-}
+        @media (max-width: 768px) {
+            .carousel3d-nav {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+            }
+        }
 
         .carousel3d-section {
             width: 100%;
@@ -484,7 +530,7 @@
 
         .carousel3d-card {
             width: 100%;
-            max-width: 320px;  /* 最新記事の1カラムとほぼ同じサイズ感 */
+            max-width: 320px;
             background: #fff;
             border-radius: 24px;
             overflow: hidden;
@@ -691,6 +737,10 @@
                 max-width: 300px;
             }
 
+            .search-results-container {
+                padding: 0 16px;
+            }
+
             .hero {
                 padding-top: 120px;
                 padding-bottom: 40px;
@@ -735,7 +785,8 @@
         <div class="top-header">
             <div class="nav-left">
                 <div class="search-wrapper">
-                    <input type="text" class="search-input" id="search-input" placeholder="検索">
+                    <!-- ★ id を searchInput に統一 -->
+                    <input type="text" class="search-input" id="searchInput" placeholder="サービス名やタイトルで検索">
                     <span class="clear-btn" id="clear-btn">×</span>
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -781,6 +832,11 @@
         </ul>
     </div>
 
+    <!-- 🔍 検索結果エリア -->
+    <div class="search-results-container">
+        <div id="searchResults"></div>
+    </div>
+
     <!-- Hero -->
     <header class="hero" id="hero">
         <div class="hero-branding reveal active">
@@ -796,49 +852,48 @@
 
     <!-- おすすめ 3D カルーセル -->
     <section class="carousel3d-section" id="recommend">
-    <div class="container">
-        <h2 class="carousel3d-title">おすすめ記事</h2>
+        <div class="container">
+            <h2 class="carousel3d-title">おすすめ記事</h2>
 
-        <div class="carousel3d">
-            <!-- ← ボタン -->
-            <button class="carousel3d-nav carousel3d-nav-prev" type="button">&#10094;</button>
+            <div class="carousel3d">
+                <!-- ← ボタン -->
+                <button class="carousel3d-nav carousel3d-nav-prev" type="button">&#10094;</button>
 
-            <div class="carousel3d-inner">
-                <div class="carousel3d-item">
-                    <div class="carousel3d-card">
-                        <img src="images/sample1.jpg" alt="">
-                        <p>Apple Music の最新機能まとめ</p>
+                <div class="carousel3d-inner">
+                    <div class="carousel3d-item">
+                        <div class="carousel3d-card">
+                            <img src="images/sample1.jpg" alt="">
+                            <p>Apple Music の最新機能まとめ</p>
+                        </div>
+                    </div>
+
+                    <div class="carousel3d-item">
+                        <div class="carousel3d-card">
+                            <img src="images/sample2.jpg" alt="">
+                            <p>Netflix 2025年おすすめ作品</p>
+                        </div>
+                    </div>
+
+                    <div class="carousel3d-item">
+                        <div class="carousel3d-card">
+                            <img src="images/sample3.jpg" alt="">
+                            <p>人気サブスク徹底比較ガイド</p>
+                        </div>
+                    </div>
+
+                    <div class="carousel3d-item">
+                        <div class="carousel3d-card">
+                            <img src="images/sample4.jpg" alt="">
+                            <p>Spotify vs Apple Music</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="carousel3d-item">
-                    <div class="carousel3d-card">
-                        <img src="images/sample2.jpg" alt="">
-                        <p>Netflix 2025年おすすめ作品</p>
-                    </div>
-                </div>
-
-                <div class="carousel3d-item">
-                    <div class="carousel3d-card">
-                        <img src="images/sample3.jpg" alt="">
-                        <p>人気サブスク徹底比較ガイド</p>
-                    </div>
-                </div>
-
-                <div class="carousel3d-item">
-                    <div class="carousel3d-card">
-                        <img src="images/sample4.jpg" alt="">
-                        <p>Spotify vs Apple Music</p>
-                    </div>
-                </div>
+                <!-- → ボタン -->
+                <button class="carousel3d-nav carousel3d-nav-next" type="button">&#10095;</button>
             </div>
-
-            <!-- → ボタン -->
-            <button class="carousel3d-nav carousel3d-nav-next" type="button">&#10095;</button>
         </div>
-    </div>
-</section>
-
+    </section>
 
     <!-- Latest Articles -->
     <section class="section" id="latest">
@@ -862,6 +917,7 @@
         </div>
     </footer>
 
+    <!-- ★ JS 読み込み -->
     <script src="index.js"></script>
 </body>
 </html>
