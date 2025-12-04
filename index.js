@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderHero();
     renderLatest(articles);
 
-   // ---------------------------
+// ---------------------------
 //  検索機能
 // ---------------------------
 const searchInput = document.getElementById("searchInput");
@@ -154,7 +154,7 @@ function renderSearchResults(results) {
     searchResults.innerHTML = results
         .map(
             (a) => `
-            <div class="search-item" onclick="location.href='article.html?id=${a.id}'">
+            <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
                 <img src="${a.image}" alt="">
                 <div>
                     <h3>${a.title}</h3>
@@ -176,11 +176,13 @@ if (searchInput) {
             return;
         }
 
-        const matched = articles.filter((a) =>
-            a.title.toLowerCase().includes(keyword) ||
-            a.description.toLowerCase().includes(keyword) ||
-            a.category.toLowerCase().includes(keyword)
-        );
+        const matched = articles.filter((a) => {
+            const text =
+                (a.title || "") +
+                (a.description || "") +
+                (a.service || "");
+            return text.toLowerCase().includes(keyword);
+        });
 
         renderSearchResults(matched);
     });
@@ -373,4 +375,5 @@ if (searchInput) {
         }
     }
 });
+
 
