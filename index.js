@@ -263,13 +263,18 @@ document.addEventListener("DOMContentLoaded", () => {
         revealEls.forEach((el) => el.classList.add("active"));
     }
 
-    // ----------------------------------
-    // 7. 3D おすすめカルーセル
-    //    → articles の先頭 4件を使用
-    // ----------------------------------
-    const carouselItems = document.querySelectorAll(".carousel3d-item");
+// ----------------------------------
+// 7. 3D おすすめカルーセル（ボタン＋スワイプ）
+//    → articles の先頭 4件を使用
+// ----------------------------------
+const carousel = document.querySelector(".carousel3d");
+if (carousel) {
+    const inner = carousel.querySelector(".carousel3d-inner");
+    const carouselItems = inner.querySelectorAll(".carousel3d-item");
+    const prevBtn = carousel.querySelector(".carousel3d-nav-prev");
+    const nextBtn = carousel.querySelector(".carousel3d-nav-next");
+
     if (carouselItems.length) {
-        // 先頭4件で中身を入れ替え
         const recommend = articles.slice(0, 4);
         carouselItems.forEach((item, i) => {
             const a = recommend[i % recommend.length];
@@ -286,6 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const total = carouselItems.length;
         let currentIndex = 0;
+        let autoTimer = null;
 
         function updateCarouselPositions() {
             carouselItems.forEach((item, i) => {
@@ -304,11 +310,94 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        updateCarouselPositions();
-
-        setInterval(() => {
+        function goNext() {
             currentIndex = (currentIndex + 1) % total;
             updateCarouselPositions();
-        }, 3000);
+        }
+
+        function goPrev() {
+            currentIndex = (currentIndex - 1 + total) % total;
+            updateCarouselPositions();
+        }
+
+        function resetAuto() {
+            if (autoTimer) clearInterval(autoTimer);
+            autoTimer = setInterval(goNext, 3000);
+        }
+
+        // 初期表示 + 自動スクロール開始
+        updateCarouselPositions();
+        resetAuto();
+
+        // ボタンクリック
+        if (nextBtn) {
+            nextBtn.addEventListener("click", () => {
+                goNext();
+                resetAuto();
+            });
+        }
+        if (prevBtn) {
+            prevBtn.addEventListener("click", () => {
+                goPrev();
+                resetAuto();
+            });
+        }
+
+        // スワイプ操作（スマホ）
+        let touchStartX = null;
+        let touchDragging = false;
+
+        carousel.addEventListener("touchstart", (e) => {
+            if (!e.touches[0]) return;
+            touchStartX = e.touches[0].clientX;
+            touchDragging = true;
+        });
+
+        carousel.addEventListener("touchend", (e) => {
+            if (!touchDragging || touchStartX === null) return;
+            const endX = e.changedTouches[0].clientX;
+            const diff = endX - touchStartX;
+
+            if (Math.abs(diff) > 40) {
+                if (diff < 0) {
+                    goNext();
+                } else {
+                    goPrev();
+                }
+                resetAuto();
+            }
+            touchDragging = false;
+            touchStartX = null;
+        });
+
+        // マウスドラッグ（PC）
+        let mouseStartX = null;
+        let mouseDragging = false;
+
+        carousel.addEventListener("mousedown", (e) => {
+            mouseStartX = e.clientX;
+            mouseDragging = true;
+        });
+
+        window.addEventListener("mouseup", () => {
+            mouseDragging = false;
+            mouseStartX = null;
+        });
+
+        carousel.addEventListener("mouseup", (e) => {
+            if (!mouseDragging || mouseStartX === null) return;
+            const diff = e.clientX - mouseStartX;
+
+            if (Math.abs(diff) > 40) {
+                if (diff < 0) {
+                    goNext();
+                } else {
+                    goPrev();
+                }
+                resetAuto();
+            }
+            mouseDragging = false;
+            mouseStartX = null;
+        });
     }
-});
+}
