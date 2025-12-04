@@ -90,9 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function createArticleCard(article) {
         const card = document.createElement("article");
         card.className = "article-card";
-        card.dataset.title = article.title.toLowerCase();
-        card.dataset.service = article.service.toLowerCase();
-        card.dataset.desc = article.description.toLowerCase();
 
         card.innerHTML = `
             <div class="card-image" style="background-image:url('${article.image}')"></div>
@@ -133,43 +130,44 @@ document.addEventListener("DOMContentLoaded", () => {
     renderHero();
     renderLatest(articles);
 
-// ---------------------------
-//  検索機能
-// ---------------------------
-const searchInput = document.getElementById("searchInput");
-const searchResults = document.getElementById("searchResults");
+    // ----------------------------------
+    // 4. 検索機能
+    // ----------------------------------
+    const searchInput = document.getElementById("searchInput");
+    const searchResults = document.getElementById("searchResults");
+    const clearBtn = document.getElementById("clear-btn");
 
-function renderSearchResults(results) {
-    if (!searchResults) return;
+    function renderSearchResults(results) {
+        if (!searchResults) return;
 
-    if (results.length === 0) {
-        searchResults.innerHTML = `
-            <p style="padding:20px; text-align:center; color:#666;">
-                該当する記事が見つかりませんでした
-            </p>
-        `;
-        return;
+        if (results.length === 0) {
+            searchResults.innerHTML = `
+                <p style="padding:12px 4px; text-align:center; color:#666; font-size:0.85rem;">
+                    該当する記事が見つかりませんでした
+                </p>
+            `;
+            return;
+        }
+
+        searchResults.innerHTML = results
+            .map(
+                (a) => `
+                <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
+                    <img src="${a.image}" alt="">
+                    <div>
+                        <h3>${a.title}</h3>
+                        <p>${a.description}</p>
+                    </div>
+                </div>
+            `
+            )
+            .join("");
     }
 
-    searchResults.innerHTML = results
-        .map(
-            (a) => `
-            <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
-                <img src="${a.image}" alt="">
-                <div>
-                    <h3>${a.title}</h3>
-                    <p>${a.description}</p>
-                </div>
-            </div>
-        `
-        )
-        .join("");
-}
+    function handleSearch(keywordRaw) {
+        const keyword = keywordRaw.trim().toLowerCase();
 
-// 入力するたびに検索
-if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-        const keyword = e.target.value.trim().toLowerCase();
+        if (!searchResults) return;
 
         if (keyword === "") {
             searchResults.innerHTML = "";
@@ -185,8 +183,35 @@ if (searchInput) {
         });
 
         renderSearchResults(matched);
-    });
-}
+    }
+
+    // 入力するたびに検索
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            handleSearch(e.target.value);
+        });
+    }
+
+    // ×ボタンでクリア
+    if (clearBtn && searchInput) {
+        clearBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            searchInput.focus();
+            if (searchResults) {
+                searchResults.innerHTML = "";
+            }
+        });
+    }
+
+    // Enterで確定っぽく動かしたい場合（お好み）
+    if (searchInput) {
+        searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                handleSearch(e.target.value);
+            }
+        });
+    }
 
     // ----------------------------------
     // 5. Menu トグル & スムーススクロール
@@ -375,5 +400,3 @@ if (searchInput) {
         }
     }
 });
-
-
