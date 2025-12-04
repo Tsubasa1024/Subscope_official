@@ -133,43 +133,58 @@ document.addEventListener("DOMContentLoaded", () => {
     renderHero();
     renderLatest(articles);
 
-    // ----------------------------------
-    // 4. 検索機能
-    // ----------------------------------
-    const searchInput = document.getElementById("search-input");
-    const clearBtn = document.getElementById("clear-btn");
+   // ---------------------------
+//  検索機能
+// ---------------------------
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
 
-    function applySearch() {
-        if (!searchInput) return;
-        const q = searchInput.value.trim().toLowerCase();
+function renderSearchResults(results) {
+    if (!searchResults) return;
 
-        if (!q) {
-            renderLatest(articles);
+    if (results.length === 0) {
+        searchResults.innerHTML = `
+            <p style="padding:20px; text-align:center; color:#666;">
+                該当する記事が見つかりませんでした
+            </p>
+        `;
+        return;
+    }
+
+    searchResults.innerHTML = results
+        .map(
+            (a) => `
+            <div class="search-item" onclick="location.href='article.html?id=${a.id}'">
+                <img src="${a.image}" alt="">
+                <div>
+                    <h3>${a.title}</h3>
+                    <p>${a.description}</p>
+                </div>
+            </div>
+        `
+        )
+        .join("");
+}
+
+// 入力するたびに検索
+if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+        const keyword = e.target.value.trim().toLowerCase();
+
+        if (keyword === "") {
+            searchResults.innerHTML = "";
             return;
         }
 
-        const filtered = articles.filter((a) => {
-            return (
-                a.title.toLowerCase().includes(q) ||
-                a.service.toLowerCase().includes(q) ||
-                a.description.toLowerCase().includes(q)
-            );
-        });
+        const matched = articles.filter((a) =>
+            a.title.toLowerCase().includes(keyword) ||
+            a.description.toLowerCase().includes(keyword) ||
+            a.category.toLowerCase().includes(keyword)
+        );
 
-        renderLatest(filtered);
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("input", applySearch);
-    }
-
-    if (clearBtn && searchInput) {
-        clearBtn.addEventListener("click", () => {
-            searchInput.value = "";
-            applySearch();
-            searchInput.focus();
-        });
-    }
+        renderSearchResults(matched);
+    });
+}
 
     // ----------------------------------
     // 5. Menu トグル & スムーススクロール
@@ -358,3 +373,4 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
+
