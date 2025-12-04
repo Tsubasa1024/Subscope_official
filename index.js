@@ -181,8 +181,6 @@ function initSearch() {
 
     const sectionsToHide = [
       document.getElementById("hero-featured-wrapper"),
-      document.getElementById("shortcuts"),
-      document.getElementById("ranking"),
     ];
 
     if (!query) {
@@ -261,5 +259,6 @@ async function loadArticlesAndInit() {
 window.addEventListener("DOMContentLoaded", () => {
   loadArticlesAndInit();
 });
+
 
 
