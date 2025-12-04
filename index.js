@@ -4,7 +4,8 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------------
-    // 1. 記事データ（ここを書き換えれば中身を増減できる）
+    // 1. 記事データ
+    //    ※ここに記事を増やせばヒーロー・おすすめ・最新記事すべて増える
     // ----------------------------------
     const articles = [
         {
@@ -13,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
             service: "Apple Music",
             date: "2025.12.04",
             description: "空間オーディオやロスレスなど、Apple Music の最新機能をまとめて解説。",
-            image: "images/apple-music-hero.jpg",
+            image: "images/sample1.jpg",
             views: 21827
         },
         {
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             service: "Netflix",
             date: "2025.11.30",
             description: "新作ドラマから話題の映画まで、2025年にチェックしたい作品をピックアップ。",
-            image: "images/netflix-2025.jpg",
+            image: "images/sample2.jpg",
             views: 15432
         },
         {
@@ -31,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
             service: "SUBSCOPE Review",
             date: "2025.11.25",
             description: "音楽・動画・学習系など、主要サブスクリプションの強みと弱みを比較。",
-            image: "images/sub-comparison.jpg",
+            image: "images/sample3.jpg",
             views: 18740
         },
         {
@@ -40,53 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
             service: "Music",
             date: "2025.11.20",
             description: "音質・料金・機能…どっちを選べばいい？実際の使い勝手をもとに比較。",
-            image: "images/spotify-vs-apple.jpg",
+            image: "images/sample4.jpg",
             views: 13201
-        },
-        {
-            id: "youtube-premium",
-            title: "YouTube Premium を本気で使い倒す",
-            service: "YouTube Premium",
-            date: "2025.11.15",
-            description: "広告なし視聴だけじゃない、オフライン再生・バックグラウンド再生のメリットを解説。",
-            image: "images/youtube-premium.jpg",
-            views: 9800
-        },
-        {
-            id: "fitplace24-review",
-            title: "FitPlace24 の実際の使い心地",
-            service: "FitPlace24",
-            date: "2025.11.10",
-            description: "料金・混雑状況・設備など、24時間ジム FitPlace24 を実体験でレビュー。",
-            image: "images/fitplace24.jpg",
-            views: 7200
-        },
-        {
-            id: "abceed-toeic",
-            title: "Abceed でTOEICスコアを伸ばすコツ",
-            service: "Abceed",
-            date: "2025.11.05",
-            description: "3ヶ月でどこまでスコアを伸ばせるか、勉強法と機能をセットで紹介。",
-            image: "images/abceed-toeic.jpg",
-            views: 6500
-        },
-        {
-            id: "spotify-new-feature",
-            title: "Spotify の新しい発見系プレイリスト",
-            service: "Spotify",
-            date: "2025.10.28",
-            description: "Release Radar や Discover Weekly を使いこなして、新しい音楽との出会い方を広げよう。",
-            image: "images/spotify-discover.jpg",
-            views: 5400
-        },
-        {
-            id: "learning-subs",
-            title: "英語学習に使いたいサブスク3選",
-            service: "Learning",
-            date: "2025.10.20",
-            description: "スタディサプリENGLISH・Abceed・Netflix を組み合わせた学習プラン。",
-            image: "images/learning-subs.jpg",
-            views: 5000
         }
     ];
 
@@ -98,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderHero() {
         if (!heroContainer || !articles.length) return;
 
+        // 一番閲覧数が多い記事をヒーローにする
         const heroArticle = [...articles].sort((a, b) => b.views - a.views)[0];
 
         heroContainer.innerHTML = "";
@@ -118,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-        // クリックで記事ページへ
         card.addEventListener("click", () => {
             window.location.href = `article.html?id=${encodeURIComponent(heroArticle.id)}`;
         });
@@ -263,141 +219,142 @@ document.addEventListener("DOMContentLoaded", () => {
         revealEls.forEach((el) => el.classList.add("active"));
     }
 
-// ----------------------------------
-// 7. 3D おすすめカルーセル（ボタン＋スワイプ）
-//    → articles の先頭 4件を使用
-// ----------------------------------
-const carousel = document.querySelector(".carousel3d");
-if (carousel) {
-    const inner = carousel.querySelector(".carousel3d-inner");
-    const carouselItems = inner.querySelectorAll(".carousel3d-item");
-    const prevBtn = carousel.querySelector(".carousel3d-nav-prev");
-    const nextBtn = carousel.querySelector(".carousel3d-nav-next");
+    // ----------------------------------
+    // 7. 3D おすすめカルーセル（ボタン＋スワイプ）
+    //    → articles の先頭 4件を使用
+    // ----------------------------------
+    const carousel = document.querySelector(".carousel3d");
+    if (carousel) {
+        const inner = carousel.querySelector(".carousel3d-inner");
+        const carouselItems = inner.querySelectorAll(".carousel3d-item");
+        const prevBtn = carousel.querySelector(".carousel3d-nav-prev");
+        const nextBtn = carousel.querySelector(".carousel3d-nav-next");
 
-    if (carouselItems.length) {
-        const recommend = articles.slice(0, 4);
-        carouselItems.forEach((item, i) => {
-            const a = recommend[i % recommend.length];
-            item.innerHTML = `
-                <div class="carousel3d-card">
-                    <img src="${a.image}" alt="">
-                    <p>${a.title}</p>
-                </div>
-            `;
-            item.addEventListener("click", () => {
-                window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-            });
-        });
-
-        const total = carouselItems.length;
-        let currentIndex = 0;
-        let autoTimer = null;
-
-        function updateCarouselPositions() {
+        if (carouselItems.length) {
+            const recommend = articles.slice(0, 4);
             carouselItems.forEach((item, i) => {
-                const offset = (i - currentIndex + total) % total;
-                item.className = "carousel3d-item";
-
-                if (offset === 0) {
-                    item.classList.add("is-center");
-                } else if (offset === 1) {
-                    item.classList.add("is-right");
-                } else if (offset === total - 1) {
-                    item.classList.add("is-left");
-                } else {
-                    item.classList.add("is-back");
-                }
+                const a = recommend[i % recommend.length];
+                item.innerHTML = `
+                    <div class="carousel3d-card">
+                        <img src="${a.image}" alt="">
+                        <p>${a.title}</p>
+                    </div>
+                `;
+                item.addEventListener("click", () => {
+                    window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                });
             });
-        }
 
-        function goNext() {
-            currentIndex = (currentIndex + 1) % total;
-            updateCarouselPositions();
-        }
+            const total = carouselItems.length;
+            let currentIndex = 0;
+            let autoTimer = null;
 
-        function goPrev() {
-            currentIndex = (currentIndex - 1 + total) % total;
-            updateCarouselPositions();
-        }
+            function updateCarouselPositions() {
+                carouselItems.forEach((item, i) => {
+                    const offset = (i - currentIndex + total) % total;
+                    item.className = "carousel3d-item";
 
-        function resetAuto() {
-            if (autoTimer) clearInterval(autoTimer);
-            autoTimer = setInterval(goNext, 3000);
-        }
-
-        // 初期表示 + 自動スクロール開始
-        updateCarouselPositions();
-        resetAuto();
-
-        // ボタンクリック
-        if (nextBtn) {
-            nextBtn.addEventListener("click", () => {
-                goNext();
-                resetAuto();
-            });
-        }
-        if (prevBtn) {
-            prevBtn.addEventListener("click", () => {
-                goPrev();
-                resetAuto();
-            });
-        }
-
-        // スワイプ操作（スマホ）
-        let touchStartX = null;
-        let touchDragging = false;
-
-        carousel.addEventListener("touchstart", (e) => {
-            if (!e.touches[0]) return;
-            touchStartX = e.touches[0].clientX;
-            touchDragging = true;
-        });
-
-        carousel.addEventListener("touchend", (e) => {
-            if (!touchDragging || touchStartX === null) return;
-            const endX = e.changedTouches[0].clientX;
-            const diff = endX - touchStartX;
-
-            if (Math.abs(diff) > 40) {
-                if (diff < 0) {
-                    goNext();
-                } else {
-                    goPrev();
-                }
-                resetAuto();
+                    if (offset === 0) {
+                        item.classList.add("is-center");
+                    } else if (offset === 1) {
+                        item.classList.add("is-right");
+                    } else if (offset === total - 1) {
+                        item.classList.add("is-left");
+                    } else {
+                        item.classList.add("is-back");
+                    }
+                });
             }
-            touchDragging = false;
-            touchStartX = null;
-        });
 
-        // マウスドラッグ（PC）
-        let mouseStartX = null;
-        let mouseDragging = false;
-
-        carousel.addEventListener("mousedown", (e) => {
-            mouseStartX = e.clientX;
-            mouseDragging = true;
-        });
-
-        window.addEventListener("mouseup", () => {
-            mouseDragging = false;
-            mouseStartX = null;
-        });
-
-        carousel.addEventListener("mouseup", (e) => {
-            if (!mouseDragging || mouseStartX === null) return;
-            const diff = e.clientX - mouseStartX;
-
-            if (Math.abs(diff) > 40) {
-                if (diff < 0) {
-                    goNext();
-                } else {
-                    goPrev();
-                }
-                resetAuto();
+            function goNext() {
+                currentIndex = (currentIndex + 1) % total;
+                updateCarouselPositions();
             }
-            mouseDragging = false;
-            mouseStartX = null;
-        });
+
+            function goPrev() {
+                currentIndex = (currentIndex - 1 + total) % total;
+                updateCarouselPositions();
+            }
+
+            function resetAuto() {
+                if (autoTimer) clearInterval(autoTimer);
+                autoTimer = setInterval(goNext, 3000);
+            }
+
+            // 初期表示 + 自動スクロール開始
+            updateCarouselPositions();
+            resetAuto();
+
+            // ボタンクリック
+            if (nextBtn) {
+                nextBtn.addEventListener("click", () => {
+                    goNext();
+                    resetAuto();
+                });
+            }
+            if (prevBtn) {
+                prevBtn.addEventListener("click", () => {
+                    goPrev();
+                    resetAuto();
+                });
+            }
+
+            // スワイプ操作（スマホ）
+            let touchStartX = null;
+            let touchDragging = false;
+
+            carousel.addEventListener("touchstart", (e) => {
+                if (!e.touches[0]) return;
+                touchStartX = e.touches[0].clientX;
+                touchDragging = true;
+            });
+
+            carousel.addEventListener("touchend", (e) => {
+                if (!touchDragging || touchStartX === null) return;
+                const endX = e.changedTouches[0].clientX;
+                const diff = endX - touchStartX;
+
+                if (Math.abs(diff) > 40) {
+                    if (diff < 0) {
+                        goNext();
+                    } else {
+                        goPrev();
+                    }
+                    resetAuto();
+                }
+                touchDragging = false;
+                touchStartX = null;
+            });
+
+            // マウスドラッグ（PC）
+            let mouseStartX = null;
+            let mouseDragging = false;
+
+            carousel.addEventListener("mousedown", (e) => {
+                mouseStartX = e.clientX;
+                mouseDragging = true;
+            });
+
+            window.addEventListener("mouseup", () => {
+                mouseDragging = false;
+                mouseStartX = null;
+            });
+
+            carousel.addEventListener("mouseup", (e) => {
+                if (!mouseDragging || mouseStartX === null) return;
+                const diff = e.clientX - mouseStartX;
+
+                if (Math.abs(diff) > 40) {
+                    if (diff < 0) {
+                        goNext();
+                    } else {
+                        goPrev();
+                    }
+                    resetAuto();
+                }
+                mouseDragging = false;
+                mouseStartX = null;
+            });
+        }
     }
-}
+});
