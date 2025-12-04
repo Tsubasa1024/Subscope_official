@@ -89,7 +89,7 @@ function renderLatest() {
   const sorted = [...articles].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
-  renderArticles(sorted.slice(0, 5), "latest-grid", true);
+  renderArticles(sorted.slice(0, 8), "latest-grid", true);
 }
 
 function renderRanking(type) {
@@ -261,4 +261,5 @@ async function loadArticlesAndInit() {
 window.addEventListener("DOMContentLoaded", () => {
   loadArticlesAndInit();
 });
+
 
