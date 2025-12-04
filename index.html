@@ -392,6 +392,50 @@
         /* =========================================
            3D Carousel (おすすめ記事)
            ========================================= */
+        /* カルーセル左右ナビボタン */
+.carousel3d-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+    z-index: 10;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.carousel3d-nav:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+    background: #fff;
+}
+
+.carousel3d-nav-prev {
+    left: 0;
+}
+
+.carousel3d-nav-next {
+    right: 0;
+}
+
+@media (max-width: 768px) {
+    .carousel3d-nav {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+}
+
         .carousel3d-section {
             width: 100%;
             padding: 40px 0 24px;
@@ -752,42 +796,49 @@
 
     <!-- おすすめ 3D カルーセル -->
     <section class="carousel3d-section" id="recommend">
-        <div class="container">
-            <h2 class="carousel3d-title">おすすめ記事</h2>
+    <div class="container">
+        <h2 class="carousel3d-title">おすすめ記事</h2>
 
-            <div class="carousel3d">
-                <div class="carousel3d-inner">
-                    <div class="carousel3d-item">
-                        <div class="carousel3d-card">
-                            <img src="images/sample1.jpg" alt="">
-                            <p>Apple Music の最新機能まとめ</p>
-                        </div>
+        <div class="carousel3d">
+            <!-- ← ボタン -->
+            <button class="carousel3d-nav carousel3d-nav-prev" type="button">&#10094;</button>
+
+            <div class="carousel3d-inner">
+                <div class="carousel3d-item">
+                    <div class="carousel3d-card">
+                        <img src="images/sample1.jpg" alt="">
+                        <p>Apple Music の最新機能まとめ</p>
                     </div>
+                </div>
 
-                    <div class="carousel3d-item">
-                        <div class="carousel3d-card">
-                            <img src="images/sample2.jpg" alt="">
-                            <p>Netflix 2025年おすすめ作品</p>
-                        </div>
+                <div class="carousel3d-item">
+                    <div class="carousel3d-card">
+                        <img src="images/sample2.jpg" alt="">
+                        <p>Netflix 2025年おすすめ作品</p>
                     </div>
+                </div>
 
-                    <div class="carousel3d-item">
-                        <div class="carousel3d-card">
-                            <img src="images/sample3.jpg" alt="">
-                            <p>人気サブスク徹底比較ガイド</p>
-                        </div>
+                <div class="carousel3d-item">
+                    <div class="carousel3d-card">
+                        <img src="images/sample3.jpg" alt="">
+                        <p>人気サブスク徹底比較ガイド</p>
                     </div>
+                </div>
 
-                    <div class="carousel3d-item">
-                        <div class="carousel3d-card">
-                            <img src="images/sample4.jpg" alt="">
-                            <p>Spotify vs Apple Music</p>
-                        </div>
+                <div class="carousel3d-item">
+                    <div class="carousel3d-card">
+                        <img src="images/sample4.jpg" alt="">
+                        <p>Spotify vs Apple Music</p>
                     </div>
                 </div>
             </div>
+
+            <!-- → ボタン -->
+            <button class="carousel3d-nav carousel3d-nav-next" type="button">&#10095;</button>
         </div>
-    </section>
+    </div>
+</section>
+
 
     <!-- Latest Articles -->
     <section class="section" id="latest">
