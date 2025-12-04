@@ -792,7 +792,6 @@
             <ul class="nav-list">
                 <li><a href="#" class="nav-link" onclick="smoothScroll('#hero'); toggleMenu();">トップ</a></li>
                 <li><a href="#" class="nav-link" onclick="smoothScroll('#latest'); toggleMenu();">最新の記事</a></li>
-                <li><a href="#" class="nav-link" onclick="smoothScroll('#shortcuts'); toggleMenu();">ショートカット</a></li>
                 <li><a href="#" class="nav-link" onclick="smoothScroll('#ranking'); toggleMenu();">ランキング</a></li>
             </ul>
         </div>
@@ -817,74 +816,6 @@
             <h2 class="section-title reveal" id="latest-title">最新の記事</h2>
             <div class="grid-layout reveal" id="latest-grid">
                 <!-- JS will inject cards here -->
-            </div>
-        </div>
-    </section>
-
-    <!-- 4. SHORTCUTS SECTION -->
-    <section class="section" id="shortcuts">
-        <div class="container">
-            <h2 class="section-title reveal">探し方のショートカット</h2>
-            <div class="shortcut-grid reveal">
-                
-                <div class="shortcut-item" id="sc-recommend" onclick="smoothScroll('#hero')">
-                    <div class="shortcut-bg"></div>
-                    <div class="shortcut-overlay"></div>
-                    <div class="shortcut-content">
-                        <div class="shortcut-icon">★</div>
-                        <div class="shortcut-label">おすすめ</div>
-                    </div>
-                </div>
-
-                <div class="shortcut-item" id="sc-new" onclick="smoothScroll('#latest')">
-                    <div class="shortcut-bg"></div>
-                    <div class="shortcut-overlay"></div>
-                    <div class="shortcut-content">
-                        <div class="shortcut-icon">⚡️</div>
-                        <div class="shortcut-label">新着</div>
-                    </div>
-                </div>
-
-                <div class="shortcut-item" id="sc-ranking" onclick="smoothScroll('#ranking')">
-                    <div class="shortcut-bg"></div>
-                    <div class="shortcut-overlay"></div>
-                    <div class="shortcut-content">
-                        <div class="shortcut-icon">👑</div>
-                        <div class="shortcut-label">ランキング</div>
-                    </div>
-                </div>
-
-                <div class="shortcut-item" id="sc-genre" onclick="smoothScroll('#latest')">
-                    <div class="shortcut-bg"></div>
-                    <div class="shortcut-overlay"></div>
-                    <div class="shortcut-content">
-                        <div class="shortcut-icon">📂</div>
-                        <div class="shortcut-label">ジャンル別</div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- 5. RANKING SECTION -->
-    <section class="section" id="ranking">
-        <div class="container">
-            <h2 class="section-title reveal">ランキング</h2>
-            
-            <div class="reveal" style="text-align: center;">
-                <div class="ranking-tabs">
-                    <button class="tab-btn active" onclick="switchTab('daily')">デイリー</button>
-                    <button class="tab-btn" onclick="switchTab('weekly')">ウィークリー</button>
-                    <button class="tab-btn" onclick="switchTab('monthly')">マンスリー</button>
-                    <button class="tab-btn" onclick="switchTab('allTime')">全期間</button>
-                </div>
-            </div>
-
-            <div id="ranking-list-container" class="reveal">
-                <ul class="ranking-list" id="ranking-list">
-                    <!-- JS will inject list items here -->
-                </ul>
             </div>
         </div>
     </section>
