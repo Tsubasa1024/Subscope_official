@@ -154,6 +154,21 @@ window.toggleMenu = function () {
 // 検索
 // =========================================
 
+// =========================================
+// Search Clear Button（検索バーの×ボタン）
+// =========================================
+const searchInputElement = document.getElementById("search-input");
+const clearBtn = document.getElementById("clear-btn");
+
+if (clearBtn && searchInputElement) {
+  clearBtn.addEventListener("click", () => {
+    searchInputElement.value = "";
+    searchInputElement.focus();
+    // 検索のリセットを即反映
+    searchInputElement.dispatchEvent(new Event("input"));
+  });
+}
+
 function initSearch() {
   const searchInput = document.getElementById("search-input");
   const latestTitle = document.getElementById("latest-title");
@@ -246,3 +261,4 @@ async function loadArticlesAndInit() {
 window.addEventListener("DOMContentLoaded", () => {
   loadArticlesAndInit();
 });
+
