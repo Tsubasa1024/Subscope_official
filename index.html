@@ -174,19 +174,22 @@
             pointer-events: auto;
         }
 
-        /* 検索結果エリア */
+        /* 検索結果エリア（常に画面上部固定） */
         .search-results-container {
+            position: fixed;
+            top: 72px; /* 固定ヘッダーのすぐ下 */
+            left: 0;
+            right: 0;
             max-width: var(--container-width);
-            margin: 72px auto 0; /* ヘッダーの下にくるように */
-            padding: 0 24px;
+            margin: 0 auto;
+            padding: 0 24px 16px;
+            z-index: 130; /* ヘッダー(150)より下、コンテンツより上 */
         }
 
-#searchResults {
-    margin-top: 8px;
-    max-height: 380px;     /* 画面を埋め尽くしすぎない程度の高さ */
-    overflow-y: auto;      /* 結果が多いときは内部スクロール */
-}
-
+        #searchResults {
+            margin-top: 8px;
+            max-height: 380px;
+            overflow-y: auto;
         }
 
         .search-item {
@@ -736,6 +739,30 @@
             font-size: 13px;
         }
 
+        /* 「すべての記事」ボタン */
+        .all-articles-btn-wrapper {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .all-articles-btn {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 14px 38px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .all-articles-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.15);
+        }
+
         /* =========================================
            Responsive
            ========================================= */
@@ -754,7 +781,7 @@
             }
 
             .search-results-container {
-                padding: 0 16px;
+                padding: 0 16px 12px;
             }
 
             .hero {
@@ -797,30 +824,6 @@
                 flex-wrap: wrap;
             }
         }
-        /* 「すべての記事」ボタン */
-.all-articles-btn-wrapper {
-    text-align: center;
-    margin-top: 40px;
-}
-
-.all-articles-btn {
-    display: inline-block;
-    background: #000;
-    color: #fff;
-    padding: 14px 38px;
-    border-radius: 40px;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.25s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-}
-
-.all-articles-btn:hover {
-    background: #333;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(0,0,0,0.15);
-}
-
     </style>
 </head>
 <body>
@@ -876,18 +879,10 @@
         </ul>
     </div>
 
-    <!-- 🔍 検索結果エリア -->
-   /* 検索結果コンテナ：ヘッダーの下に固定表示 */
-.search-results-container {
-    position: fixed;
-    top: 72px;                         /* 固定ヘッダーのすぐ下 */
-    left: 0;
-    right: 0;
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 24px 16px;
-    z-index: 130;                      /* ヘッダー(150)より下、コンテンツより上 */
-}
+    <!-- 🔍 検索結果エリア（HTML部分） -->
+    <div class="search-results-container">
+        <div id="searchResults"></div>
+    </div>
 
     <!-- Hero -->
     <header class="hero" id="hero">
@@ -948,20 +943,19 @@
     </section>
 
     <!-- Latest Articles -->
-<section class="section" id="latest">
-    <div class="container">
-        <h2 class="section-title reveal" id="latest-title">最新の記事</h2>
+    <section class="section" id="latest">
+        <div class="container">
+            <h2 class="section-title reveal" id="latest-title">最新の記事</h2>
 
-        <!-- 記事グリッド（JS が注入） -->
-        <div class="grid-layout reveal" id="latest-grid"></div>
+            <!-- 記事グリッド（JS が注入） -->
+            <div class="grid-layout reveal" id="latest-grid"></div>
 
-        <!-- すべての記事ボタン -->
-        <div class="all-articles-btn-wrapper">
-            <a href="all.html" class="all-articles-btn">すべての記事を見る</a>
+            <!-- すべての記事ボタン -->
+            <div class="all-articles-btn-wrapper">
+                <a href="all.html" class="all-articles-btn">すべての記事を見る</a>
+            </div>
         </div>
-    </div>
-</section>
-
+    </section>
 
     <!-- ================================
           SUBSCOPE Footer
