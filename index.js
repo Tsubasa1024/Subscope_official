@@ -135,7 +135,7 @@ function renderLatest(limit = 6) {
 }
 
 // =====================================
-// 3D カルーセル
+// 3D カルーセル（おすすめ記事）
 // =====================================
 function initCarousel3D() {
     const items = document.querySelectorAll(".carousel3d-item");
@@ -145,6 +145,26 @@ function initCarousel3D() {
 
     let currentIndex = 0;
     const total = items.length;
+
+    // 先頭からおすすめ用の記事を取ってくる（articles の先頭4件）
+    const recommend = articles.slice(0, total);
+
+    // カードの中身を articles から注入 ＋ クリックで記事へ飛ぶ
+    items.forEach((item, i) => {
+        const a = recommend[i % recommend.length];
+
+        item.innerHTML = `
+            <div class="carousel3d-card">
+                <img src="${a.image}" alt="">
+                <p>${a.title}</p>
+            </div>
+        `;
+
+        // カード全体をクリックで記事ページへ
+        item.onclick = () => {
+            location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+        };
+    });
 
     function updatePositions() {
         items.forEach((item, i) => {
@@ -173,6 +193,7 @@ function initCarousel3D() {
         updatePositions();
     });
 
+    // 最初の配置
     updatePositions();
 }
 
@@ -381,3 +402,4 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearch();
     initScrollReveal();
 });
+
