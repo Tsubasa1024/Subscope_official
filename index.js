@@ -60,7 +60,7 @@ const articles = [
 ];
 
 // =====================================
-// DOM 用の変数（あとで中身を入れる）
+// DOM 用の変数
 // =====================================
 let searchInput;
 let clearBtn;
@@ -136,20 +136,25 @@ function renderLatest(limit = 6) {
 
 // =====================================
 // 3D カルーセル（おすすめ記事）
+//   - カードクリックで記事へ
+//   - 自動スクロール付き
 // =====================================
 function initCarousel3D() {
-    const items = document.querySelectorAll(".carousel3d-item");
-    const prevBtn = document.querySelector(".carousel3d-nav-prev");
-    const nextBtn = document.querySelector(".carousel3d-nav-next");
+    const carousel = document.querySelector(".carousel3d");
+    if (!carousel) return;
+
+    const items = carousel.querySelectorAll(".carousel3d-item");
+    const prevBtn = carousel.querySelector(".carousel3d-nav-prev");
+    const nextBtn = carousel.querySelector(".carousel3d-nav-next");
     if (!items.length || !prevBtn || !nextBtn) return;
 
-    let currentIndex = 0;
     const total = items.length;
+    let currentIndex = 0;
 
-    // 先頭からおすすめ用の記事を取ってくる（articles の先頭4件）
+    // articles からおすすめ記事を取得（先頭から total 件）
     const recommend = articles.slice(0, total);
 
-    // カードの中身を articles から注入 ＋ クリックで記事へ飛ぶ
+    // カード中身を注入 & クリックで記事ページへ
     items.forEach((item, i) => {
         const a = recommend[i % recommend.length];
 
@@ -160,10 +165,13 @@ function initCarousel3D() {
             </div>
         `;
 
-        // カード全体をクリックで記事ページへ
-        item.onclick = () => {
-            location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-        };
+        const card = item.querySelector(".carousel3d-card");
+        if (card) {
+            card.style.cursor = "pointer";
+            card.addEventListener("click", () => {
+                location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+            });
+        }
     });
 
     function updatePositions() {
@@ -183,17 +191,44 @@ function initCarousel3D() {
         });
     }
 
-    prevBtn.addEventListener("click", () => {
-        currentIndex = (currentIndex - 1 + total) % total;
-        updatePositions();
-    });
-
-    nextBtn.addEventListener("click", () => {
+    function goNext() {
         currentIndex = (currentIndex + 1) % total;
         updatePositions();
+    }
+
+    function goPrev() {
+        currentIndex = (currentIndex - 1 + total) % total;
+        updatePositions();
+    }
+
+    // 自動スクロール用タイマー
+    let autoTimer = setInterval(goNext, 4000);
+
+    function resetAutoTimer() {
+        clearInterval(autoTimer);
+        autoTimer = setInterval(goNext, 4000);
+    }
+
+    // ボタン操作
+    nextBtn.addEventListener("click", () => {
+        goNext();
+        resetAutoTimer();
     });
 
-    // 最初の配置
+    prevBtn.addEventListener("click", () => {
+        goPrev();
+        resetAutoTimer();
+    });
+
+    // スマホだと hover 無いけど、PC 用に一応 stop しておく
+    carousel.addEventListener("mouseenter", () => {
+        clearInterval(autoTimer);
+    });
+    carousel.addEventListener("mouseleave", () => {
+        resetAutoTimer();
+    });
+
+    // 初期配置
     updatePositions();
 }
 
@@ -357,12 +392,12 @@ function smoothScroll(targetSelector) {
     });
 }
 
-// グローバル関数として window に出す（HTML から呼べるように）
+// HTML から呼べるようにグローバルへ
 window.toggleMenu = toggleMenu;
 window.smoothScroll = smoothScroll;
 
 // =====================================
-// スクロールリビール（既存 .reveal クラス用）
+// スクロールリビール（.reveal 用）
 // =====================================
 function initScrollReveal() {
     const targets = document.querySelectorAll(".reveal");
@@ -389,12 +424,11 @@ function initScrollReveal() {
 // 初期化
 // =====================================
 document.addEventListener("DOMContentLoaded", () => {
-    // ここで DOM 要素を取得（どのページでも安全）
-    searchInput   = document.getElementById("searchInput");
-    clearBtn      = document.getElementById("clear-btn");
+    searchInput     = document.getElementById("searchInput");
+    clearBtn        = document.getElementById("clear-btn");
     searchResultsEl = document.getElementById("searchResults");
-    heroContainer = document.getElementById("most-viewed-content");
-    latestGrid    = document.getElementById("latest-grid");
+    heroContainer   = document.getElementById("most-viewed-content");
+    latestGrid      = document.getElementById("latest-grid");
 
     renderHero();
     renderLatest();
@@ -402,4 +436,3 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearch();
     initScrollReveal();
 });
-
