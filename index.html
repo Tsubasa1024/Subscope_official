@@ -456,7 +456,6 @@
             width: 100%;
             padding: 40px 0 24px;
             background: var(--color-bg);
-            /* 横だけ隠す。上下は見える */
             overflow-x: hidden;
             overflow-y: visible;
         }
@@ -474,7 +473,7 @@
 
         .carousel3d {
             width: 100%;
-            height: 320px;  /* 余裕をもたせて切れないように */
+            height: 320px;
             position: relative;
             perspective: 1200px;
             display: flex;
@@ -489,7 +488,7 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            z-index: 1; /* カード層 */
+            z-index: 1;
         }
 
         .carousel3d-item {
@@ -516,11 +515,16 @@
                 transform 0.6s ease,
                 opacity 0.6s ease,
                 box-shadow 0.4s ease;
+
+            /* ★ ここでカードの大きさを統一 */
+            height: 320px;
+            display: flex;
+            flex-direction: column;
         }
 
         .carousel3d-card img {
             width: 100%;
-            height: 200px;
+            height: 200px;  /* 画像の高さも固定 */
             object-fit: cover;
             display: block;
         }
@@ -529,6 +533,9 @@
             padding: 10px 16px 16px;
             font-size: 15px;
             font-weight: 500;
+            flex-grow: 1; /* タイトル部分で高さ調整 */
+            display: flex;
+            align-items: center;
         }
 
         .carousel3d-item.is-center {
@@ -581,15 +588,15 @@
             color: #222;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-            z-index: 20; /* カードより手前でクリック可能に */
+            z-index: 20;
         }
 
         .carousel3d-nav-prev {
-            left: 20px;   /* 内側に寄せる */
+            left: 20px;
         }
 
         .carousel3d-nav-next {
-            right: 20px;  /* 内側に寄せる */
+            right: 20px;
         }
 
         .carousel3d-nav:hover {
@@ -704,7 +711,7 @@
         }
 
         /* =========================================
-           Footer（新デザイン）
+           Footer
            ========================================= */
         .footer {
             background: #F5F5F7;
@@ -878,19 +885,16 @@
     <!-- Menu オーバーレイ -->
     <div class="nav-overlay" id="nav-overlay">
         <ul class="nav-list">
-            <!-- トップ -->
             <li>
                 <a href="#" class="nav-link" onclick="smoothScroll('#hero'); toggleMenu();">
                     トップ
                 </a>
             </li>
-            <!-- 記事一覧 -->
             <li>
                 <a href="all.html" class="nav-link" onclick="toggleMenu();">
                     記事一覧
                 </a>
             </li>
-            <!-- ランキング -->
             <li>
                 <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
                     ランキング
@@ -923,7 +927,6 @@
             <h2 class="carousel3d-title">おすすめ記事</h2>
 
             <div class="carousel3d">
-                <!-- ← ボタン -->
                 <button class="carousel3d-nav carousel3d-nav-prev" type="button">&#10094;</button>
 
                 <div class="carousel3d-inner">
@@ -956,7 +959,6 @@
                     </div>
                 </div>
 
-                <!-- → ボタン -->
                 <button class="carousel3d-nav carousel3d-nav-next" type="button">&#10095;</button>
             </div>
         </div>
@@ -967,19 +969,15 @@
         <div class="container">
             <h2 class="section-title reveal" id="latest-title">最新の記事</h2>
 
-            <!-- 記事グリッド（JS が注入） -->
             <div class="grid-layout reveal" id="latest-grid"></div>
 
-            <!-- すべての記事ボタン -->
             <div class="all-articles-btn-wrapper">
                 <a href="all.html" class="all-articles-btn">すべての記事を見る</a>
             </div>
         </div>
     </section>
 
-    <!-- ================================
-          SUBSCOPE Footer
-    ==================================== -->
+    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-links">
@@ -991,7 +989,6 @@
         </div>
     </footer>
 
-    <!-- JS 読み込み -->
     <script src="index.js"></script>
 </body>
 </html>
