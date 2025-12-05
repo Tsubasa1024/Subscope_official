@@ -1,130 +1,817 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ranking - SUBSCOPE</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ランキング | SUBSCOPE</title>
     <style>
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #ffffff;
-            color: #1d1d1f;
+        /* =========================================
+           Global Styles & Variables
+           ========================================= */
+        :root {
+            --color-bg: #FFFFFF;
+            --color-bg-secondary: #F5F5F7;
+            --color-text-main: #1D1D1F;
+            --color-text-gray: #86868B;
+            --color-border: #D2D2D7;
+            --color-accent: #000000;
+            
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --transition-hover: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            
+            --container-width: 1080px;
+            --spacing-section: 80px;
         }
 
-        /* ===== Header（ロゴ + Menu） ===== */
-        header {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+        }
+
+        /* =========================================
+           Scroll Reveal
+           ========================================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity var(--transition-fade), transform var(--transition-fade);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================
+           Fixed Header（検索バー＋Menu）
+           ========================================= */
+        .fixed-header {
             position: fixed;
             top: 0;
+            left: 0;
             width: 100%;
-            height: 60px;
-            background: #ffffff;
+            z-index: 150;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .top-header {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid #e0e0e0;
-            z-index: 1000;
         }
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: #000;
-            text-decoration: none;
+        .nav-left,
+        .nav-right {
+            pointer-events: auto;
         }
 
-        .menu a {
-            margin-left: 20px;
-            font-size: 15px;
-            text-decoration: none;
-            color: #1d1d1f;
+        .search-wrapper {
+            width: 280px;
+            position: relative;
         }
 
-        /* ===== Main Content ===== */
-        main {
-            padding: 100px 20px 40px;
-            max-width: 900px;
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 44px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            font-size: 0.9rem;
+            color: var(--color-text-main);
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .search-input:focus {
+            width: 320px;
+            background: #fff;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            border-color: rgba(0,0,0,0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--color-text-gray);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .search-input:not(:placeholder-shown) ~ .clear-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 検索結果エリア（共通） */
+        .search-results-container {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            max-width: var(--container-width);
             margin: 0 auto;
+            padding: 0 24px 16px;
+            z-index: 130;
         }
 
-        h1 {
-            font-size: 26px;
-            font-weight: bold;
-            margin-bottom: 20px;
+        #searchResults {
+            margin-top: 8px;
+            max-height: 380px;
+            overflow-y: auto;
         }
 
-        .ranking-item {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 20px 0;
+        .search-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: #fff;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .search-item:hover {
+            background: #f5f5f7;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+        }
+
+        .search-item img {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .search-item h3 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .search-item p {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        /* Menu Button */
+        .menu-btn {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-text-main);
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
 
-        .ranking-number {
-            font-size: 28px;
-            font-weight: bold;
-            width: 50px;
-            text-align: center;
+        .menu-btn:hover {
+            background: #fff;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
-        .ranking-details {
-            flex: 1;
+        .menu-icon-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-line {
+            width: 16px;
+            height: 2px;
+            background-color: var(--color-text-main);
+            border-radius: 2px;
+        }
+
+        .nav-overlay {
+            position: fixed;
+            top: 72px;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,0,0,0.05);
+            transform: translateY(-20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 140;
+            min-width: 200px;
+        }
+
+        .nav-overlay.open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-list li {
+            margin-bottom: 8px;
+        }
+
+        .nav-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-text-main);
+            transition: background 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        /* =========================================
+           ランキング Hero
+           ========================================= */
+        .ranking-hero {
+            padding-top: 96px;
+            padding-bottom: 40px;
+        }
+
+        .ranking-hero-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         .ranking-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .ranking-sub {
+            font-size: 0.98rem;
+            color: var(--color-text-gray);
+            max-width: 520px;
+        }
+
+        .period-toggle {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .period-btn {
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid #D2D2D7;
+            font-size: 0.85rem;
+            background: #fff;
+            color: #1D1D1F;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .period-btn.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* =========================================
+           ランキング本体
+           ========================================= */
+        .ranking-section {
+            padding: 16px 0 80px;
+        }
+
+        .ranking-top3 {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .ranking-card {
+            display: flex;
+            align-items: stretch;
+            gap: 16px;
+            padding: 16px 18px;
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .ranking-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 36px rgba(0,0,0,0.08);
+            background: #F9F9FB;
+        }
+
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            background: #000;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .rank-badge.rank-1 {
+            background: #000;
+        }
+        .rank-badge.rank-2 {
+            background: #333;
+        }
+        .rank-badge.rank-3 {
+            background: #555;
+        }
+
+        .ranking-thumb {
+            width: 110px;
+            height: 72px;
+            border-radius: 16px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .ranking-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ranking-service {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--color-text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ranking-title-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .ranking-desc {
-            font-size: 14px;
+            font-size: 0.9rem;
             color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .ranking-meta {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: var(--color-text-gray);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* 4位以降のリスト */
+        .ranking-rest {
+            border-top: 1px solid #E5E5EA;
+            padding-top: 16px;
+        }
+
+        .ranking-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 4px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.18s ease, transform 0.18s ease;
+        }
+
+        .ranking-row:hover {
+            background: #F5F5F7;
+            transform: translateY(-1px);
+        }
+
+        .ranking-row-rank {
+            width: 28px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        .ranking-row-thumb {
+            width: 64px;
+            height: 48px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .ranking-row-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ranking-row-title {
+            font-size: 0.98rem;
+            font-weight: 600;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ranking-row-meta {
+            margin-top: 2px;
+            font-size: 0.78rem;
+            color: var(--color-text-gray);
+            display: flex;
+            gap: 10px;
+        }
+
+        .ranking-row-service {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ranking-cta-wrapper {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .ranking-cta-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 40px;
+            border: none;
+            background: #000;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+        }
+
+        .ranking-cta-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.2);
+        }
+
+        .ranking-cta-link {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--color-text-gray);
+        }
+
+        .ranking-cta-link a {
+            text-decoration: underline;
+        }
+
+        /* =========================================
+           Footer
+           ========================================= */
+        .footer {
+            background: #F5F5F7;
+            padding: 40px 0;
+            border-top: 1px solid #D2D2D7;
+            margin-top: 60px;
+        }
+
+        .footer-container {
+            max-width: 1080px;
+            margin: 0 auto;
+            text-align: center;
+            font-family: var(--font-family);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: #1D1D1F;
+            text-decoration: none;
+            font-size: 15px;
+            transition: opacity .3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: .6;
+        }
+
+        .footer-copy {
+            color: #86868B;
+            font-size: 13px;
+        }
+
+        /* =========================================
+           Responsive
+           ========================================= */
+        @media (max-width: 768px) {
+            :root {
+                --spacing-section: 60px;
+            }
+
+            .top-header {
+                padding: 10px 16px;
+            }
+
+            .search-wrapper {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .search-results-container {
+                padding: 0 16px 12px;
+            }
+
+            .ranking-hero {
+                padding-top: 92px;
+                padding-bottom: 32px;
+            }
+
+            .ranking-title {
+                font-size: 2rem;
+            }
+
+            .footer-links {
+                gap: 24px;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
-
 <body>
-    <!-- ===== Header ===== -->
-    <header>
-        <a href="index.html" class="logo">SUBSCOPE</a>
-        <nav class="menu">
-            <a href="all.html">All</a>
-            <a href="ranking.html">Ranking</a>
-            <a href="service.html">Service</a>
-        </nav>
-    </header>
 
-    <!-- ===== Main ===== -->
-    <main>
-        <h1>Ranking</h1>
-
-        <div class="ranking-item">
-            <div class="ranking-number">1</div>
-            <div class="ranking-details">
-                <div class="ranking-title">サービス名A</div>
-                <div class="ranking-desc">説明文がここに入ります。</div>
+    <!-- 固定ヘッダー（検索バー＋Menu） -->
+    <div class="fixed-header">
+        <div class="top-header">
+            <div class="nav-left">
+                <div class="search-wrapper">
+                    <input type="text" class="search-input" id="searchInput" placeholder="">
+                    <span class="clear-btn" id="clear-btn">×</span>
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="nav-right">
+                <button class="menu-btn" onclick="toggleMenu()">
+                    <div class="menu-icon-lines">
+                        <span class="menu-line"></span>
+                        <span class="menu-line"></span>
+                    </div>
+                    <span>Menu</span>
+                </button>
             </div>
         </div>
+    </div>
 
-        <div class="ranking-item">
-            <div class="ranking-number">2</div>
-            <div class="ranking-details">
-                <div class="ranking-title">サービス名B</div>
-                <div class="ranking-desc">説明文がここに入ります。</div>
+    <!-- Menu オーバーレイ -->
+    <div class="nav-overlay" id="nav-overlay">
+        <ul class="nav-list">
+            <li>
+                <a href="index.html" class="nav-link" onclick="toggleMenu();">
+                    トップ
+                </a>
+            </li>
+            <li>
+                <a href="all.html" class="nav-link" onclick="toggleMenu();">
+                    記事一覧
+                </a>
+            </li>
+            <li>
+                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
+                    ランキング
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 検索結果エリア -->
+    <div class="search-results-container">
+        <div id="searchResults"></div>
+    </div>
+
+    <!-- ランキング Hero -->
+    <section class="ranking-hero">
+        <div class="container">
+            <div class="ranking-hero-inner reveal active" id="ranking-hero-inner">
+                <div>
+                    <h1 class="ranking-title">ランキング</h1>
+                    <p class="ranking-sub">
+                        いま読まれている人気記事を、期間別の閲覧ランキングでチェックできます。
+                        SUBSCOPE 全体でどの記事が注目されているか、一目でわかります。
+                    </p>
+                </div>
+                <div class="period-toggle" id="period-toggle">
+                    <!-- まずは見た目だけ。JSで後から切り替え予定 -->
+                    <button class="period-btn" data-period="24h">24時間</button>
+                    <button class="period-btn active" data-period="all">累計</button>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="ranking-item">
-            <div class="ranking-number">3</div>
-            <div class="ranking-details">
-                <div class="ranking-title">サービス名C</div>
-                <div class="ranking-desc">説明文がここに入ります。</div>
+    <!-- ランキング本体 -->
+    <section class="ranking-section">
+        <div class="container">
+
+            <!-- Top3（後でJSで差し替えしやすいように id を付けてある） -->
+            <div class="ranking-top3 reveal" id="ranking-top3">
+                <!-- ▼ ここはダミー。あとで JS から articles を使って書き換え予定 ▼ -->
+                <div class="ranking-card">
+                    <div class="rank-badge rank-1">1</div>
+                    <div class="ranking-thumb" style="background-image:url('images/sample1.jpg');"></div>
+                    <div class="ranking-content">
+                        <div class="ranking-service">APPLE MUSIC</div>
+                        <div class="ranking-title-text">Apple Music の最新機能まとめ</div>
+                        <div class="ranking-desc">空間オーディオ、ロスレス、オートミックスなど Apple Music の最新機能を徹底解説。</div>
+                        <div class="ranking-meta">
+                            <span>音楽</span>
+                            <span>閲覧数 320</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ranking-card">
+                    <div class="rank-badge rank-2">2</div>
+                    <div class="ranking-thumb" style="background-image:url('images/sample3.jpg');"></div>
+                    <div class="ranking-content">
+                        <div class="ranking-service">ALL</div>
+                        <div class="ranking-title-text">人気サブスク徹底比較ガイド</div>
+                        <div class="ranking-desc">音楽・映像・学習系など主要サブスクサービスを横断比較。</div>
+                        <div class="ranking-meta">
+                            <span>比較</span>
+                            <span>閲覧数 400</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ranking-card">
+                    <div class="rank-badge rank-3">3</div>
+                    <div class="ranking-thumb" style="background-image:url('images/sample2.jpg');"></div>
+                    <div class="ranking-content">
+                        <div class="ranking-service">NETFLIX</div>
+                        <div class="ranking-title-text">Netflix 2025年おすすめ作品</div>
+                        <div class="ranking-desc">2025年に絶対観ておきたい Netflix オリジナル作品を厳選紹介。</div>
+                        <div class="ranking-meta">
+                            <span>映像</span>
+                            <span>閲覧数 280</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- 4位以降 -->
+            <div class="ranking-rest reveal" id="ranking-rest">
+                <!-- ▼ ここもダミー。後で JS で articles から生成する ▼ -->
+                <div class="ranking-row">
+                    <div class="ranking-row-rank">4</div>
+                    <div class="ranking-row-thumb" style="background-image:url('images/sample4.jpg');"></div>
+                    <div class="ranking-row-main">
+                        <div class="ranking-row-title">Spotify vs Apple Music</div>
+                        <div class="ranking-row-meta">
+                            <span class="ranking-row-service">SPOTIFY</span>
+                            <span>音楽</span>
+                            <span>閲覧数 250</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ranking-row">
+                    <div class="ranking-row-rank">5</div>
+                    <div class="ranking-row-thumb" style="background-image:url('images/sample5.jpg');"></div>
+                    <div class="ranking-row-main">
+                        <div class="ranking-row-title">勉強がはかどる学習系サブスク5選</div>
+                        <div class="ranking-row-meta">
+                            <span class="ranking-row-service">STUDY</span>
+                            <span>学習</span>
+                            <span>閲覧数 150</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="ranking-cta-wrapper reveal">
+                <a href="all.html" class="ranking-cta-btn">すべての記事を見る</a>
+                <div class="ranking-cta-link">
+                    または <a href="index.html">トップページに戻る</a>
+                </div>
+            </div>
+
         </div>
-    </main>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="terms.html">利用規約</a>
+                <a href="company.html">運営会社</a>
+            </div>
+            <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 検索・Menu・スクロールリビール用（index.js 共通） -->
+    <script src="index.js"></script>
 </body>
 </html>
