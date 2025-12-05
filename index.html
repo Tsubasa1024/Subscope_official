@@ -30,7 +30,7 @@
             box-sizing: border-box;
         }
 
-        /* ★ 追加：html側も横スクロール禁止 */
+        /* 横スクロール防止 */
         html {
             width: 100%;
             overflow-x: hidden;
@@ -458,7 +458,6 @@
             transform: translateY(-50%);
             border: none;
             background: rgba(255,255,255,0.9);
-            box-shadow: 0 8px 18px rgba(0,0,0,0.15);
             width: 36px;
             height: 36px;
             border-radius: 999px;
@@ -469,29 +468,37 @@
             font-size: 18px;
             font-weight: 600;
             color: #222;
-            z-index: 10;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .carousel3d-nav-prev {
+            left: 20px;   /* 内側に寄せる */
+        }
+
+        .carousel3d-nav-next {
+            right: 20px;  /* 内側に寄せる */
         }
 
         .carousel3d-nav:hover {
             transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.25);
             background: #fff;
-        }
-
-        .carousel3d-nav-prev {
-            left: 0;
-        }
-
-        .carousel3d-nav-next {
-            right: 0;
         }
 
         @media (max-width: 768px) {
             .carousel3d-nav {
-                width: 30px;
-                height: 30px;
+                width: 32px;
+                height: 32px;
                 font-size: 16px;
+            }
+
+            .carousel3d-nav-prev {
+                left: 14px;
+            }
+
+            .carousel3d-nav-next {
+                right: 14px;
             }
         }
 
@@ -499,8 +506,9 @@
             width: 100%;
             padding: 40px 0 24px;
             background: var(--color-bg);
-            /* ★ 追加：このセクションからのはみ出しを隠す */
+            /* 横だけ隠す。上下は見える */
             overflow-x: hidden;
+            overflow-y: visible;
         }
 
         .carousel3d-section .container {
@@ -516,14 +524,14 @@
 
         .carousel3d {
             width: 100%;
-            height: 260px;
+            height: 320px;  /* 余裕をもたせて切れないように */
             position: relative;
             perspective: 1200px;
             display: flex;
             align-items: center;
             justify-content: center;
-            /* ★ 変更：visible → hidden に */
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: visible;
         }
 
         .carousel3d-inner {
@@ -820,6 +828,10 @@
                 padding: 0 16px;
             }
 
+            .carousel3d {
+                height: 300px;
+            }
+
             .grid-layout {
                 grid-template-columns: 1fr;
             }
@@ -865,16 +877,19 @@
     <!-- Menu オーバーレイ -->
     <div class="nav-overlay" id="nav-overlay">
         <ul class="nav-list">
+            <!-- トップ -->
             <li>
                 <a href="#" class="nav-link" onclick="smoothScroll('#hero'); toggleMenu();">
                     トップ
                 </a>
             </li>
+            <!-- 記事一覧 -->
             <li>
                 <a href="all.html" class="nav-link" onclick="toggleMenu();">
                     記事一覧
                 </a>
             </li>
+            <!-- ランキング -->
             <li>
                 <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
                     ランキング
@@ -883,7 +898,7 @@
         </ul>
     </div>
 
-    <!-- 🔍 検索結果エリア（HTML部分） -->
+    <!-- 🔍 検索結果エリア -->
     <div class="search-results-container">
         <div id="searchResults"></div>
     </div>
