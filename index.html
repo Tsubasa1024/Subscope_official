@@ -873,9 +873,17 @@
     </div>
 
     <!-- 🔍 検索結果エリア -->
-    <div class="search-results-container">
-        <div id="searchResults"></div>
-    </div>
+   /* 検索結果コンテナ：ヘッダーの下に固定表示 */
+.search-results-container {
+    position: fixed;
+    top: 72px;                         /* 固定ヘッダーのすぐ下 */
+    left: 0;
+    right: 0;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 24px 16px;
+    z-index: 130;                      /* ヘッダー(150)より下、コンテンツより上 */
+}
 
     <!-- Hero -->
     <header class="hero" id="hero">
