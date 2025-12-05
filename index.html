@@ -854,30 +854,32 @@
     </div>
 
     <!-- Menu オーバーレイ -->
-    <div class="nav-overlay" id="nav-overlay">
-        <ul class="nav-list">
-            <li>
-                <a href="#" class="nav-link" onclick="smoothScroll('#hero'); toggleMenu();">
-                    トップ
-                </a>
-            </li>
-            <li>
-                <a href="#" class="nav-link" onclick="smoothScroll('#recommend'); toggleMenu();">
-                    おすすめ記事
-                </a>
-            </li>
-            <li>
-                <a href="#" class="nav-link" onclick="smoothScroll('#latest'); toggleMenu();">
-                    最新の記事
-                </a>
-            </li>
-            <li>
-                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
-                    ランキング
-                </a>
-            </li>
-        </ul>
-    </div>
+<div class="nav-overlay" id="nav-overlay">
+    <ul class="nav-list">
+
+        <!-- トップ（Hero へスクロール） -->
+        <li>
+            <a href="#" class="nav-link" onclick="smoothScroll('#hero'); toggleMenu();">
+                トップ
+            </a>
+        </li>
+
+        <!-- 記事一覧 -->
+        <li>
+            <a href="all.html" class="nav-link" onclick="toggleMenu();">
+                記事一覧
+            </a>
+        </li>
+
+        <!-- ランキング -->
+        <li>
+            <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
+                ランキング
+            </a>
+        </li>
+
+    </ul>
+</div>
 
     <!-- 🔍 検索結果エリア（HTML部分） -->
     <div class="search-results-container">
