@@ -801,6 +801,10 @@
         padding: 10px 16px;
     }
 
+        .nav-left {
+        flex: 1;
+        margin-right: 12px; /* Menuとの余白 */
+
     /* ===== スマホ時：デフォは小さめ🔍アイコンだけ ===== */
     .search-wrapper {
         width: 44px;
@@ -843,8 +847,8 @@
 
     /* ===== 検索オープン時：ロゴ非表示＋バー1本だけ表示 ===== */
 .fixed-header.search-open .search-wrapper {
-    width: calc(100% - 90px);  /* Menuの幅を引いて短くする */
-    max-width: calc(100% - 90px);
+     width: 100%;
+    max-width: 100%;
     border: none;
     box-shadow: none;
     justify-content: flex-start;
