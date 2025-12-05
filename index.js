@@ -191,7 +191,7 @@ function initCarousel3D() {
         });
     }
 
-    function goNext() {
+        function goNext() {
         currentIndex = (currentIndex + 1) % total;
         updatePositions();
     }
@@ -201,36 +201,36 @@ function initCarousel3D() {
         updatePositions();
     }
 
-    // 自動スクロール用タイマー
-    let autoTimer = setInterval(goNext, 4000);
+    // =========================
+    // 自動スクロール（常に回る）
+    // =========================
+    let autoTimer = null;
 
-    function resetAutoTimer() {
-        clearInterval(autoTimer);
-        autoTimer = setInterval(goNext, 4000);
+    function startAutoScroll() {
+        // いったん止めてから再スタート
+        if (autoTimer) clearInterval(autoTimer);
+        autoTimer = setInterval(goNext, 4000); // 4秒ごとに次へ
     }
 
-    // ボタン操作
+    // 最初に自動スクロールを開始
+    startAutoScroll();
+
+    // ボタン操作したら一旦動かしてカウントもリセット
     nextBtn.addEventListener("click", () => {
         goNext();
-        resetAutoTimer();
+        startAutoScroll();
     });
 
     prevBtn.addEventListener("click", () => {
         goPrev();
-        resetAutoTimer();
+        startAutoScroll();
     });
 
-    // スマホだと hover 無いけど、PC 用に一応 stop しておく
-    carousel.addEventListener("mouseenter", () => {
-        clearInterval(autoTimer);
-    });
-    carousel.addEventListener("mouseleave", () => {
-        resetAutoTimer();
-    });
-
+    // マウスホバーで止めたりはしない（スマホでも安定して回すため）
     // 初期配置
     updatePositions();
 }
+
 
 // =====================================
 // 最強検索ロジック
@@ -436,3 +436,4 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearch();
     initScrollReveal();
 });
+
