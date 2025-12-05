@@ -786,9 +786,10 @@
 
             /* 左エリアを「余った幅ぜんぶ」にする */
             .nav-left {
-                flex: 1;
-                margin-right: 12px; /* Menuとの余白 */
-            }
+    flex: 0 0 auto;   /* ← 余った幅全部じゃなくする */
+    margin-right: 12px;
+}
+
 
             /* ===== スマホ時：デフォは小さめ🔍アイコンだけ ===== */
             .search-wrapper {
@@ -834,8 +835,8 @@
             }
 
             .fixed-header.search-open .search-wrapper {
-                width: 100%;
-                max-width: 100%;
+                 width: calc(100vw - 150px);      /* ← 画面幅から Menuぶん引く */
+    max-width: calc(100vw - 150px);
                 border: none;
                 box-shadow: none;
                 justify-content: flex-start;
