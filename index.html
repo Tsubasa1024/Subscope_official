@@ -842,13 +842,14 @@
     }
 
     /* ===== 検索オープン時：ロゴ非表示＋バー1本だけ表示 ===== */
-    .fixed-header.search-open .search-wrapper {
-        width: 100%;
-        max-width: 100%;
-        border: none;              /* ← これで二重枠を消す */
-        box-shadow: none;
-        justify-content: flex-start;
-    }
+.fixed-header.search-open .search-wrapper {
+    width: calc(100% - 120px);  /* Menuの幅を引いて短くする */
+    max-width: calc(100% - 120px);
+    border: none;
+    box-shadow: none;
+    justify-content: flex-start;
+}
+
 
     .fixed-header.search-open .search-input {
         display: block;
