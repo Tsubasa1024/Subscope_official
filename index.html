@@ -905,19 +905,58 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <a href="#">プライバシーポリシー</a>
-                <a href="#">利用規約</a>
-                <a href="#">運営会社</a>
-            </div>
-            <p class="copyright">© 2023 SUBSCOPE. All rights reserved.</p>
-        </div>
-    </footer>
+<!-- ================================
+      SUBSCOPE Footer
+================================ -->
+<footer class="footer">
+    <div class="footer-container">
 
-    <!-- ★ JS 読み込み -->
-    <script src="index.js"></script>
-</body>
-</html>
+        <div class="footer-links">
+            <a href="privacy.html">プライバシーポリシー</a>
+            <a href="terms.html">利用規約</a>
+            <a href="company.html">運営会社</a>
+        </div>
+
+        <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+    </div>
+</footer>
+
+<style>
+/* Footer Style */
+.footer {
+    background: #F5F5F7;
+    padding: 40px 0;
+    border-top: 1px solid #D2D2D7;
+    margin-top: 80px;
+}
+
+.footer-container {
+    max-width: 1080px;
+    margin: 0 auto;
+    text-align: center;
+    font-family: var(--font-family);
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 20px;
+}
+
+.footer-links a {
+    color: #1D1D1F;
+    text-decoration: none;
+    font-size: 15px;
+    transition: opacity .3s ease;
+}
+
+.footer-links a:hover {
+    opacity: .6;
+}
+
+.footer-copy {
+    color: #86868B;
+    font-size: 13px;
+}
+</style>
