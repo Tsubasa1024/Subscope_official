@@ -181,8 +181,12 @@
             padding: 0 24px;
         }
 
-        #searchResults {
-            margin-top: 8px;
+#searchResults {
+    margin-top: 8px;
+    max-height: 380px;     /* 画面を埋め尽くしすぎない程度の高さ */
+    overflow-y: auto;      /* 結果が多いときは内部スクロール */
+}
+
         }
 
         .search-item {
