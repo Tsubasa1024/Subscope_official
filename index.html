@@ -452,56 +452,6 @@
         /* =========================================
            3D Carousel (おすすめ記事)
            ========================================= */
-        .carousel3d-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: rgba(255,255,255,0.9);
-            width: 36px;
-            height: 36px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            color: #222;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-        }
-
-        .carousel3d-nav-prev {
-            left: 20px;   /* 内側に寄せる */
-        }
-
-        .carousel3d-nav-next {
-            right: 20px;  /* 内側に寄せる */
-        }
-
-        .carousel3d-nav:hover {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.25);
-            background: #fff;
-        }
-
-        @media (max-width: 768px) {
-            .carousel3d-nav {
-                width: 32px;
-                height: 32px;
-                font-size: 16px;
-            }
-
-            .carousel3d-nav-prev {
-                left: 14px;
-            }
-
-            .carousel3d-nav-next {
-                right: 14px;
-            }
-        }
-
         .carousel3d-section {
             width: 100%;
             padding: 40px 0 24px;
@@ -539,6 +489,7 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
+            z-index: 1; /* カード層 */
         }
 
         .carousel3d-item {
@@ -609,6 +560,42 @@
 
         .carousel3d-item.is-back .carousel3d-card {
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        /* 矢印ボタン */
+        .carousel3d-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(255,255,255,0.9);
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            z-index: 20; /* カードより手前でクリック可能に */
+        }
+
+        .carousel3d-nav-prev {
+            left: 20px;   /* 内側に寄せる */
+        }
+
+        .carousel3d-nav-next {
+            right: 20px;  /* 内側に寄せる */
+        }
+
+        .carousel3d-nav:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+            background: #fff;
         }
 
         /* =========================================
@@ -830,6 +817,20 @@
 
             .carousel3d {
                 height: 300px;
+            }
+
+            .carousel3d-nav {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .carousel3d-nav-prev {
+                left: 14px;
+            }
+
+            .carousel3d-nav-next {
+                right: 14px;
             }
 
             .grid-layout {
