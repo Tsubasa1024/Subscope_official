@@ -30,7 +30,6 @@
             box-sizing: border-box;
         }
 
-        /* 横スクロール防止 */
         html {
             width: 100%;
             overflow-x: hidden;
@@ -456,8 +455,6 @@
             width: 100%;
             padding: 40px 0 24px;
             background: var(--color-bg);
-            overflow-x: hidden;
-            overflow-y: visible;
         }
 
         .carousel3d-section .container {
@@ -479,8 +476,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
-            overflow-y: visible;
         }
 
         .carousel3d-inner {
@@ -503,28 +498,25 @@
         }
 
         .carousel3d-card {
-            width: 100%;
-            max-width: 320px;
+            width: 280px;     /* 幅を固定 */
+            height: 280px;    /* 高さも固定 */
             background: #fff;
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+            display: flex;
+            flex-direction: column;
             transform: scale(0.9);
             opacity: 0.7;
             transition:
                 transform 0.6s ease,
                 opacity 0.6s ease,
                 box-shadow 0.4s ease;
-
-            /* ★ ここでカードの大きさを統一 */
-            height: 320px;
-            display: flex;
-            flex-direction: column;
         }
 
         .carousel3d-card img {
             width: 100%;
-            height: 200px;  /* 画像の高さも固定 */
+            height: 170px;
             object-fit: cover;
             display: block;
         }
@@ -533,7 +525,7 @@
             padding: 10px 16px 16px;
             font-size: 15px;
             font-weight: 500;
-            flex-grow: 1; /* タイトル部分で高さ調整 */
+            flex-grow: 1;
             display: flex;
             align-items: center;
         }
@@ -560,7 +552,7 @@
         }
 
         .carousel3d-item.is-back {
-            transform: translate(-50%, -50%) translateZ(-160px) scale(0.85);
+            transform: translate(-50%, -50%) translateZ(-150px) scale(0.85);
             opacity: 0.3;
             z-index: 1;
         }
