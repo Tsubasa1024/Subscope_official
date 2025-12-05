@@ -94,7 +94,7 @@
         }
 
         /* =========================================
-           Fixed Header（検索バー＋Menu）
+           Fixed Header（検索バー＋Menu＋SUBSCOPE）
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -114,11 +114,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative; /* 中央ロゴ用 */
         }
 
         .nav-left,
         .nav-right {
             pointer-events: auto;
+        }
+
+        /* 固定ヘッダー中央ロゴ */
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none; /* 検索やMenu操作を邪魔しない */
+        }
+
+        .header-logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--color-text-main);
+            user-select: none;
         }
 
         /* Search Bar */
@@ -498,8 +515,8 @@
         }
 
         .carousel3d-card {
-            width: 280px;     /* 幅を固定 */
-            height: 280px;    /* 高さも固定 */
+            width: 280px;
+            height: 280px;
             background: #fff;
             border-radius: 24px;
             overflow: hidden;
@@ -849,9 +866,10 @@
 </head>
 <body>
 
-    <!-- 固定ヘッダー（検索バー＋Menu） -->
+    <!-- 固定ヘッダー（検索バー＋SUBSCOPE＋Menu） -->
     <div class="fixed-header">
         <div class="top-header">
+            <!-- 左：検索 -->
             <div class="nav-left">
                 <div class="search-wrapper">
                     <input type="text" class="search-input" id="searchInput" placeholder="">
@@ -862,6 +880,13 @@
                     </svg>
                 </div>
             </div>
+
+            <!-- 中央：SUBSCOPE ロゴ -->
+            <div class="nav-center">
+                <h1 class="header-logo">SUBSCOPE</h1>
+            </div>
+
+            <!-- 右：Menu -->
             <div class="nav-right">
                 <button class="menu-btn" onclick="toggleMenu()">
                     <div class="menu-icon-lines">
