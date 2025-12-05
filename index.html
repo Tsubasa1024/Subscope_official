@@ -127,7 +127,12 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            pointer-events: none; /* 検索やMenu操作を邪魔しない */
+        }
+
+        .header-logo-link {
+            display: inline-block;
+            text-decoration: none;
+            color: inherit;
         }
 
         .header-logo {
@@ -136,6 +141,7 @@
             letter-spacing: -0.03em;
             color: var(--color-text-main);
             user-select: none;
+            cursor: pointer;
         }
 
         /* Search Bar */
@@ -881,9 +887,11 @@
                 </div>
             </div>
 
-            <!-- 中央：SUBSCOPE ロゴ -->
+            <!-- 中央：SUBSCOPE ロゴ（クリックでトップへ）-->
             <div class="nav-center">
-                <h1 class="header-logo">SUBSCOPE</h1>
+                <a href="index.html" class="header-logo-link">
+                    <h1 class="header-logo">SUBSCOPE</h1>
+                </a>
             </div>
 
             <!-- 右：Menu -->
@@ -1002,7 +1010,7 @@
                 <a href="terms.html">利用規約</a>
                 <a href="company.html">運営会社</a>
             </div>
-            <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+            <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved。</p>
         </div>
     </footer>
 
