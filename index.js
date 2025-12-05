@@ -1,6 +1,5 @@
 // =====================================
 // 記事データ
-// ※あとで自由に増やして OK
 // =====================================
 const articles = [
     {
@@ -61,13 +60,13 @@ const articles = [
 ];
 
 // =====================================
-// DOM 取得
+// DOM 用の変数（あとで中身を入れる）
 // =====================================
-const searchInput = document.getElementById("searchInput");
-const clearBtn = document.getElementById("clear-btn");
-const searchResultsEl = document.getElementById("searchResults");
-const heroContainer = document.getElementById("most-viewed-content");
-const latestGrid = document.getElementById("latest-grid");
+let searchInput;
+let clearBtn;
+let searchResultsEl;
+let heroContainer;
+let latestGrid;
 
 // =====================================
 // テキスト正規化（小文字化＋スペース除去）
@@ -136,7 +135,7 @@ function renderLatest(limit = 6) {
 }
 
 // =====================================
-// 3D カルーセル：既存のデザインそのままに、左右ボタンだけ制御
+// 3D カルーセル
 // =====================================
 function initCarousel3D() {
     const items = document.querySelectorAll(".carousel3d-item");
@@ -233,6 +232,11 @@ function calcArticleScore(article, tokens) {
 }
 
 function searchArticles(query) {
+    if (!searchResultsEl) {
+        // 安全対策：検索結果エリアが無いページでは何もしない
+        return;
+    }
+
     const q = query.trim();
     if (!q) {
         // 何も入力されていないときは検索結果を消す
@@ -277,7 +281,16 @@ function searchArticles(query) {
 // 検索イベント紐付け
 // =====================================
 function initSearch() {
-    if (!searchInput || !searchResultsEl) return;
+    if (!searchInput) return;
+
+    // searchResultsEl が存在しないページなら、自動で作る
+    if (!searchResultsEl) {
+        const container = document.createElement("div");
+        container.className = "search-results-container";
+        container.innerHTML = `<div id="searchResults"></div>`;
+        document.body.appendChild(container);
+        searchResultsEl = container.querySelector("#searchResults");
+    }
 
     // 入力のたびに検索
     searchInput.addEventListener("input", (e) => {
@@ -294,11 +307,13 @@ function initSearch() {
     });
 
     // クリアボタン
-    clearBtn?.addEventListener("click", () => {
-        searchInput.value = "";
-        searchResultsEl.innerHTML = "";
-        searchInput.focus();
-    });
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            searchResultsEl.innerHTML = "";
+            searchInput.focus();
+        });
+    }
 }
 
 // =====================================
@@ -353,6 +368,13 @@ function initScrollReveal() {
 // 初期化
 // =====================================
 document.addEventListener("DOMContentLoaded", () => {
+    // ここで DOM 要素を取得（どのページでも安全）
+    searchInput   = document.getElementById("searchInput");
+    clearBtn      = document.getElementById("clear-btn");
+    searchResultsEl = document.getElementById("searchResults");
+    heroContainer = document.getElementById("most-viewed-content");
+    latestGrid    = document.getElementById("latest-grid");
+
     renderHero();
     renderLatest();
     initCarousel3D();
