@@ -15,11 +15,11 @@
             --color-text-gray: #86868B;
             --color-border: #D2D2D7;
             --color-accent: #000000;
-
+            
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --transition-hover: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-
+            
             --container-width: 1080px;
             --spacing-section: 80px;
         }
@@ -53,7 +53,7 @@
             list-style: none;
         }
 
-        /* Utility */
+        /* Utility Classes */
         .container {
             max-width: var(--container-width);
             margin: 0 auto;
@@ -61,8 +61,40 @@
             width: 100%;
         }
 
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
         /* =========================================
-           Fixed Header（検索＋SUBSCOPEロゴ＋Menu）
+           Scroll Reveal Animation
+           ========================================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity var(--transition-fade), transform var(--transition-fade);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =========================================
+           Fixed Header（検索バー＋Menu＋SUBSCOPE）
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -82,7 +114,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
+            position: relative; /* 中央ロゴ用 */
         }
 
         .nav-left,
@@ -90,7 +122,7 @@
             pointer-events: auto;
         }
 
-        /* 中央ロゴ（クリックでトップへ戻る） */
+        /* 固定ヘッダー中央ロゴ */
         .nav-center {
             position: absolute;
             left: 50%;
@@ -98,20 +130,21 @@
         }
 
         .header-logo-link {
+            display: inline-block;
             text-decoration: none;
             color: inherit;
-            pointer-events: auto;
         }
 
         .header-logo {
             font-size: 1.6rem;
             font-weight: 700;
             letter-spacing: -0.03em;
-            cursor: pointer;
+            color: var(--color-text-main);
             user-select: none;
+            cursor: pointer;
         }
 
-        /* 検索バー */
+        /* Search Bar */
         .search-wrapper {
             width: 280px;
             position: relative;
@@ -126,6 +159,7 @@
             backdrop-filter: blur(20px);
             font-size: 0.9rem;
             color: var(--color-text-main);
+            outline: none;
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
@@ -134,6 +168,7 @@
             width: 320px;
             background: #fff;
             box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            border-color: rgba(0,0,0,0.1);
         }
 
         .search-icon {
@@ -144,6 +179,8 @@
             width: 16px;
             height: 16px;
             color: var(--color-text-gray);
+            pointer-events: none;
+            z-index: 2;
         }
 
         .clear-btn {
@@ -156,22 +193,25 @@
             cursor: pointer;
             opacity: 0;
             transition: 0.2s;
+            pointer-events: none;
+            user-select: none;
         }
 
         .search-input:not(:placeholder-shown) ~ .clear-btn {
             opacity: 1;
+            pointer-events: auto;
         }
 
-        /* 検索結果 */
+        /* 検索結果エリア（常に画面上部固定） */
         .search-results-container {
             position: fixed;
-            top: 72px;
+            top: 72px; /* 固定ヘッダーのすぐ下 */
             left: 0;
             right: 0;
             max-width: var(--container-width);
             margin: 0 auto;
             padding: 0 24px 16px;
-            z-index: 130;
+            z-index: 130; /* ヘッダー(150)より下、コンテンツより上 */
         }
 
         #searchResults {
@@ -180,71 +220,275 @@
             overflow-y: auto;
         }
 
-        /* Menu ボタン */
+        .search-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: #fff;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .search-item:hover {
+            background: #f5f5f7;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+        }
+
+        .search-item img {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .search-item h3 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .search-item p {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        /* Menu Button */
         .menu-btn {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.1);
             padding: 10px 20px;
             border-radius: 50px;
             font-size: 0.9rem;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.8);
+            font-weight: 600;
+            color: var(--color-text-main);
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
-            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
 
-        .menu-icon-lines { display: flex; flex-direction: column; gap: 4px; }
+        .menu-btn:hover {
+            background: #fff;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .menu-icon-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .menu-line {
             width: 16px;
             height: 2px;
-            background: #000;
+            background-color: var(--color-text-main);
+            border-radius: 2px;
         }
 
-        /* Menu overlay */
+        /* Navigation Menu Overlay */
         .nav-overlay {
             position: fixed;
             top: 72px;
             right: 40px;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
             padding: 20px;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,0,0,0.05);
             transform: translateY(-20px);
             opacity: 0;
             visibility: hidden;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             z-index: 140;
             min-width: 200px;
         }
-        .nav-overlay.open { opacity: 1; visibility: visible; transform: translateY(0); }
 
-        /* ===== Hero Section（SUBSCOPE ロゴ削除済み）===== */
+        .nav-overlay.open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-list li {
+            margin-bottom: 8px;
+        }
+
+        .nav-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-text-main);
+            transition: background 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        /* =========================================
+           1. Hero Section
+           ========================================= */
         .hero {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 120px; /* ヘッダー分だけ余白調整 */
+            position: relative;
+            background: var(--color-bg);
+            padding-top: 90px;
             padding-bottom: 40px;
+        }
+
+        .hero-branding {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hero-logo {
+            font-size: 4.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--color-text-main);
+            line-height: 1;
+            margin-bottom: 8px;
         }
 
         .hero-featured-wrapper {
             width: 100%;
             max-width: var(--container-width);
             padding: 0 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
+
+        .featured-card {
+            background-color: #000;
+            border-radius: 32px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            min-height: 60vh;
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        
+        .featured-card:hover {
+            transform: scale(1.005);
+        }
+
+        .featured-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+        }
+
+        .featured-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .featured-meta {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .featured-meta .tag {
+            color: #fff;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-right: 12px;
+            margin-bottom: 0;
+            border: none;
+        }
+
+        .featured-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .featured-desc {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+            max-width: 600px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .btn-read {
+            background-color: #fff;
+            color: #000;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-read:hover {
+            background-color: #f5f5f7;
+            transform: translateY(-2px);
+        }
+
         /* =========================================
-           3D Carousel（おすすめ記事）
-        ========================================= */
+           3D Carousel (おすすめ記事)
+           ========================================= */
         .carousel3d-section {
             width: 100%;
             padding: 40px 0 24px;
             background: var(--color-bg);
         }
 
+        .carousel3d-section .container {
+            padding: 0 24px;
+        }
+
         .carousel3d-title {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 600;
             margin-bottom: 24px;
+            letter-spacing: -0.02em;
         }
 
         .carousel3d {
@@ -262,87 +506,134 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
+            z-index: 1;
         }
 
         .carousel3d-item {
             position: absolute;
             top: 50%;
             left: 50%;
-            transition: 0.6s ease;
+            transform-style: preserve-3d;
+            transition:
+                transform 0.6s ease,
+                opacity 0.6s ease,
+                z-index 0.6s ease;
         }
 
         .carousel3d-card {
             width: 280px;
             height: 280px;
-            border-radius: 24px;
             background: #fff;
+            border-radius: 24px;
             overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+            display: flex;
+            flex-direction: column;
             transform: scale(0.9);
             opacity: 0.7;
-            transition: 0.6s;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+            transition:
+                transform 0.6s ease,
+                opacity 0.6s ease,
+                box-shadow 0.4s ease;
         }
 
         .carousel3d-card img {
             width: 100%;
             height: 170px;
             object-fit: cover;
+            display: block;
         }
 
         .carousel3d-card p {
-            padding: 10px 16px;
+            padding: 10px 16px 16px;
             font-size: 15px;
             font-weight: 500;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
         }
 
         .carousel3d-item.is-center {
             transform: translate(-50%, -50%) translateZ(80px);
-            z-index: 3;
+            z-index: 4;
         }
 
         .carousel3d-item.is-center .carousel3d-card {
-            transform: scale(1.05);
+            transform: scale(1.05) translateY(-6px);
             opacity: 1;
+            box-shadow: 0 18px 38px rgba(0,0,0,0.22);
         }
 
         .carousel3d-item.is-right {
-            transform: translate(-50%, -50%) translateX(220px) rotateY(-18deg);
+            transform: translate(-50%, -50%) translateX(220px) rotateY(-18deg) translateZ(-20px);
+            z-index: 3;
         }
 
         .carousel3d-item.is-left {
-            transform: translate(-50%, -50%) translateX(-220px) rotateY(18deg);
+            transform: translate(-50%, -50%) translateX(-220px) rotateY(18deg) translateZ(-20px);
+            z-index: 3;
         }
 
         .carousel3d-item.is-back {
             transform: translate(-50%, -50%) translateZ(-150px) scale(0.85);
-            opacity: 0.35;
+            opacity: 0.3;
+            z-index: 1;
         }
 
+        .carousel3d-item.is-back .carousel3d-card {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        /* 矢印ボタン */
         .carousel3d-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
+            border: none;
+            background: rgba(255,255,255,0.9);
             width: 36px;
             height: 36px;
-            border-radius: 50%;
-            border: none;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            z-index: 10;
-            font-size: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            z-index: 20;
         }
 
-        .carousel3d-nav-prev { left: 20px; }
-        .carousel3d-nav-next { right: 20px; }
+        .carousel3d-nav-prev {
+            left: 20px;
+        }
+
+        .carousel3d-nav-next {
+            right: 20px;
+        }
+
+        .carousel3d-nav:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+            background: #fff;
+        }
 
         /* =========================================
-           Latest Articles（最新記事）
-        ========================================= */
+           General Sections
+           ========================================= */
         .section {
             padding: var(--spacing-section) 0;
         }
 
+        #latest {
+            padding-top: 0;
+        }
+
+        /* =========================================
+           Latest Articles (Grid)
+           ========================================= */
         .grid-layout {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -350,16 +641,19 @@
         }
 
         .article-card {
-            background: #fff;
+            display: flex;
+            flex-direction: column;
             border-radius: 24px;
-            overflow: hidden;
+            background: #fff;
+            transition: all var(--transition-hover);
             cursor: pointer;
-            transition: 0.3s;
+            height: 100%;
+            overflow: hidden;
         }
 
         .article-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 14px 28px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
         }
 
         .card-image {
@@ -367,194 +661,340 @@
             height: 200px;
             background-size: cover;
             background-position: center;
+            background-color: #f0f0f0;
+            border-radius: 24px;
+            margin-bottom: 16px;
         }
 
         .card-body {
-            padding: 16px;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 6px;
+            padding: 0 16px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .card-service {
             font-size: 0.7rem;
             font-weight: 700;
+            color: var(--color-text-gray);
             margin-bottom: 6px;
-            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .card-desc {
-            font-size: 0.9rem;
-            color: #555;
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 8px;
+            color: var(--color-text-main);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .card-date {
-            margin-top: 10px;
             font-size: 0.75rem;
-            color: #86868B;
+            color: var(--color-text-gray);
+            margin-top: 8px;
         }
 
-        /* すべての記事ボタン */
-        .all-articles-btn-wrapper {
+        .card-desc {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .placeholder-card {
+            background-color: var(--color-bg-secondary);
+            border: none;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-height: 280px;
             text-align: center;
-            margin-top: 40px;
-        }
-
-        .all-articles-btn {
-            padding: 14px 36px;
-            border-radius: 40px;
-            background: #000;
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
-            display: inline-block;
-            transition: 0.3s;
-        }
-
-        .all-articles-btn:hover {
-            background: #333;
-            transform: translateY(-2px);
         }
 
         /* =========================================
            Footer
-        ========================================= */
+           ========================================= */
         .footer {
             background: #F5F5F7;
             padding: 40px 0;
-            margin-top: 80px;
             border-top: 1px solid #D2D2D7;
+            margin-top: 80px;
         }
 
         .footer-container {
             max-width: 1080px;
             margin: 0 auto;
             text-align: center;
+            font-family: var(--font-family);
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 18px;
+            gap: 40px;
+            margin-bottom: 20px;
         }
 
         .footer-links a {
             color: #1D1D1F;
+            text-decoration: none;
             font-size: 15px;
+            transition: opacity .3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: .6;
         }
 
         .footer-copy {
             color: #86868B;
             font-size: 13px;
         }
+
+        /* 「すべての記事」ボタン */
+        .all-articles-btn-wrapper {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .all-articles-btn {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 14px 38px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .all-articles-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.15);
+        }
+
+        /* =========================================
+           Responsive
+           ========================================= */
+        @media (max-width: 768px) {
+            :root {
+                --spacing-section: 60px;
+            }
+
+            .top-header {
+                padding: 10px 16px;
+            }
+
+            .search-wrapper {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .search-results-container {
+                padding: 0 16px 12px;
+            }
+
+            .hero {
+                padding-top: 90px;
+                padding-bottom: 40px;
+            }
+
+            .hero-logo {
+                font-size: 2.2rem;
+            }
+
+            .hero-featured-wrapper {
+                padding: 0 16px;
+            }
+
+            .featured-card {
+                padding: 24px;
+                min-height: 450px;
+                border-radius: 24px;
+            }
+
+            .featured-title {
+                font-size: 1.8rem;
+            }
+
+            .carousel3d-section .container {
+                padding: 0 16px;
+            }
+
+            .carousel3d {
+                height: 300px;
+            }
+
+            .carousel3d-nav {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .carousel3d-nav-prev {
+                left: 14px;
+            }
+
+            .carousel3d-nav-next {
+                right: 14px;
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-overlay {
+                right: 16px;
+            }
+
+            .footer-links {
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
-
 <body>
 
-    <!-- 固定ヘッダー -->
+    <!-- 固定ヘッダー（検索バー＋SUBSCOPE＋Menu） -->
     <div class="fixed-header">
         <div class="top-header">
-
+            <!-- 左：検索 -->
             <div class="nav-left">
                 <div class="search-wrapper">
-                    <input type="text" class="search-input" id="searchInput">
+                    <input type="text" class="search-input" id="searchInput" placeholder="">
                     <span class="clear-btn" id="clear-btn">×</span>
-                    <svg class="search-icon" viewBox="0 0 24 24">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </div>
             </div>
 
+            <!-- 中央：SUBSCOPE ロゴ（クリックでトップへ）-->
             <div class="nav-center">
                 <a href="index.html" class="header-logo-link">
                     <h1 class="header-logo">SUBSCOPE</h1>
                 </a>
             </div>
 
+            <!-- 右：Menu -->
             <div class="nav-right">
                 <button class="menu-btn" onclick="toggleMenu()">
                     <div class="menu-icon-lines">
                         <span class="menu-line"></span>
                         <span class="menu-line"></span>
                     </div>
-                    Menu
+                    <span>Menu</span>
                 </button>
             </div>
-
         </div>
     </div>
 
-    <!-- Menu overlay -->
-    <div id="nav-overlay" class="nav-overlay">
+    <!-- Menu オーバーレイ -->
+    <div class="nav-overlay" id="nav-overlay">
         <ul class="nav-list">
-            <li><a href="index.html" class="nav-link">トップ</a></li>
-            <li><a href="all.html" class="nav-link">記事一覧</a></li>
-            <li><a href="ranking.html" class="nav-link">ランキング</a></li>
+            <li>
+                <a href="#" class="nav-link" onclick="smoothScroll('#hero'); toggleMenu();">
+                    トップ
+                </a>
+            </li>
+            <li>
+                <a href="all.html" class="nav-link" onclick="toggleMenu();">
+                    記事一覧
+                </a>
+            </li>
+            <li>
+                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
+                    ランキング
+                </a>
+            </li>
         </ul>
     </div>
 
-    <!-- 検索結果 -->
+    <!-- 🔍 検索結果エリア -->
     <div class="search-results-container">
         <div id="searchResults"></div>
     </div>
 
-    <!-- Hero（SUBSCOPE ロゴなし版） -->
-    <section class="hero">
-        <div class="hero-featured-wrapper">
-            <div id="most-viewed-content" style="height:100%; display:flex;"></div>
+    <!-- Hero -->
+    <header class="hero" id="hero">
+        <div class="hero-branding reveal active">
+            <h1 class="hero-logo">SUBSCOPE</h1>
         </div>
-    </section>
+
+        <div class="hero-featured-wrapper reveal" id="hero-featured-wrapper">
+            <div id="most-viewed-content" style="height: 100%; display: flex;">
+                <!-- JS が注入 -->
+            </div>
+        </div>
+    </header>
 
     <!-- おすすめ 3D カルーセル -->
-    <section class="carousel3d-section">
+    <section class="carousel3d-section reveal" id="recommend">
         <div class="container">
             <h2 class="carousel3d-title">おすすめ記事</h2>
 
             <div class="carousel3d">
-                <button class="carousel3d-nav carousel3d-nav-prev">&#10094;</button>
+                <button class="carousel3d-nav carousel3d-nav-prev" type="button">&#10094;</button>
 
                 <div class="carousel3d-inner">
                     <div class="carousel3d-item">
                         <div class="carousel3d-card">
-                            <img src="images/sample1.jpg"><p>Apple Music の最新機能まとめ</p>
+                            <img src="images/sample1.jpg" alt="">
+                            <p>Apple Music の最新機能まとめ</p>
                         </div>
                     </div>
 
                     <div class="carousel3d-item">
                         <div class="carousel3d-card">
-                            <img src="images/sample2.jpg"><p>Netflix 2025年おすすめ作品</p>
+                            <img src="images/sample2.jpg" alt="">
+                            <p>Netflix 2025年おすすめ作品</p>
                         </div>
                     </div>
 
                     <div class="carousel3d-item">
                         <div class="carousel3d-card">
-                            <img src="images/sample3.jpg"><p>人気サブスク徹底比較ガイド</p>
+                            <img src="images/sample3.jpg" alt="">
+                            <p>人気サブスク徹底比較ガイド</p>
                         </div>
                     </div>
 
                     <div class="carousel3d-item">
                         <div class="carousel3d-card">
-                            <img src="images/sample4.jpg"><p>Spotify vs Apple Music</p>
+                            <img src="images/sample4.jpg" alt="">
+                            <p>Spotify vs Apple Music</p>
                         </div>
                     </div>
                 </div>
 
-                <button class="carousel3d-nav carousel3d-nav-next">&#10095;</button>
+                <button class="carousel3d-nav carousel3d-nav-next" type="button">&#10095;</button>
             </div>
         </div>
     </section>
 
-    <!-- 最新記事 -->
-    <section class="section">
+    <!-- Latest Articles -->
+    <section class="section" id="latest">
         <div class="container">
-            <h2 class="section-title">最新の記事</h2>
-            <div id="latest-grid" class="grid-layout"></div>
+            <h2 class="section-title reveal" id="latest-title">最新の記事</h2>
+
+            <div class="grid-layout reveal" id="latest-grid"></div>
 
             <div class="all-articles-btn-wrapper">
                 <a href="all.html" class="all-articles-btn">すべての記事を見る</a>
@@ -570,11 +1010,10 @@
                 <a href="terms.html">利用規約</a>
                 <a href="company.html">運営会社</a>
             </div>
-            <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+            <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved。</p>
         </div>
     </footer>
 
-    <!-- JS -->
     <script src="index.js"></script>
 </body>
 </html>
