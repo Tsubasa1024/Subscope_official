@@ -1270,6 +1270,35 @@ window.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clear-btn");
 
+    if (!searchInput || !clearBtn) return;
+
+    // 入力が空なら × を非表示
+    function updateClearBtn() {
+        if (searchInput.value.trim() === "") {
+            clearBtn.style.display = "none";
+        } else {
+            clearBtn.style.display = "block";
+        }
+    }
+
+    // 入力イベント
+    searchInput.addEventListener("input", updateClearBtn);
+
+    // ×ボタン押したら消す
+    clearBtn.addEventListener("click", function () {
+        searchInput.value = "";
+        updateClearBtn();
+        searchInput.focus();
+    });
+
+    // 初期状態
+    updateClearBtn();
+});
+</script>
 </body>
 </html>
