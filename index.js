@@ -229,6 +229,36 @@ function initCarousel3D() {
     // マウスホバーで止めたりはしない（スマホでも安定して回すため）
     // 初期配置
     updatePositions();
+    
+     // ======================================
+    // スワイプ操作対応（スマホ・iPad）
+    // ======================================
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const SWIPE_THRESHOLD = 40;
+
+    const carouselInner = carousel.querySelector(".carousel3d-inner");
+
+    if (carouselInner) {
+        carouselInner.addEventListener("touchstart", (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        carouselInner.addEventListener("touchend", (e) => {
+            touchEndX = e.changedTouches[0].clientX;
+
+            const diff = touchEndX - touchStartX;
+
+            if (diff > SWIPE_THRESHOLD) {
+                goPrev();
+                startAutoScroll();
+            } else if (diff < -SWIPE_THRESHOLD) {
+                goNext();
+                startAutoScroll();
+            }
+        }, { passive: true });
+    }
+
 }
 
 // =====================================
@@ -435,4 +465,5 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearch();
     initScrollReveal();
 });
+
 
