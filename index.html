@@ -771,6 +771,30 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 26px rgba(0,0,0,0.15);
         }
+/* タブレット・PCでは検索バーを通常サイズで表示（アニメなし） */
+@media (min-width: 769px) {
+    .search-wrapper {
+        width: 280px !important;   /* PCと同じ通常サイズ */
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .search-input {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    .search-icon {
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        position: absolute;
+    }
+
+    .fixed-header.search-open .search-wrapper {
+        width: 280px !important;  /* スマホだけ伸びるので、ここは伸びさせない */
+    }
+}
 
         /* =========================================
            Responsive
