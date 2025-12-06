@@ -831,6 +831,30 @@
            Responsive
            ========================================= */
         @media (max-width: 767px) {
+            /* iPadをスマホ扱いから除外する */
+    @media (min-width: 600px) and (max-width: 1024px) and (pointer: coarse) {
+        .search-wrapper {
+            width: 280px !important;
+            transition: none !important;
+            transform: none !important;
+        }
+        .search-input {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        .search-icon {
+            left: 16px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+        }
+        .fixed-header.search-open .search-wrapper {
+            width: 280px !important;
+        }
+        .fixed-header.search-open .nav-center {
+            display: block !important;
+        }
+    }
+
     :root {
         --spacing-section: 60px;
     }
