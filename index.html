@@ -1222,50 +1222,52 @@
 
     <script src="index.js"></script>
 <script>
-    // スマホだけ：検索アイコンをタップしたら検索バー展開
-    window.addEventListener("DOMContentLoaded", function () {
-        const fixedHeader  = document.querySelector(".fixed-header");
-        const searchWrapper = document.querySelector(".search-wrapper");
-        const searchInput   = document.getElementById("searchInput");
-        if (!fixedHeader || !searchWrapper || !searchInput) return;
+window.addEventListener("DOMContentLoaded", function () {
+    const fixedHeader  = document.querySelector(".fixed-header");
+    const searchWrapper = document.querySelector(".search-wrapper");
+    const searchInput   = document.getElementById("searchInput");
 
-        let isOpen = false;
+    if (!fixedHeader || !searchWrapper || !searchInput) return;
 
-        // スマホ判定（幅 767px 以下だけをスマホ扱い）
-        const isMobile = () => window.innerWidth <= 767;
+    let isOpen = false;
 
-        searchWrapper.addEventListener("click", function (e) {
-            if (!isMobile()) {
-                // iPad / PC：class を付けずにフォーカスだけ
-                if (e.target !== searchInput) {
-                    searchInput.focus();
-                }
-                return;
+    // 📱 スマホだけ true（幅767px以下）
+    const isMobile = () => window.innerWidth <= 767;
+
+    searchWrapper.addEventListener("click", function (e) {
+
+        // 🖥 PC・iPad → アニメーション禁止。クラスを絶対つけない。
+        if (!isMobile()) {
+            // PC/iPad は普通の検索バー扱い
+            if (e.target !== searchInput) {
+                searchInput.focus();
             }
+            return; 
+        }
 
-            // ここからはスマホだけ
-            if (isOpen && e.target === searchInput) return;
+        // 📱 スマホだけアニメーション ON
+        if (isOpen && e.target === searchInput) return;
 
-            if (!isOpen) {
-                fixedHeader.classList.add("search-open");
-                isOpen = true;
-                setTimeout(() => searchInput.focus(), 80);
-            } else {
-                fixedHeader.classList.remove("search-open");
-                isOpen = false;
-                searchInput.blur();
-            }
-        });
-
-        // 途中で向きや幅を変えたときのリセット
-        window.addEventListener("resize", () => {
-            if (!isMobile() && isOpen) {
-                fixedHeader.classList.remove("search-open");
-                isOpen = false;
-                searchInput.blur();
-            }
-        });
+        if (!isOpen) {
+            fixedHeader.classList.add("search-open");
+            isOpen = true;
+            setTimeout(() => searchInput.focus(), 80);
+        } else {
+            fixedHeader.classList.remove("search-open");
+            isOpen = false;
+            searchInput.blur();
+        }
     });
+
+    // 📏 画面サイズ変更時に状態リセット（PC/iPad で誤作動しないようにする）
+    window.addEventListener("resize", () => {
+        if (!isMobile() && isOpen) {
+            fixedHeader.classList.remove("search-open");
+            isOpen = false;
+            searchInput.blur();
+        }
+    });
+});
 </script>
 
 </body>
