@@ -979,6 +979,19 @@
         background-color: var(--color-text-main);
         border-radius: 2px;
     }
+    /* スマホだけ × を大きくする */
+    .fixed-header.search-open .clear-btn {
+        display: block;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        
+        font-size: 22px;   /* ← 大きさアップ */
+        width: 36px;       /* ← タップ領域UP */
+        height: 36px;
+        line-height: 36px;
+        text-align: center;
+    }
 
     .footer-links {
         gap: 24px;
