@@ -805,16 +805,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
+        position: relative;   /* ★ これが大事。絶対入れておく */
         box-shadow: 0 4px 15px rgba(0,0,0,0.06);
         overflow: hidden;
-        /* ★ 伸びるアニメーション */
         transition:
             width 0.35s ease,
             box-shadow 0.3s ease,
             border 0.3s ease,
             background 0.3s ease;
     }
+
 
     /* 最初は中身は透明でクリック不可にしておく */
     .search-input {
@@ -830,14 +830,18 @@
         transition: opacity 0.25s ease;
     }
 
+    /* 🔍 丸の“ど真ん中”に配置 */
     .search-icon {
-        position: static;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
         width: 22px;
         height: 22px;
         color: #a7a7aa;
-        transform: none;
         transition: transform 0.25s ease;
     }
+
 
     .clear-btn {
         display: none;
