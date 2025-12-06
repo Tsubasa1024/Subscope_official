@@ -260,74 +260,49 @@
 
         /* Menu Button */
 /* Menu Button（PC・タブレット共通） */
-/* =============================
-   PC・タブレット用 Menu ボタン（完全安定版）
-   ============================= */
+/* Menu Button（PC・タブレット共通） */
 .menu-btn {
     position: relative;
     background: rgba(255,255,255,0.9);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(0,0,0,0.1);
-
-    /* ★ ボタン高さを固定（ズレ防止の最重要ポイント） */
-    height: 44px;
-
-    padding: 0 24px;  /* 横だけ余白 */
+    padding: 12px 24px;          /* ← 縦も横も少し広げる */
     border-radius: 999px;
-
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-text-main);
     cursor: pointer;
-
+    transition: background 0.3s ease, box-shadow 0.3s ease;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-
+    gap: 8px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-
-    overflow: hidden; /* ← 念のため余白内に抑える */
+    overflow: visible;           /* 念のためはみ出し許可 */
 }
 
-/* hover は transform 使わない（ズレ原因なので） */
 .menu-btn:hover {
     background: #fff;
+    /* transform は使わない → ズレ防止 */
     box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-/* =============================
-   三本線アイコン
-   ============================= */
+/* 三本線コンテナ */
 .menu-icon-lines {
-    position: relative;
-
-    /* ★ アイコンの高さも固定 */
-    height: 14px;
-    width: 18px;
-
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-
-    /* ★ ズレ対策：中央へ「絶対配置」 */
-    position: relative;
-    top: 0;
+    gap: 4px;
+    transform: translateY(0.5px);  /* ← 0.5pxだけ下に。丸め誤差対策 */
 }
 
-/* 一本一本の線 */
+/* 1本1本の線 */
 .menu-line {
-    display: block;
-    width: 18px;
+    width: 16px;
     height: 2px;
-
-    border-radius: 2px;
-    background: var(--color-text-main);
+    border-radius: 999px;
+    background-color: var(--color-text-main);
 }
-
-
 
         /* Navigation Menu Overlay */
         .nav-overlay {
