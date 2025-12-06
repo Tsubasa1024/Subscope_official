@@ -795,6 +795,37 @@
         width: 280px !important;  /* スマホだけ伸びるので、ここは伸びさせない */
     }
 }
+/* iPad（縦・横どっちも）をタブレット扱いにする */
+@media (min-width: 768px) and (max-width: 1024px) and (pointer: coarse) {
+    /* 検索バーは常にPC版（アニメなし） */
+    .search-wrapper {
+        width: 280px !important;
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .search-input {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    .search-icon {
+        position: absolute !important;
+        left: 16px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+
+    /* iPadでは伸びない */
+    .fixed-header.search-open .search-wrapper {
+        width: 280px !important;
+    }
+
+    /* ロゴは消さない */
+    .fixed-header.search-open .nav-center {
+        display: block !important;
+    }
+}
 
         /* =========================================
            Responsive
