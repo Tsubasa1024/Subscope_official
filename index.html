@@ -791,7 +791,7 @@
         display: flex;
     }
 
-    /* ===== スマホ時：デフォは小さめ🔍アイコンだけ ===== */
+    /* 🔍 丸いボタン → にゅーんと伸びる用 */
     .search-wrapper {
         width: 44px;
         height: 44px;
@@ -804,10 +804,16 @@
         position: relative;
         box-shadow: 0 4px 15px rgba(0,0,0,0.06);
         overflow: hidden;
+        /* ★ 伸びるアニメーション */
+        transition:
+            width 0.35s ease,
+            box-shadow 0.3s ease,
+            border 0.3s ease,
+            background 0.3s ease;
     }
 
+    /* 最初は中身は透明でクリック不可にしておく */
     .search-input {
-        display: none;
         width: 100%;
         box-shadow: none;
         border: none;
@@ -815,6 +821,9 @@
         font-size: 0.9rem;
         color: var(--color-text-main);
         background: transparent;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
     }
 
     .search-icon {
@@ -823,32 +832,34 @@
         height: 22px;
         color: #a7a7aa;
         transform: none;
+        transition: transform 0.25s ease;
     }
 
     .clear-btn {
         display: none;
     }
 
-    /* ===== 検索オープン時：ロゴ非表示＋バー1本だけ表示 ===== */
+    /* ===== 検索オープン時：ロゴ消してバーを伸ばす ===== */
     .fixed-header.search-open .nav-center {
-        display: none;  /* SUBSCOPEロゴ消える */
+        display: none;
     }
 
-    /* 開いている間だけ nav-left を「余ったスペース全部」にする */
     .fixed-header.search-open .nav-left {
         flex: 1 1 auto;
     }
 
     .fixed-header.search-open .search-wrapper {
-        width: 100%;             /* nav-left の中でめいっぱい */
+        width: 100%;             /* ← ここがにゅーんと伸びる */
         max-width: 100%;
         border: none;
         box-shadow: none;
         justify-content: flex-start;
+        background: transparent;
     }
 
     .fixed-header.search-open .search-input {
-        display: block;
+        opacity: 1;
+        pointer-events: auto;
         padding: 10px 40px 10px 44px;
         border-radius: 999px;
         border: 1px solid rgba(0,0,0,0.1);
