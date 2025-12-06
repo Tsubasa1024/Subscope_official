@@ -1221,31 +1221,52 @@
     </footer>
 
     <script src="index.js"></script>
-    <script>
-        // スマホ用：検索アイコンをタップしたら検索バー展開＆ロゴ非表示
-        window.addEventListener("DOMContentLoaded", function () {
-            const fixedHeader = document.querySelector(".fixed-header");
-            const searchWrapper = document.querySelector(".search-wrapper");
-            const searchInput = document.getElementById("searchInput");
-            if (!fixedHeader || !searchWrapper || !searchInput) return;
+<script>
+    // スマホだけ：検索アイコンをタップしたら検索バー展開
+    window.addEventListener("DOMContentLoaded", function () {
+        const fixedHeader  = document.querySelector(".fixed-header");
+        const searchWrapper = document.querySelector(".search-wrapper");
+        const searchInput   = document.getElementById("searchInput");
+        if (!fixedHeader || !searchWrapper || !searchInput) return;
 
-            let isOpen = false;
+        let isOpen = false;
 
-            searchWrapper.addEventListener("click", function (e) {
-                // すでに開いていて、input自体をタップしたときはトグルしない
-                if (isOpen && e.target === searchInput) return;
+        // スマホ判定（幅 767px 以下だけをスマホ扱い）
+        const isMobile = () => window.innerWidth <= 767;
 
-                if (!isOpen) {
-                    fixedHeader.classList.add("search-open");
-                    isOpen = true;
-                    setTimeout(() => searchInput.focus(), 80);
-                } else {
-                    fixedHeader.classList.remove("search-open");
-                    isOpen = false;
-                    searchInput.blur();
+        searchWrapper.addEventListener("click", function (e) {
+            if (!isMobile()) {
+                // iPad / PC：class を付けずにフォーカスだけ
+                if (e.target !== searchInput) {
+                    searchInput.focus();
                 }
-            });
+                return;
+            }
+
+            // ここからはスマホだけ
+            if (isOpen && e.target === searchInput) return;
+
+            if (!isOpen) {
+                fixedHeader.classList.add("search-open");
+                isOpen = true;
+                setTimeout(() => searchInput.focus(), 80);
+            } else {
+                fixedHeader.classList.remove("search-open");
+                isOpen = false;
+                searchInput.blur();
+            }
         });
-    </script>
+
+        // 途中で向きや幅を変えたときのリセット
+        window.addEventListener("resize", () => {
+            if (!isMobile() && isOpen) {
+                fixedHeader.classList.remove("search-open");
+                isOpen = false;
+                searchInput.blur();
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
