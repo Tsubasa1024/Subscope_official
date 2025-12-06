@@ -786,9 +786,13 @@
 
     /* ふだんは nav-left は必要なぶんだけの幅 */
     .nav-left {
-        flex: 0 0 auto;
-        margin-right: 12px;
         display: flex;
+        align-items: center;
+    }
+
+    /* 丸い検索ボタンを 1〜2px だけ上に持ち上げる */
+    .nav-left .search-wrapper {
+        transform: translateY(-2px); /* 気になるなら -1px や 0 に調整してOK */
     }
 
     /* 🔍 丸いボタン → にゅーんと伸びる用 */
