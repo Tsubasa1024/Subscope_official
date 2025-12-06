@@ -946,6 +946,40 @@
         right: 16px;
     }
 
+        /* ▼ スマホは Menu をアイコンだけにする（追加コード） ▼ */
+
+    /* Menu の “Menu” という文字を消す */
+    .menu-btn span {
+        display: none;
+    }
+
+    /* Menu ボタンを検索アイコンと同じ正方形にする */
+    .menu-btn {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .menu-icon-lines {
+        display: flex;
+        flex-direction: column;
+        gap: 4px; /* 線の間隔調整 */
+        align-items: center;
+        justify-content: center;
+    }
+
+    .menu-line {
+        width: 18px;   /* スマホでは少し小さくする */
+        height: 2px;
+        background-color: var(--color-text-main);
+        border-radius: 2px;
+    }
+
     .footer-links {
         gap: 24px;
         flex-wrap: wrap;
