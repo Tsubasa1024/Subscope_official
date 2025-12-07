@@ -616,87 +616,87 @@
         </div>
     </footer>
 
-<!-- 共通スクリプト -->
-<script src="index.js"></script>
+    <!-- 共通スクリプト -->
+    <script src="index.js"></script>
 
-<!-- 記事一覧生成用スクリプト（ここから差し替え） -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const all = window.articles || [];
+    <!-- 記事一覧生成用スクリプト -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const all = window.articles || [];
 
-  // URLの ?tab= によるタブ選択（なければ「すべて」）
-  const url = new URLSearchParams(window.location.search);
-  const tabParam = url.get("tab") || "すべて";
+      // URLの ?tab= によるタブ選択（なければ「すべて」）
+      const url = new URLSearchParams(window.location.search);
+      const tabParam = url.get("tab") || "すべて";
 
-  const tabsEl = document.getElementById("tabs");
-  const gridEl = document.getElementById("article-grid");
+      const tabsEl = document.getElementById("tabs");
+      const gridEl = document.getElementById("article-grid");
 
-  if (!tabsEl || !gridEl) return;
+      if (!tabsEl || !gridEl) return;
 
-  // 🔹 タブに表示するカテゴリを固定で定義
-  const categories = [
-    "すべて",
-    "音楽",
-    "映画・ドラマ",
-    "学習・資格",
-    "健康・フィットネス",
-    "ゲーム・エンタメ",
-    "生活・ライフスタイル",
-    "AI・ツール",
-    "その他"
-  ];
+      // 🔹 タブに表示するカテゴリを固定で定義
+      const categories = [
+        "すべて",
+        "音楽",
+        "映画・ドラマ",
+        "学習・資格",
+        "健康・フィットネス",
+        "ゲーム・エンタメ",
+        "生活・ライフスタイル",
+        "AI・ツール",
+        "その他"
+      ];
 
-  // 🔹 タブ生成（固定カテゴリをそのまま表示）
-  tabsEl.innerHTML = categories
-    .map(c => `
-      <button class="tab ${c === tabParam ? "active" : ""}"
-              onclick="changeTab('${c}')">${c}</button>
-    `)
-    .join("");
+      // 🔹 タブ生成（固定カテゴリをそのまま表示）
+      tabsEl.innerHTML = categories
+        .map(c => `
+          <button class="tab ${c === tabParam ? "active" : ""}"
+                  onclick="changeTab('${c}')">${c}</button>
+        `)
+        .join("");
 
-  // 🔹 記事の絞り込み
-  const filtered = tabParam === "すべて"
-    ? all
-    : all.filter(a => a.category === tabParam);
+      // 🔹 記事の絞り込み
+      const filtered = tabParam === "すべて"
+        ? all
+        : all.filter(a => a.category === tabParam);
 
-  // 🔹 記事が1件もないときの表示
-  if (!filtered.length) {
-    gridEl.innerHTML = `
-      <div class="empty-message">
-        まだ記事がありません。
-      </div>
-    `;
-    return;
-  }
-
-  // 🔹 記事カードを描画
-  gridEl.innerHTML = filtered
-    .map(a => `
-      <div class="article-card" onclick="openArticle('${a.id}')">
-        <div class="article-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-        <div class="article-body">
-          <div class="article-service">${a.service || ""}</div>
-          <div class="article-title">${a.title || ""}</div>
-          <div class="article-desc">${a.description || ""}</div>
-          <div class="article-meta">
-            <span>${(a.date || "").replace(/-/g, ".")}</span>
+      // 🔹 記事が1件もないときの表示
+      if (!filtered.length) {
+        gridEl.innerHTML = `
+          <div class="empty-message">
+            まだ記事がありません。
           </div>
-        </div>
-      </div>
-    `)
-    .join("");
-});
+        `;
+        return;
+      }
 
-// タブを押したとき：URLのクエリだけ変更してリロード
-function changeTab(cat) {
-  const encoded = encodeURIComponent(cat);
-  window.location.href = "all.html?tab=" + encoded;
-}
+      // 🔹 記事カードを描画
+      gridEl.innerHTML = filtered
+        .map(a => `
+          <div class="article-card" onclick="openArticle('${a.id}')">
+            <div class="article-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+            <div class="article-body">
+              <div class="article-service">${a.service || ""}</div>
+              <div class="article-title">${a.title || ""}</div>
+              <div class="article-desc">${a.description || ""}</div>
+              <div class="article-meta">
+                <span>${(a.date || "").replace(/-/g, ".")}</span>
+              </div>
+            </div>
+          </div>
+        `)
+        .join("");
+    });
 
-// 記事カードを押したとき
-function openArticle(id) {
-  window.location.href = "article.html?id=" + encodeURIComponent(id);
-}
-</script>
+    // タブを押したとき：URLのクエリだけ変更してリロード
+    function changeTab(cat) {
+      const encoded = encodeURIComponent(cat);
+      window.location.href = "all.html?tab=" + encoded;
+    }
+
+    // 記事カードを押したとき
+    function openArticle(id) {
+      window.location.href = "article.html?id=" + encodeURIComponent(id);
+    }
+    </script>
 </body>
 </html>
