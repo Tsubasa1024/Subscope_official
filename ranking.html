@@ -372,6 +372,118 @@
         /* =========================================
            ランキング本体
            ========================================= */
+        /* 1位：ヒーロー大カード */
+.rank-hero {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 20px;
+    padding: 24px;
+    border-radius: 28px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    margin-bottom: 20px;
+}
+
+.rank-hero:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+}
+
+.rank-hero-thumb {
+    width: 260px;
+    height: 160px;
+    border-radius: 20px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.rank-hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rank-hero-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.rank-hero-desc {
+    font-size: 1rem;
+    color: #555;
+}
+
+.rank-hero-meta {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #86868B;
+    display: flex;
+    gap: 16px;
+}
+
+/* 2・3位：中カード */
+.rank-mid {
+    display: flex;
+    gap: 16px;
+    padding: 18px;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    margin-bottom: 14px;
+}
+
+.rank-mid:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+}
+
+.rank-mid-thumb {
+    width: 150px;
+    height: 90px;
+    border-radius: 16px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.rank-mid-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.rank-mid-desc {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.rank-mid-meta {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: #86868B;
+    display: flex;
+    gap: 12px;
+}
+
+/* バッジを大きくする用 */
+.rank-badge-large {
+    width: 54px;
+    height: 54px;
+    font-size: 1.2rem;
+}
+
+.rank-badge-medium {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+}
+
         .ranking-section {
             padding: 16px 0 80px;
         }
@@ -798,137 +910,136 @@
     <script src="index.js"></script>
 
     <!-- ランキング生成用スクリプト -->
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // index.js 側で articles が定義されている前提
-        if (typeof articles === "undefined" || !Array.isArray(articles)) {
-            console.error("articles が見つからないよ");
-            return;
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // index.js 側で articles が定義されている前提
+    if (!window.articles || !Array.isArray(articles)) return;
+
+    const top3El = document.getElementById("ranking-top3");
+    const restEl = document.getElementById("ranking-rest");
+    const periodBtns = document.querySelectorAll(".period-btn");
+
+    if (!top3El || !restEl) return;
+
+    // 今は全部 article.views を使う。
+    // 将来 views_day / views_week / views_month を追加したらここで切り替えられるようにしておく。
+    let currentPeriod = "ALL";
+
+    function getViews(a, period) {
+        if (!a) return 0;
+        switch (period) {
+            case "DAY":
+                return a.views_day ?? a.views ?? 0;
+            case "WEEK":
+                return a.views_week ?? a.views ?? 0;
+            case "MONTH":
+                return a.views_month ?? a.views ?? 0;
+            case "ALL":
+            default:
+                return a.views ?? 0;
+        }
+    }
+
+    function getSortedArticles() {
+        return [...articles].sort((a, b) => getViews(b, currentPeriod) - getViews(a, currentPeriod));
+    }
+
+    function renderRanking() {
+        const sorted = getSortedArticles();
+
+        const hero = sorted[0];            // 1位
+        const mids = sorted.slice(1, 3);   // 2位・3位
+        const rest = sorted.slice(3, 20);  // 4位以降
+
+        // ------- 1位：ヒーロー大カード -------
+        top3El.innerHTML = "";
+
+        if (hero) {
+            const viewsHero = getViews(hero, currentPeriod);
+            top3El.innerHTML += `
+                <div class="rank-hero" onclick="window.location.href='article.html?id=${encodeURIComponent(hero.id)}'">
+                    <div class="rank-badge rank-1 rank-badge-large">1</div>
+                    <div class="rank-hero-thumb" style="background-image:url('${hero.image || "images/sample1.jpg"}');"></div>
+                    <div class="rank-hero-content">
+                        <div class="ranking-service">${(hero.service || "").toUpperCase()}</div>
+                        <div class="rank-hero-title">${hero.title || ""}</div>
+                        <div class="rank-hero-desc">${hero.description || ""}</div>
+                        <div class="rank-hero-meta">
+                            <span>${hero.category || ""}</span>
+                            <span>閲覧数 ${viewsHero}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
-        const top3El   = document.getElementById("ranking-top3");
-        const restEl   = document.getElementById("ranking-rest");
-        const periodBtns = document.querySelectorAll(".period-btn");
+        // ------- 2位・3位：中カード -------
+        mids.forEach((a, index) => {
+            if (!a) return;
+            const rank = index + 2; // 2 or 3
+            const views = getViews(a, currentPeriod);
 
-        if (!top3El || !restEl) return;
-
-        let currentPeriod = "all";
-
-        // period ごとの閲覧数を取得
-        function getViews(article, period) {
-            if (period === "day")   return article.viewsDay   ?? article.views ?? 0;
-            if (period === "week")  return article.viewsWeek  ?? article.views ?? 0;
-            if (period === "month") return article.viewsMonth ?? article.views ?? 0;
-            return article.views ?? 0; // all
-        }
-
-        function getSortedArticles(period = "all") {
-            return [...articles].sort((a, b) => getViews(b, period) - getViews(a, period));
-        }
-
-        function renderRanking() {
-            const sorted = getSortedArticles(currentPeriod);
-            const top3   = sorted.slice(0, 3);
-            const rest   = sorted.slice(3, 20); // 20位まで
-
-            // Top3
-            top3El.innerHTML = "";
-            top3.forEach((a, index) => {
-                const rank  = index + 1;
-                const views = getViews(a, currentPeriod);
-
-                const div = document.createElement("div");
-                div.className = "ranking-card";
-                div.innerHTML = `
-                    <div class="rank-badge rank-${rank}">${rank}</div>
-                    <div class="ranking-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+            top3El.innerHTML += `
+                <div class="rank-mid" onclick="window.location.href='article.html?id=${encodeURIComponent(a.id)}'">
+                    <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
+                    <div class="rank-mid-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
                     <div class="ranking-content">
                         <div class="ranking-service">${(a.service || "").toUpperCase()}</div>
-                        <div class="ranking-title-text">${a.title || ""}</div>
-                        <div class="ranking-desc">${a.description || ""}</div>
-                        <div class="ranking-meta">
+                        <div class="rank-mid-title">${a.title || ""}</div>
+                        <div class="rank-mid-desc">${a.description || ""}</div>
+                        <div class="rank-mid-meta">
                             <span>${a.category || ""}</span>
                             <span>閲覧数 ${views}</span>
                         </div>
                     </div>
-                `;
-                div.addEventListener("click", () => {
-                    if (a.id) {
-                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-                    }
-                });
-                top3El.appendChild(div);
-            });
-
-            // 4位以降
-            restEl.innerHTML = "";
-            rest.forEach((a, index) => {
-                const rank  = index + 4;
-                const views = getViews(a, currentPeriod);
-
-                // 4位・5位だけカードっぽく（今の2位・3位イメージ）
-                if (rank <= 5) {
-                    const card = document.createElement("div");
-                    card.className = "ranking-card ranking-card-sub";
-                    card.innerHTML = `
-                        <div class="rank-badge">${rank}</div>
-                        <div class="ranking-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-                        <div class="ranking-content">
-                            <div class="ranking-service">${(a.service || "").toUpperCase()}</div>
-                            <div class="ranking-title-text">${a.title || ""}</div>
-                            <div class="ranking-desc">${a.description || ""}</div>
-                            <div class="ranking-meta">
-                                <span>${a.category || ""}</span>
-                                <span>閲覧数 ${views}</span>
-                            </div>
-                        </div>
-                    `;
-                    card.addEventListener("click", () => {
-                        if (a.id) {
-                            window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-                        }
-                    });
-                    restEl.appendChild(card);
-                    return;
-                }
-
-                // 6位以降はリスト形式
-                const row = document.createElement("div");
-                row.className = "ranking-row";
-                row.innerHTML = `
-                    <div class="ranking-row-rank">${rank}</div>
-                    <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-                    <div class="ranking-row-main">
-                        <div class="ranking-row-title">${a.title || ""}</div>
-                        <div class="ranking-row-meta">
-                            <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
-                            <span>${a.category || ""}</span>
-                            <span>閲覧数 ${views}</span>
-                        </div>
-                    </div>
-                `;
-                row.addEventListener("click", () => {
-                    if (a.id) {
-                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-                    }
-                });
-                restEl.appendChild(row);
-            });
-        }
-
-        // 期間ボタン切り替え
-        periodBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                periodBtns.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                currentPeriod = btn.dataset.period || "all";
-                renderRanking();
-            });
+                </div>
+            `;
         });
 
-        // 初期描画（ALL）
-        renderRanking();
+        // ------- 4位以降：今までの小さい行カード -------
+        restEl.innerHTML = "";
+        rest.forEach((a, index) => {
+            const rank = index + 4;
+            const views = getViews(a, currentPeriod);
+
+            const row = document.createElement("div");
+            row.className = "ranking-row";
+            row.innerHTML = `
+                <div class="ranking-row-rank">${rank}</div>
+                <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                <div class="ranking-row-main">
+                    <div class="ranking-row-title">${a.title || ""}</div>
+                    <div class="ranking-row-meta">
+                        <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
+                        <span>${a.category || ""}</span>
+                        <span>閲覧数 ${views}</span>
+                    </div>
+                </div>
+            `;
+            row.addEventListener("click", () => {
+                if (a.id) {
+                    window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                }
+            });
+            restEl.appendChild(row);
+        });
+    }
+
+    // 期間ボタン
+    periodBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            periodBtns.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            currentPeriod = btn.dataset.period || "ALL";
+            renderRanking();
+        });
     });
-    </script>
+
+    // 初期表示
+    renderRanking();
+});
+</script>
+
 </body>
 </html>
