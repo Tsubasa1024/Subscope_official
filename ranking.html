@@ -95,6 +95,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative; /* ★ 追加：中央ロゴの基準 */
         }
 /* 中央 SUBSCOPE ロゴ */
 .nav-center {
@@ -658,30 +659,40 @@
 </head>
 <body>
 
-    <!-- 固定ヘッダー（検索バー＋Menu） -->
-    <div class="fixed-header">
-        <div class="top-header">
-            <div class="nav-left">
-                <div class="search-wrapper">
-                    <input type="text" class="search-input" id="searchInput" placeholder="">
-                    <span class="clear-btn" id="clear-btn">×</span>
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </div>
-            </div>
-            <div class="nav-right">
-                <button class="menu-btn" onclick="toggleMenu()">
-                    <div class="menu-icon-lines">
-                        <span class="menu-line"></span>
-                        <span class="menu-line"></span>
-                    </div>
-                    <span>Menu</span>
-                </button>
+   <div class="fixed-header">
+    <div class="top-header">
+        <!-- 左：検索 -->
+        <div class="nav-left">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="">
+                <span class="clear-btn" id="clear-btn">×</span>
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
             </div>
         </div>
+
+        <!-- ★ 中央：SUBSCOPE ロゴ -->
+        <div class="nav-center">
+            <a href="index.html" class="header-logo-link">
+                <h1 class="header-logo">SUBSCOPE</h1>
+            </a>
+        </div>
+
+        <!-- 右：Menu -->
+        <div class="nav-right">
+            <button class="menu-btn" onclick="toggleMenu()">
+                <div class="menu-icon-lines">
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                </div>
+                <span>Menu</span>
+            </button>
+        </div>
     </div>
+</div>
+
 
     <!-- Menu オーバーレイ -->
     <div class="nav-overlay" id="nav-overlay">
