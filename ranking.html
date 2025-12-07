@@ -779,6 +779,43 @@
            Responsive
            ========================================= */
         @media (max-width: 768px) {
+            /* ===== スマホ版：1位のヒーローカードを中カードサイズに変更 ===== */
+.rank-hero {
+    flex-direction: row !important;
+    padding: 18px !important;
+    gap: 14px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.05) !important;
+    height: auto !important;
+}
+
+/* サムネを中カードと同じ大きさに */
+.rank-hero-thumb {
+    width: 150px !important;
+    height: 90px !important;
+    border-radius: 16px !important;
+}
+
+/* テキストのサイズ調整 */
+.rank-hero-title {
+    font-size: 1.15rem !important;
+}
+
+.rank-hero-desc {
+    font-size: 0.9rem !important;
+}
+
+.rank-hero-meta {
+    font-size: 0.8rem !important;
+}
+
+/* 1位バッジも中サイズに統一 */
+.rank-badge-large {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1rem !important;
+}
+
             :root {
                 --spacing-section: 60px;
             }
