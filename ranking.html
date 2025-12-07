@@ -372,6 +372,24 @@
         /* =========================================
            ランキング本体
            ========================================= */
+        /* ランキング切り替え時のアニメーション用 */
+.ranking-animate > * {
+    opacity: 0;
+    animation: fadeUp 0.45s ease forwards;
+}
+
+/* 下からフワッと出てくる */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
         /* 1位：ヒーロー大カード */
 .rank-hero {
     display: flex;
@@ -949,23 +967,20 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-    function renderRanking() {
-        const sorted = getSortedArticles();
+function renderRanking() {
+    const sorted = getSortedArticles();
 
-        const hero = sorted[0];           // 1位
-        const mids = sorted.slice(1, 3);  // 2・3位
-        const rest = sorted.slice(3, 10); // 4位以降
+    const hero = sorted[0];            // 1位
+    const mids = sorted.slice(1, 3);   // 2位・3位
+    const rest = sorted.slice(3, 20);  // 4位以降
 
-        // ---------- 1位：ヒーロー大カード ----------
-        top3El.innerHTML = "";
+    // ------- 1位：ヒーロー大カード -------
+    top3El.innerHTML = "";
 
-        if (hero) {
-            const viewsHero = getViews(hero, currentPeriod);
-
-            const heroEl = document.createElement("div");
-            heroEl.className = "rank-hero";
-
-            heroEl.innerHTML = `
+    if (hero) {
+        const viewsHero = getViews(hero, currentPeriod);
+        top3El.innerHTML += `
+            <div class="rank-hero" onclick="window.location.href='article.html?id=${encodeURIComponent(hero.id)}'">
                 <div class="rank-badge rank-1 rank-badge-large">1</div>
                 <div class="rank-hero-thumb" style="background-image:url('${hero.image || "images/sample1.jpg"}');"></div>
                 <div class="rank-hero-content">
@@ -977,26 +992,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span>閲覧数 ${viewsHero}</span>
                     </div>
                 </div>
-            `;
-            heroEl.addEventListener("click", () => {
-                if (hero.id) {
-                    window.location.href =
-                        `article.html?id=${encodeURIComponent(hero.id)}`;
-                }
-            });
+            </div>
+        `;
+    }
 
-            top3El.appendChild(heroEl);
-        }
+    // ------- 2位・3位：中カード -------
+    mids.forEach((a, index) => {
+        if (!a) return;
+        const rank = index + 2; // 2 or 3
+        const views = getViews(a, currentPeriod);
 
-        // ---------- 2位・3位：中カード ----------
-        mids.forEach((a, index) => {
-            if (!a) return;
-            const rank = index + 2;
-            const views = getViews(a, currentPeriod);
-
-            const midEl = document.createElement("div");
-            midEl.className = "rank-mid";
-            midEl.innerHTML = `
+        top3El.innerHTML += `
+            <div class="rank-mid" onclick="window.location.href='article.html?id=${encodeURIComponent(a.id)}'">
                 <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
                 <div class="rank-mid-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
                 <div class="ranking-content">
@@ -1008,47 +1015,46 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span>閲覧数 ${views}</span>
                     </div>
                 </div>
-            `;
-            midEl.addEventListener("click", () => {
-                if (a.id) {
-                    window.location.href =
-                        `article.html?id=${encodeURIComponent(a.id)}`;
-                }
-            });
+            </div>
+        `;
+    });
 
-            top3El.appendChild(midEl);
-        });
+    // ------- 4位以降：小カード -------
+    restEl.innerHTML = "";
+    rest.forEach((a, index) => {
+        const rank = index + 4;
+        const views = getViews(a, currentPeriod);
 
-        // ---------- 4位以降：小さい行カード ----------
-        restEl.innerHTML = "";
-        rest.forEach((a, index) => {
-            const rank = index + 4;
-            const views = getViews(a, currentPeriod);
-
-            const row = document.createElement("div");
-            row.className = "ranking-row";
-            row.innerHTML = `
-                <div class="ranking-row-rank">${rank}</div>
-                <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-                <div class="ranking-row-main">
-                    <div class="ranking-row-title">${a.title || ""}</div>
-                    <div class="ranking-row-meta">
-                        <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
-                        <span>${a.category || ""}</span>
-                        <span>閲覧数 ${views}</span>
-                    </div>
+        const row = document.createElement("div");
+        row.className = "ranking-row";
+        row.innerHTML = `
+            <div class="ranking-row-rank">${rank}</div>
+            <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+            <div class="ranking-row-main">
+                <div class="ranking-row-title">${a.title || ""}</div>
+                <div class="ranking-row-meta">
+                    <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
+                    <span>${a.category || ""}</span>
+                    <span>閲覧数 ${views}</span>
                 </div>
-            `;
-            row.addEventListener("click", () => {
-                if (a.id) {
-                    window.location.href =
-                        `article.html?id=${encodeURIComponent(a.id)}`;
-                }
-            });
-
-            restEl.appendChild(row);
+            </div>
+        `;
+        row.addEventListener("click", () => {
+            if (a.id) {
+                window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+            }
         });
-    }
+        restEl.appendChild(row);
+    });
+
+    // 🔥 ここで毎回アニメーションをかけ直す
+    [top3El, restEl].forEach(el => {
+        el.classList.remove("ranking-animate");
+        void el.offsetWidth;          // 一度リフローさせてリセット
+        el.classList.add("ranking-animate");
+    });
+}
+
 
     // 期間ボタン
     periodBtns.forEach(btn => {
