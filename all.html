@@ -76,7 +76,6 @@
 
         /* =========================================
            Fixed Header（検索バー＋SUBSCOPE＋Menu）
-           ※ ランキングページと同じデザイン
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -99,7 +98,6 @@
             position: relative;
         }
 
-        /* 中央 SUBSCOPE ロゴ */
         .nav-center {
             position: absolute;
             left: 50%;
@@ -183,7 +181,6 @@
             pointer-events: auto;
         }
 
-        /* 検索結果エリア（共通） */
         .search-results-container {
             position: fixed;
             top: 72px;
@@ -237,7 +234,6 @@
             color: #555;
         }
 
-        /* Menu Button */
         .menu-btn {
             background: rgba(255,255,255,0.8);
             backdrop-filter: blur(20px);
@@ -346,7 +342,6 @@
             max-width: 520px;
         }
 
-        /* タブ（カテゴリ） */
         .tabs {
             display: flex;
             flex-wrap: wrap;
@@ -469,9 +464,6 @@
             padding: 24px 0;
         }
 
-        /* =========================================
-           Footer
-           ========================================= */
         .footer {
             background: #F5F5F7;
             padding: 40px 0;
@@ -509,9 +501,6 @@
             font-size: 13px;
         }
 
-        /* =========================================
-           Responsive
-           ========================================= */
         @media (max-width: 768px) {
             :root {
                 --spacing-section: 60px;
@@ -556,7 +545,6 @@
     <!-- 固定ヘッダー -->
     <div class="fixed-header">
         <div class="top-header">
-            <!-- 左：検索 -->
             <div class="nav-left">
                 <div class="search-wrapper">
                     <input type="text" class="search-input" id="searchInput" placeholder="">
@@ -568,14 +556,12 @@
                 </div>
             </div>
 
-            <!-- 中央：SUBSCOPE -->
             <div class="nav-center">
                 <a href="index.html" class="header-logo-link">
                     <h1 class="header-logo">SUBSCOPE</h1>
                 </a>
             </div>
 
-            <!-- 右：Menu -->
             <div class="nav-right">
                 <button class="menu-btn" onclick="toggleMenu()">
                     <div class="menu-icon-lines">
@@ -588,27 +574,18 @@
         </div>
     </div>
 
-    <!-- Menu オーバーレイ -->
     <div class="nav-overlay" id="nav-overlay">
         <ul class="nav-list">
-            <li>
-                <a href="index.html" class="nav-link" onclick="toggleMenu();">トップ</a>
-            </li>
-            <li>
-                <a href="all.html" class="nav-link" onclick="toggleMenu();">記事一覧</a>
-            </li>
-            <li>
-                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">ランキング</a>
-            </li>
+            <li><a href="index.html" class="nav-link" onclick="toggleMenu();">トップ</a></li>
+            <li><a href="all.html" class="nav-link" onclick="toggleMenu();">記事一覧</a></li>
+            <li><a href="ranking.html" class="nav-link" onclick="toggleMenu();">ランキング</a></li>
         </ul>
     </div>
 
-    <!-- 検索結果エリア -->
     <div class="search-results-container">
         <div id="searchResults"></div>
     </div>
 
-    <!-- Hero（タイトル＋タブ） -->
     <section class="all-hero">
         <div class="container">
             <div class="all-hero-inner reveal active">
@@ -621,7 +598,6 @@
         </div>
     </section>
 
-    <!-- 記事グリッド -->
     <section class="all-section">
         <div class="container">
             <div class="article-grid reveal" id="article-grid">
@@ -630,7 +606,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-links">
@@ -642,70 +617,73 @@
         </div>
     </footer>
 
-    <!-- 共通スクリプト（検索・Menu・scroll reveal・articles 定義） -->
+    <!-- 共通スクリプト -->
     <script src="index.js"></script>
 
     <!-- 記事一覧生成用スクリプト -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // index.js で定義した記事データを使う
-  const all = window.articles || [];
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const all = window.articles || [];
 
-  const url = new URLSearchParams(window.location.search);
-  const tabParam = url.get("tab") || "すべて";
+      const url = new URLSearchParams(window.location.search);
+      const tabParam = url.get("tab") || "すべて";
 
-  const tabsEl = document.getElementById("tabs");
-  const gridEl = document.getElementById("grid");
+      const tabsEl = document.getElementById("tabs");
+      const gridEl = document.getElementById("article-grid"); // ★ 修正ポイント
 
-  if (!tabsEl || !gridEl) return;
+      if (!tabsEl || !gridEl) return;
 
-  // ===== カテゴリ一覧（用途・ニーズ別） =====
-  const categorySet = new Set(["すべて"]);
-  all.forEach(a => {
-    if (a.category) categorySet.add(a.category);
-  });
-  const categories = Array.from(categorySet);
+      // カテゴリ一覧
+      const categorySet = new Set(["すべて"]);
+      all.forEach(a => {
+        if (a.category) categorySet.add(a.category);
+      });
+      const categories = Array.from(categorySet);
 
-  // ===== タブ生成（category ベース） =====
-  tabsEl.innerHTML = categories
-    .map(c => `
-      <div class="tab ${c === tabParam ? "active" : ""}"
-           onclick="changeTab('${c}')">${c}</div>
-    `)
-    .join("");
+      // タブ生成
+      tabsEl.innerHTML = categories
+        .map(c => `
+          <button class="tab ${c === tabParam ? "active" : ""}"
+                  onclick="changeTab('${c}')">${c}</button>
+        `)
+        .join("");
 
-  // ===== フィルタ（「すべて」なら全件） =====
-  const filtered = tabParam === "すべて"
-    ? all
-    : all.filter(a => a.category === tabParam);
+      // フィルタ
+      const filtered = tabParam === "すべて"
+        ? all
+        : all.filter(a => a.category === tabParam);
 
-  // ===== カード描画 =====
-  gridEl.innerHTML = filtered
-    .map(a => `
-      <div class="card" onclick="openArticle('${a.id}')">
-        <img class="thumb" src="${a.image || "images/sample1.jpg"}" alt="">
-        <div class="card-body">
-          <div class="service">${a.service || ""}</div>
-          <div class="title">${a.title || ""}</div>
-          <div class="desc">${a.description || ""}</div>
-          <div class="date">${(a.date || "").replace(/-/g, ".")}</div>
-        </div>
-      </div>
-    `)
-    .join("");
-});
+      if (!filtered.length) {
+        gridEl.innerHTML = '<div class="empty-message">該当する記事がありません。</div>';
+        return;
+      }
 
-// タブを押したとき：クエリだけ変える
-function changeTab(cat) {
-  const encoded = encodeURIComponent(cat);
-  window.location.href = "all.html?tab=" + encoded;
-}
+      // カード描画（CSSのクラス名に合わせてある）
+      gridEl.innerHTML = filtered
+        .map(a => `
+          <div class="article-card" onclick="openArticle('${a.id}')">
+            <div class="article-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+            <div class="article-body">
+              <div class="article-service">${a.service || ""}</div>
+              <div class="article-title">${a.title || ""}</div>
+              <div class="article-desc">${a.description || ""}</div>
+              <div class="article-meta">
+                <span>${(a.date || "").replace(/-/g, ".")}</span>
+              </div>
+            </div>
+          </div>
+        `)
+        .join("");
+    });
 
-// 記事カードを押したとき
-function openArticle(id) {
-  window.location.href = "article.html?id=" + encodeURIComponent(id);
-}
-</script>
-    <script src="index.js"></script>
+    function changeTab(cat) {
+      const encoded = encodeURIComponent(cat);
+      window.location.href = "all.html?tab=" + encoded;
+    }
+
+    function openArticle(id) {
+      window.location.href = "article.html?id=" + encodeURIComponent(id);
+    }
+    </script>
 </body>
 </html>
