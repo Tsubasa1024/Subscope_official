@@ -75,7 +75,7 @@
         }
 
         /* =========================================
-           Fixed Header（検索バー＋Menu）
+           Fixed Header（検索バー＋SUBSCOPE＋Menu）
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -95,29 +95,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative; /* ★ 追加：中央ロゴの基準 */
+            position: relative;
         }
-/* 中央 SUBSCOPE ロゴ */
-.nav-center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-}
 
-.header-logo-link {
-    display: inline-block;
-    text-decoration: none;
-    color: inherit;
-}
+        /* 中央 SUBSCOPE ロゴ */
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-.header-logo {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--color-text-main);
-    user-select: none;
-    cursor: pointer;
-}
+        .header-logo-link {
+            display: inline-block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .header-logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--color-text-main);
+            user-select: none;
+            cursor: pointer;
+        }
 
         .nav-left,
         .nav-right {
@@ -570,16 +571,6 @@
             box-shadow: 0 10px 26px rgba(0,0,0,0.2);
         }
 
-        .ranking-cta-link {
-            margin-top: 8px;
-            font-size: 0.85rem;
-            color: var(--color-text-gray);
-        }
-
-        .ranking-cta-link a {
-            text-decoration: underline;
-        }
-
         /* =========================================
            Footer
            ========================================= */
@@ -659,40 +650,40 @@
 </head>
 <body>
 
-   <div class="fixed-header">
-    <div class="top-header">
-        <!-- 左：検索 -->
-        <div class="nav-left">
-            <div class="search-wrapper">
-                <input type="text" class="search-input" id="searchInput" placeholder="">
-                <span class="clear-btn" id="clear-btn">×</span>
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
+    <!-- 固定ヘッダー -->
+    <div class="fixed-header">
+        <div class="top-header">
+            <!-- 左：検索 -->
+            <div class="nav-left">
+                <div class="search-wrapper">
+                    <input type="text" class="search-input" id="searchInput" placeholder="">
+                    <span class="clear-btn" id="clear-btn">×</span>
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 中央：SUBSCOPE ロゴ -->
+            <div class="nav-center">
+                <a href="index.html" class="header-logo-link">
+                    <h1 class="header-logo">SUBSCOPE</h1>
+                </a>
+            </div>
+
+            <!-- 右：Menu -->
+            <div class="nav-right">
+                <button class="menu-btn" onclick="toggleMenu()">
+                    <div class="menu-icon-lines">
+                        <span class="menu-line"></span>
+                        <span class="menu-line"></span>
+                    </div>
+                    <span>Menu</span>
+                </button>
             </div>
         </div>
-
-        <!-- ★ 中央：SUBSCOPE ロゴ -->
-        <div class="nav-center">
-            <a href="index.html" class="header-logo-link">
-                <h1 class="header-logo">SUBSCOPE</h1>
-            </a>
-        </div>
-
-        <!-- 右：Menu -->
-        <div class="nav-right">
-            <button class="menu-btn" onclick="toggleMenu()">
-                <div class="menu-icon-lines">
-                    <span class="menu-line"></span>
-                    <span class="menu-line"></span>
-                </div>
-                <span>Menu</span>
-            </button>
-        </div>
     </div>
-</div>
-
 
     <!-- Menu オーバーレイ -->
     <div class="nav-overlay" id="nav-overlay">
@@ -727,14 +718,14 @@
                 <div>
                     <h1 class="ranking-title">ランキング</h1>
                     <p class="ranking-sub">
-                        いま読まれている人気記事を、期間別の閲覧ランキングでチェックできます。
-                        SUBSCOPE 全体でどの記事が注目されているか、一目でわかります。
+                        いま読まれている人気記事を、DAY / WEEK / MONTH / ALL の4つの指標でチェックできます。
                     </p>
                 </div>
                 <div class="period-toggle" id="period-toggle">
-                    <!-- まずは見た目だけ。JSで後から切り替え予定 -->
-                    <button class="period-btn" data-period="24h">24時間</button>
-                    <button class="period-btn active" data-period="all">累計</button>
+                    <button class="period-btn" data-period="day">DAY</button>
+                    <button class="period-btn" data-period="week">WEEK</button>
+                    <button class="period-btn" data-period="month">MONTH</button>
+                    <button class="period-btn active" data-period="all">ALL</button>
                 </div>
             </div>
         </div>
@@ -744,88 +735,19 @@
     <section class="ranking-section">
         <div class="container">
 
-            <!-- Top3（後でJSで差し替えしやすいように id を付けてある） -->
+            <!-- Top3（JSで差し替え） -->
             <div class="ranking-top3 reveal" id="ranking-top3">
-                <!-- ▼ ここはダミー。あとで JS から articles を使って書き換え予定 ▼ -->
-                <div class="ranking-card">
-                    <div class="rank-badge rank-1">1</div>
-                    <div class="ranking-thumb" style="background-image:url('images/sample1.jpg');"></div>
-                    <div class="ranking-content">
-                        <div class="ranking-service">APPLE MUSIC</div>
-                        <div class="ranking-title-text">Apple Music の最新機能まとめ</div>
-                        <div class="ranking-desc">空間オーディオ、ロスレス、オートミックスなど Apple Music の最新機能を徹底解説。</div>
-                        <div class="ranking-meta">
-                            <span>音楽</span>
-                            <span>閲覧数 320</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ranking-card">
-                    <div class="rank-badge rank-2">2</div>
-                    <div class="ranking-thumb" style="background-image:url('images/sample3.jpg');"></div>
-                    <div class="ranking-content">
-                        <div class="ranking-service">ALL</div>
-                        <div class="ranking-title-text">人気サブスク徹底比較ガイド</div>
-                        <div class="ranking-desc">音楽・映像・学習系など主要サブスクサービスを横断比較。</div>
-                        <div class="ranking-meta">
-                            <span>比較</span>
-                            <span>閲覧数 400</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ranking-card">
-                    <div class="rank-badge rank-3">3</div>
-                    <div class="ranking-thumb" style="background-image:url('images/sample2.jpg');"></div>
-                    <div class="ranking-content">
-                        <div class="ranking-service">NETFLIX</div>
-                        <div class="ranking-title-text">Netflix 2025年おすすめ作品</div>
-                        <div class="ranking-desc">2025年に絶対観ておきたい Netflix オリジナル作品を厳選紹介。</div>
-                        <div class="ranking-meta">
-                            <span>映像</span>
-                            <span>閲覧数 280</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- JS で上書きされる -->
             </div>
 
             <!-- 4位以降 -->
             <div class="ranking-rest reveal" id="ranking-rest">
-                <!-- ▼ ここもダミー。後で JS で articles から生成する ▼ -->
-                <div class="ranking-row">
-                    <div class="ranking-row-rank">4</div>
-                    <div class="ranking-row-thumb" style="background-image:url('images/sample4.jpg');"></div>
-                    <div class="ranking-row-main">
-                        <div class="ranking-row-title">Spotify vs Apple Music</div>
-                        <div class="ranking-row-meta">
-                            <span class="ranking-row-service">SPOTIFY</span>
-                            <span>音楽</span>
-                            <span>閲覧数 250</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ranking-row">
-                    <div class="ranking-row-rank">5</div>
-                    <div class="ranking-row-thumb" style="background-image:url('images/sample5.jpg');"></div>
-                    <div class="ranking-row-main">
-                        <div class="ranking-row-title">勉強がはかどる学習系サブスク5選</div>
-                        <div class="ranking-row-meta">
-                            <span class="ranking-row-service">STUDY</span>
-                            <span>学習</span>
-                            <span>閲覧数 150</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- JS で上書きされる -->
             </div>
 
-            <!-- CTA -->
+            <!-- CTA：すべての記事だけ -->
             <div class="ranking-cta-wrapper reveal">
                 <a href="all.html" class="ranking-cta-btn">すべての記事を見る</a>
-                <div class="ranking-cta-link">
-                    または <a href="index.html">トップページに戻る</a>
-                </div>
             </div>
 
         </div>
@@ -858,13 +780,25 @@
 
         if (!top3El || !restEl) return;
 
-        // views 降順でソート（とりあえず period は無視して累計ランキング）
-        function getSortedArticles() {
-            return [...articles].sort((a, b) => (b.views || 0) - (a.views || 0));
+        let currentPeriod = "all";
+
+        // period に応じて使うキーを切り替え
+        function getSortedArticles(period = "all") {
+            let key;
+            if (period === "day") key = "viewsDay";
+            else if (period === "week") key = "viewsWeek";
+            else if (period === "month") key = "viewsMonth";
+            else key = "views"; // ALL
+
+            return [...articles].sort((a, b) => {
+                const av = a[key] ?? a.views ?? 0;
+                const bv = b[key] ?? b.views ?? 0;
+                return bv - av;
+            });
         }
 
         function renderRanking() {
-            const sorted = getSortedArticles();
+            const sorted = getSortedArticles(currentPeriod);
 
             const top3 = sorted.slice(0, 3);
             const rest = sorted.slice(3, 20); // とりあえず 20位まで
@@ -884,13 +818,17 @@
                         <div class="ranking-desc">${a.description || ""}</div>
                         <div class="ranking-meta">
                             <span>${a.category || ""}</span>
-                            <span>閲覧数 ${a.views || 0}</span>
+                            <span>閲覧数 ${a[currentPeriod === "all" ? "views" : (
+                                currentPeriod === "day" ? "viewsDay" :
+                                currentPeriod === "week" ? "viewsWeek" :
+                                "viewsMonth"
+                            )] ?? a.views ?? 0}</span>
                         </div>
                     </div>
                 `;
                 div.addEventListener("click", () => {
                     if (a.id) {
-                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                        window.location.href = \`article.html?id=\${encodeURIComponent(a.id)}\`;
                     }
                 });
                 top3El.appendChild(div);
@@ -900,6 +838,12 @@
             restEl.innerHTML = "";
             rest.forEach((a, index) => {
                 const rank = index + 4;
+                const viewsValue = a[currentPeriod === "all" ? "views" : (
+                    currentPeriod === "day" ? "viewsDay" :
+                    currentPeriod === "week" ? "viewsWeek" :
+                    "viewsMonth"
+                )] ?? a.views ?? 0;
+
                 const row = document.createElement("div");
                 row.className = "ranking-row";
                 row.innerHTML = `
@@ -910,35 +854,32 @@
                         <div class="ranking-row-meta">
                             <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
                             <span>${a.category || ""}</span>
-                            <span>閲覧数 ${a.views || 0}</span>
+                            <span>閲覧数 ${viewsValue}</span>
                         </div>
                     </div>
                 `;
                 row.addEventListener("click", () => {
                     if (a.id) {
-                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                        window.location.href = \`article.html?id=\${encodeURIComponent(a.id)}\`;
                     }
                 });
                 restEl.appendChild(row);
             });
         }
 
-        // 期間ボタン（今は見た目と active 切り替えだけ）
+        // 期間ボタン切り替え
         periodBtns.forEach(btn => {
             btn.addEventListener("click", () => {
                 periodBtns.forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
-
-                // 将来的には data-period を見てフィルタリングする
-                // 今はとりあえず同じランキングを再描画
+                currentPeriod = btn.dataset.period || "all";
                 renderRanking();
             });
         });
 
-        // 初期描画
+        // 初期描画（ALL）
         renderRanking();
     });
     </script>
 </body>
 </html>
-
