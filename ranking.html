@@ -771,8 +771,11 @@
     <!-- ランキング生成用スクリプト -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // index.js 側で articles が定義されている前提
-        if (!window.articles || !Array.isArray(articles)) return;
+        // index.js 側で articles が定義されている前提（const articles = [...]）
+        if (typeof articles === "undefined" || !Array.isArray(articles)) {
+            console.error("articles が見つからないよ");
+            return;
+        }
 
         const top3El = document.getElementById("ranking-top3");
         const restEl = document.getElementById("ranking-rest");
@@ -782,31 +785,30 @@
 
         let currentPeriod = "all";
 
-        // period に応じて使うキーを切り替え
-        function getSortedArticles(period = "all") {
-            let key;
-            if (period === "day") key = "viewsDay";
-            else if (period === "week") key = "viewsWeek";
-            else if (period === "month") key = "viewsMonth";
-            else key = "views"; // ALL
+        // period に応じて使う閲覧数を返すヘルパー
+        function getViews(article, period) {
+            if (period === "day")  return article.viewsDay  ?? article.views ?? 0;
+            if (period === "week") return article.viewsWeek ?? article.views ?? 0;
+            if (period === "month")return article.viewsMonth?? article.views ?? 0;
+            return article.views ?? 0; // ALL
+        }
 
-            return [...articles].sort((a, b) => {
-                const av = a[key] ?? a.views ?? 0;
-                const bv = b[key] ?? b.views ?? 0;
-                return bv - av;
-            });
+        // period に応じてソート
+        function getSortedArticles(period = "all") {
+            return [...articles].sort((a, b) => getViews(b, period) - getViews(a, period));
         }
 
         function renderRanking() {
             const sorted = getSortedArticles(currentPeriod);
-
             const top3 = sorted.slice(0, 3);
-            const rest = sorted.slice(3, 20); // とりあえず 20位まで
+            const rest = sorted.slice(3, 20); // 20位まで
 
             // Top3
             top3El.innerHTML = "";
             top3.forEach((a, index) => {
-                const rank = index + 1;
+                const rank  = index + 1;
+                const views = getViews(a, currentPeriod);
+
                 const div = document.createElement("div");
                 div.className = "ranking-card";
                 div.innerHTML = `
@@ -818,17 +820,13 @@
                         <div class="ranking-desc">${a.description || ""}</div>
                         <div class="ranking-meta">
                             <span>${a.category || ""}</span>
-                            <span>閲覧数 ${a[currentPeriod === "all" ? "views" : (
-                                currentPeriod === "day" ? "viewsDay" :
-                                currentPeriod === "week" ? "viewsWeek" :
-                                "viewsMonth"
-                            )] ?? a.views ?? 0}</span>
+                            <span>閲覧数 ${views}</span>
                         </div>
                     </div>
                 `;
                 div.addEventListener("click", () => {
                     if (a.id) {
-                        window.location.href = \`article.html?id=\${encodeURIComponent(a.id)}\`;
+                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
                     }
                 });
                 top3El.appendChild(div);
@@ -837,12 +835,8 @@
             // 4位以降
             restEl.innerHTML = "";
             rest.forEach((a, index) => {
-                const rank = index + 4;
-                const viewsValue = a[currentPeriod === "all" ? "views" : (
-                    currentPeriod === "day" ? "viewsDay" :
-                    currentPeriod === "week" ? "viewsWeek" :
-                    "viewsMonth"
-                )] ?? a.views ?? 0;
+                const rank  = index + 4;
+                const views = getViews(a, currentPeriod);
 
                 const row = document.createElement("div");
                 row.className = "ranking-row";
@@ -854,13 +848,13 @@
                         <div class="ranking-row-meta">
                             <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
                             <span>${a.category || ""}</span>
-                            <span>閲覧数 ${viewsValue}</span>
+                            <span>閲覧数 ${views}</span>
                         </div>
                     </div>
                 `;
                 row.addEventListener("click", () => {
                     if (a.id) {
-                        window.location.href = \`article.html?id=\${encodeURIComponent(a.id)}\`;
+                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
                     }
                 });
                 restEl.appendChild(row);
