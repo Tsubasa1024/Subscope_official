@@ -379,7 +379,7 @@
         .ranking-top3 {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
             margin-bottom: 32px;
         }
 
@@ -401,6 +401,26 @@
             background: #F9F9FB;
         }
 
+        /* 1位だけ少し大きく */
+        .ranking-top3 .ranking-card:first-child {
+            padding: 22px 22px;
+        }
+
+        .ranking-top3 .ranking-card:first-child .ranking-thumb {
+            width: 150px;
+            height: 96px;
+        }
+
+        .ranking-top3 .ranking-card:first-child .ranking-title-text {
+            font-size: 1.25rem;
+        }
+
+        /* 2位・3位もほんの少しだけボリュームアップ */
+        .ranking-top3 .ranking-card:nth-child(2),
+        .ranking-top3 .ranking-card:nth-child(3) {
+            padding: 18px 20px;
+        }
+
         .rank-badge {
             width: 40px;
             height: 40px;
@@ -415,14 +435,18 @@
             flex-shrink: 0;
         }
 
+        /* 🥇 金・銀・銅バッジ */
         .rank-badge.rank-1 {
-            background: #000;
+            background: linear-gradient(135deg, #ffd700, #ffb700);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
         }
         .rank-badge.rank-2 {
-            background: #333;
+            background: linear-gradient(135deg, #d9d9d9, #b3b3b3);
+            box-shadow: 0 0 0 2px rgba(200, 200, 200, 0.4);
         }
         .rank-badge.rank-3 {
-            background: #555;
+            background: linear-gradient(135deg, #cd7f32, #b26724);
+            box-shadow: 0 0 0 2px rgba(205, 127, 50, 0.4);
         }
 
         .ranking-thumb {
@@ -480,7 +504,17 @@
             align-items: center;
         }
 
-        /* 4位以降のリスト */
+        /* 4位・5位用：カード風（2位・3位っぽい） */
+        .ranking-rest .ranking-card-sub {
+            margin-bottom: 18px;
+        }
+
+        .ranking-rest .ranking-card-sub .ranking-thumb {
+            width: 120px;
+            height: 80px;
+        }
+
+        /* 6位以降のリスト */
         .ranking-rest {
             border-top: 1px solid #E5E5EA;
             padding-top: 16px;
@@ -641,6 +675,11 @@
                 font-size: 2rem;
             }
 
+            .ranking-top3 .ranking-card:first-child .ranking-thumb {
+                width: 130px;
+                height: 84px;
+            }
+
             .footer-links {
                 gap: 24px;
                 flex-wrap: wrap;
@@ -665,7 +704,7 @@
                 </div>
             </div>
 
-            <!-- 中央：SUBSCOPE ロゴ -->
+            <!-- 中央：SUBSCOPE -->
             <div class="nav-center">
                 <a href="index.html" class="header-logo-link">
                     <h1 class="header-logo">SUBSCOPE</h1>
@@ -689,19 +728,13 @@
     <div class="nav-overlay" id="nav-overlay">
         <ul class="nav-list">
             <li>
-                <a href="index.html" class="nav-link" onclick="toggleMenu();">
-                    トップ
-                </a>
+                <a href="index.html" class="nav-link" onclick="toggleMenu();">トップ</a>
             </li>
             <li>
-                <a href="all.html" class="nav-link" onclick="toggleMenu();">
-                    記事一覧
-                </a>
+                <a href="all.html" class="nav-link" onclick="toggleMenu();">記事一覧</a>
             </li>
             <li>
-                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
-                    ランキング
-                </a>
+                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">ランキング</a>
             </li>
         </ul>
     </div>
@@ -735,17 +768,13 @@
     <section class="ranking-section">
         <div class="container">
 
-            <!-- Top3（JSで差し替え） -->
-            <div class="ranking-top3 reveal" id="ranking-top3">
-                <!-- JS で上書きされる -->
-            </div>
+            <!-- Top3（JS で差し替え） -->
+            <div class="ranking-top3 reveal" id="ranking-top3"></div>
 
             <!-- 4位以降 -->
-            <div class="ranking-rest reveal" id="ranking-rest">
-                <!-- JS で上書きされる -->
-            </div>
+            <div class="ranking-rest reveal" id="ranking-rest"></div>
 
-            <!-- CTA：すべての記事だけ -->
+            <!-- CTA -->
             <div class="ranking-cta-wrapper reveal">
                 <a href="all.html" class="ranking-cta-btn">すべての記事を見る</a>
             </div>
@@ -771,37 +800,36 @@
     <!-- ランキング生成用スクリプト -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // index.js 側で articles が定義されている前提（const articles = [...]）
+        // index.js 側で articles が定義されている前提
         if (typeof articles === "undefined" || !Array.isArray(articles)) {
             console.error("articles が見つからないよ");
             return;
         }
 
-        const top3El = document.getElementById("ranking-top3");
-        const restEl = document.getElementById("ranking-rest");
+        const top3El   = document.getElementById("ranking-top3");
+        const restEl   = document.getElementById("ranking-rest");
         const periodBtns = document.querySelectorAll(".period-btn");
 
         if (!top3El || !restEl) return;
 
         let currentPeriod = "all";
 
-        // period に応じて使う閲覧数を返すヘルパー
+        // period ごとの閲覧数を取得
         function getViews(article, period) {
-            if (period === "day")  return article.viewsDay  ?? article.views ?? 0;
-            if (period === "week") return article.viewsWeek ?? article.views ?? 0;
-            if (period === "month")return article.viewsMonth?? article.views ?? 0;
-            return article.views ?? 0; // ALL
+            if (period === "day")   return article.viewsDay   ?? article.views ?? 0;
+            if (period === "week")  return article.viewsWeek  ?? article.views ?? 0;
+            if (period === "month") return article.viewsMonth ?? article.views ?? 0;
+            return article.views ?? 0; // all
         }
 
-        // period に応じてソート
         function getSortedArticles(period = "all") {
             return [...articles].sort((a, b) => getViews(b, period) - getViews(a, period));
         }
 
         function renderRanking() {
             const sorted = getSortedArticles(currentPeriod);
-            const top3 = sorted.slice(0, 3);
-            const rest = sorted.slice(3, 20); // 20位まで
+            const top3   = sorted.slice(0, 3);
+            const rest   = sorted.slice(3, 20); // 20位まで
 
             // Top3
             top3El.innerHTML = "";
@@ -838,6 +866,33 @@
                 const rank  = index + 4;
                 const views = getViews(a, currentPeriod);
 
+                // 4位・5位だけカードっぽく（今の2位・3位イメージ）
+                if (rank <= 5) {
+                    const card = document.createElement("div");
+                    card.className = "ranking-card ranking-card-sub";
+                    card.innerHTML = `
+                        <div class="rank-badge">${rank}</div>
+                        <div class="ranking-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                        <div class="ranking-content">
+                            <div class="ranking-service">${(a.service || "").toUpperCase()}</div>
+                            <div class="ranking-title-text">${a.title || ""}</div>
+                            <div class="ranking-desc">${a.description || ""}</div>
+                            <div class="ranking-meta">
+                                <span>${a.category || ""}</span>
+                                <span>閲覧数 ${views}</span>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener("click", () => {
+                        if (a.id) {
+                            window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                        }
+                    });
+                    restEl.appendChild(card);
+                    return;
+                }
+
+                // 6位以降はリスト形式
                 const row = document.createElement("div");
                 row.className = "ranking-row";
                 row.innerHTML = `
