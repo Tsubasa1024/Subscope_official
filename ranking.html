@@ -845,5 +845,100 @@
 
     <!-- 検索・Menu・スクロールリビール用（index.js 共通） -->
     <script src="index.js"></script>
+
+    <!-- ランキング生成用スクリプト -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // index.js 側で articles が定義されている前提
+        if (!window.articles || !Array.isArray(articles)) return;
+
+        const top3El = document.getElementById("ranking-top3");
+        const restEl = document.getElementById("ranking-rest");
+        const periodBtns = document.querySelectorAll(".period-btn");
+
+        if (!top3El || !restEl) return;
+
+        // views 降順でソート（とりあえず period は無視して累計ランキング）
+        function getSortedArticles() {
+            return [...articles].sort((a, b) => (b.views || 0) - (a.views || 0));
+        }
+
+        function renderRanking() {
+            const sorted = getSortedArticles();
+
+            const top3 = sorted.slice(0, 3);
+            const rest = sorted.slice(3, 20); // とりあえず 20位まで
+
+            // Top3
+            top3El.innerHTML = "";
+            top3.forEach((a, index) => {
+                const rank = index + 1;
+                const div = document.createElement("div");
+                div.className = "ranking-card";
+                div.innerHTML = `
+                    <div class="rank-badge rank-${rank}">${rank}</div>
+                    <div class="ranking-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                    <div class="ranking-content">
+                        <div class="ranking-service">${(a.service || "").toUpperCase()}</div>
+                        <div class="ranking-title-text">${a.title || ""}</div>
+                        <div class="ranking-desc">${a.description || ""}</div>
+                        <div class="ranking-meta">
+                            <span>${a.category || ""}</span>
+                            <span>閲覧数 ${a.views || 0}</span>
+                        </div>
+                    </div>
+                `;
+                div.addEventListener("click", () => {
+                    if (a.id) {
+                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                    }
+                });
+                top3El.appendChild(div);
+            });
+
+            // 4位以降
+            restEl.innerHTML = "";
+            rest.forEach((a, index) => {
+                const rank = index + 4;
+                const row = document.createElement("div");
+                row.className = "ranking-row";
+                row.innerHTML = `
+                    <div class="ranking-row-rank">${rank}</div>
+                    <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                    <div class="ranking-row-main">
+                        <div class="ranking-row-title">${a.title || ""}</div>
+                        <div class="ranking-row-meta">
+                            <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
+                            <span>${a.category || ""}</span>
+                            <span>閲覧数 ${a.views || 0}</span>
+                        </div>
+                    </div>
+                `;
+                row.addEventListener("click", () => {
+                    if (a.id) {
+                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                    }
+                });
+                restEl.appendChild(row);
+            });
+        }
+
+        // 期間ボタン（今は見た目と active 切り替えだけ）
+        periodBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                periodBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                // 将来的には data-period を見てフィルタリングする
+                // 今はとりあえず同じランキングを再描画
+                renderRanking();
+            });
+        });
+
+        // 初期描画
+        renderRanking();
+    });
+    </script>
 </body>
 </html>
+
