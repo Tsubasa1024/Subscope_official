@@ -8,7 +8,7 @@ window.articles = [
         description: "空間オーディオ、ロスレス、オートミックスなど Apple Music の最新機能を徹底解説。",
         service: "Apple Music",
         tags: ["音楽", "ストリーミング", "ハイレゾ"],
-        category: "音楽",
+        category: "音楽",                 // ← そのまま「音楽」
         date: "2025-12-01",
         image: "images/sample1.jpg",
         views: 320
@@ -19,7 +19,7 @@ window.articles = [
         description: "2025年に絶対観ておきたい Netflix オリジナル作品を厳選紹介。",
         service: "Netflix",
         tags: ["映画", "ドラマ", "VOD"],
-        category: "映像",
+        category: "映画・ドラマ",         // ← 「映像」→「映画・ドラマ」
         date: "2025-11-28",
         image: "images/sample2.jpg",
         views: 280
@@ -30,7 +30,7 @@ window.articles = [
         description: "音楽・映像・学習系など主要サブスクサービスを横断比較。あなたに合う1本を見つけよう。",
         service: "All",
         tags: ["比較", "ガイド"],
-        category: "比較",
+        category: "生活・ライフスタイル", // ← 横断比較なのでここを採用
         date: "2025-11-20",
         image: "images/sample3.jpg",
         views: 400
@@ -41,7 +41,7 @@ window.articles = [
         description: "音質、料金、レコメンド精度まで。2大音楽サブスクを本音レビュー。",
         service: "Spotify",
         tags: ["音楽", "比較"],
-        category: "音楽",
+        category: "音楽",                 // ← 音楽ジャンルでOK
         date: "2025-11-10",
         image: "images/sample4.jpg",
         views: 250
@@ -52,12 +52,13 @@ window.articles = [
         description: "TOEIC 対策から資格勉強まで。学生にも社会人にも刺さる学習系サブスクをピックアップ。",
         service: "Study",
         tags: ["学習", "教育", "TOEIC"],
-        category: "学習",
+        category: "学習・資格",           // ← 「学習」→「学習・資格」
         date: "2025-11-05",
         image: "images/sample5.jpg",
         views: 150
     }
 ];
+
 
 // =====================================
 // DOM 用の変数
@@ -465,6 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
