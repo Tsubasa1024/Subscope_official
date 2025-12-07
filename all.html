@@ -646,97 +646,66 @@
     <script src="index.js"></script>
 
     <!-- 記事一覧生成用スクリプト -->
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const articles = window.articles || [];
-        if (!articles.length) {
-            const grid = document.getElementById("article-grid");
-            if (grid) grid.textContent = "記事がまだ登録されていません。";
-            return;
-        }
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // index.js で定義した記事データを使う
+  const all = window.articles || [];
 
-        const tabsEl  = document.getElementById("tabs");
-        const gridEl  = document.getElementById("article-grid");
+  const url = new URLSearchParams(window.location.search);
+  const tabParam = url.get("tab") || "すべて";
 
-        // URLパラメータ（?tab=XXX）から初期タブを決定
-        const params = new URLSearchParams(window.location.search);
-        const urlTag = params.get("tab");
-        let currentTag = urlTag ? decodeURIComponent(urlTag) : "すべて";
+  const tabsEl = document.getElementById("tabs");
+  const gridEl = document.getElementById("grid");
 
-        // タグ一覧を抽出
-        const tagSet = new Set(["すべて"]);
-        articles.forEach(a => {
-            (a.tags || []).forEach(t => tagSet.add(t));
-        });
-        const tags = Array.from(tagSet);
+  if (!tabsEl || !gridEl) return;
 
-        function renderTabs() {
-            tabsEl.innerHTML = tags.map(t => `
-                <button class="tab ${t === currentTag ? "active" : ""}" data-tag="${t}">
-                    ${t}
-                </button>
-            `).join("");
-        }
+  // ===== カテゴリ一覧（用途・ニーズ別） =====
+  const categorySet = new Set(["すべて"]);
+  all.forEach(a => {
+    if (a.category) categorySet.add(a.category);
+  });
+  const categories = Array.from(categorySet);
 
-        function renderGrid() {
-            let filtered = articles;
-            if (currentTag !== "すべて") {
-                filtered = articles.filter(a => (a.tags || []).includes(currentTag));
-            }
+  // ===== タブ生成（category ベース） =====
+  tabsEl.innerHTML = categories
+    .map(c => `
+      <div class="tab ${c === tabParam ? "active" : ""}"
+           onclick="changeTab('${c}')">${c}</div>
+    `)
+    .join("");
 
-            if (!filtered.length) {
-                gridEl.innerHTML = `<p class="empty-message">このカテゴリの記事はまだありません。</p>`;
-                return;
-            }
+  // ===== フィルタ（「すべて」なら全件） =====
+  const filtered = tabParam === "すべて"
+    ? all
+    : all.filter(a => a.category === tabParam);
 
-            gridEl.innerHTML = filtered.map(a => `
-                <article class="article-card" data-id="${a.id || ""}">
-                    <div class="article-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-                    <div class="article-body">
-                        <div class="article-service">${(a.service || "").toUpperCase()}</div>
-                        <h2 class="article-title">${a.title || ""}</h2>
-                        <p class="article-desc">${a.description || ""}</p>
-                        <div class="article-meta">
-                            <span>${a.category || ""}</span>
-                            <span>${(a.date || "").replace(/-/g, ".")}</span>
-                        </div>
-                    </div>
-                </article>
-            `).join("");
+  // ===== カード描画 =====
+  gridEl.innerHTML = filtered
+    .map(a => `
+      <div class="card" onclick="openArticle('${a.id}')">
+        <img class="thumb" src="${a.image || "images/sample1.jpg"}" alt="">
+        <div class="card-body">
+          <div class="service">${a.service || ""}</div>
+          <div class="title">${a.title || ""}</div>
+          <div class="desc">${a.description || ""}</div>
+          <div class="date">${(a.date || "").replace(/-/g, ".")}</div>
+        </div>
+      </div>
+    `)
+    .join("");
+});
 
-            // カードクリック → 記事ページへ
-            gridEl.querySelectorAll(".article-card").forEach(card => {
-                card.addEventListener("click", () => {
-                    const id = card.getAttribute("data-id");
-                    if (!id) return;
-                    window.location.href = `article.html?id=${encodeURIComponent(id)}`;
-                });
-            });
-        }
+// タブを押したとき：クエリだけ変える
+function changeTab(cat) {
+  const encoded = encodeURIComponent(cat);
+  window.location.href = "all.html?tab=" + encoded;
+}
 
-        // タブクリック
-        tabsEl.addEventListener("click", (e) => {
-            const btn = e.target.closest(".tab");
-            if (!btn) return;
-
-            const tag = btn.dataset.tag;
-            if (!tag || tag === currentTag) return;
-
-            currentTag = tag;
-            renderTabs();
-            renderGrid();
-
-            // URLも更新（リロードなし）
-            const p = new URLSearchParams(window.location.search);
-            p.set("tab", currentTag);
-            const newUrl = window.location.pathname + "?" + p.toString();
-            window.history.replaceState(null, "", newUrl);
-        });
-
-        // 初期描画
-        renderTabs();
-        renderGrid();
-    });
-    </script>
+// 記事カードを押したとき
+function openArticle(id) {
+  window.location.href = "article.html?id=" + encodeURIComponent(id);
+}
+</script>
+    <script src="index.js"></script>
 </body>
 </html>
