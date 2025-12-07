@@ -1,7 +1,7 @@
 // =====================================
 // 記事データ
 // =====================================
-const articles = [
+window.articles = [
     {
         id: "apple-music-latest",
         title: "Apple Music の最新機能まとめ",
@@ -465,5 +465,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
