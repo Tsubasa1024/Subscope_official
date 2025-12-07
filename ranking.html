@@ -780,41 +780,56 @@
            ========================================= */
         @media (max-width: 768px) {
             /* ===== スマホ版：1位のヒーローカードを中カードサイズに変更 ===== */
-.rank-hero {
-    flex-direction: row !important;
-    padding: 18px !important;
-    gap: 14px !important;
-    border-radius: 20px !important;
-    box-shadow: 0 8px 22px rgba(0,0,0,0.05) !important;
-    height: auto !important;
-}
+    /* ===== スマホ版：1～3位を同じサイズ・縦レイアウト ===== */
+    .rank-hero,
+    .rank-mid {
+        flex-direction: column !important;   /* 上：画像 → 下：文字 */
+        align-items: flex-start !important;
+        padding: 16px !important;
+        gap: 10px !important;
+        border-radius: 20px !important;
+        position: relative !important;
+    }
 
-/* サムネを中カードと同じ大きさに */
-.rank-hero-thumb {
-    width: 150px !important;
-    height: 90px !important;
-    border-radius: 16px !important;
-}
+    /* 画像を全幅にする */
+    .rank-hero-thumb,
+    .rank-mid-thumb {
+        width: 100% !important;
+        height: 180px !important;
+        border-radius: 16px !important;
+        background-size: cover;
+        background-position: center;
+    }
 
-/* テキストのサイズ調整 */
-.rank-hero-title {
-    font-size: 1.15rem !important;
-}
+    /* テキストを下にまとめる */
+    .rank-hero-content,
+    .ranking-content {
+        width: 100% !important;
+        margin-top: 8px !important;
+    }
 
-.rank-hero-desc {
-    font-size: 0.9rem !important;
-}
+    .rank-hero-title,
+    .rank-mid-title {
+        font-size: 1.2rem !important;
+        line-height: 1.4 !important;
+    }
 
-.rank-hero-meta {
-    font-size: 0.8rem !important;
-}
+    .rank-hero-desc,
+    .rank-mid-desc {
+        font-size: 0.92rem !important;
+        line-height: 1.45 !important;
+        color: #444 !important;
+    }
 
-/* 1位バッジも中サイズに統一 */
-.rank-badge-large {
-    width: 44px !important;
-    height: 44px !important;
-    font-size: 1rem !important;
-}
+    /* バッジを画像左上に固定 */
+    .rank-badge-large,
+    .rank-badge-medium {
+        position: absolute !important;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+    }
+
 
             :root {
                 --spacing-section: 60px;
