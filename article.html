@@ -39,7 +39,7 @@
             background-color: var(--color-bg);
             color: var(--color-text-main);
             -webkit-font-smoothing: antialiased;
-            line-height: 1.6;
+            line-height: 1.7;
             overflow-x: hidden;
         }
 
@@ -64,7 +64,7 @@
            ========================================= */
         .reveal {
             opacity: 0;
-            transform: translateY(32px);
+            transform: translateY(24px);
             transition: opacity var(--transition-fade), transform var(--transition-fade);
         }
         .reveal.active {
@@ -73,21 +73,7 @@
         }
 
         /* =========================================
-           Reading progress bar
-           ========================================= */
-        .reading-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            width: 0;
-            background: #000;
-            z-index: 200;
-            transform-origin: left;
-        }
-
-        /* =========================================
-           Fixed Header（index / all と同じ構造）
+           Fixed Header（all.html / index.html と同じ）
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -103,7 +89,8 @@
         .top-header {
             max-width: var(--container-width);
             margin: 0 auto;
-            padding: 12px 24px 16px;
+            padding: 12px 24px;
+            padding-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -183,6 +170,7 @@
             pointer-events: none;
             user-select: none;
         }
+
         .search-input:not(:placeholder-shown) ~ .clear-btn {
             opacity: 1;
             pointer-events: auto;
@@ -292,6 +280,7 @@
             z-index: 140;
             min-width: 200px;
         }
+
         .nav-overlay.open {
             transform: translateY(0);
             opacity: 1;
@@ -301,6 +290,7 @@
         .nav-list li {
             margin-bottom: 8px;
         }
+
         .nav-link {
             display: block;
             padding: 10px 16px;
@@ -309,12 +299,13 @@
             font-weight: 500;
             transition: background 0.2s;
         }
+
         .nav-link:hover {
             background: var(--color-bg-secondary);
         }
 
         /* =========================================
-           Article Layout
+           Article Layout（ブログっぽく）
            ========================================= */
         main {
             padding-top: 104px;
@@ -324,111 +315,60 @@
         .breadcrumb {
             font-size: 0.8rem;
             color: var(--color-text-gray);
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .breadcrumb a {
             color: var(--color-text-gray);
         }
 
+        /* ヒーロー：写真のみ */
         .article-hero {
-            display: grid;
-            grid-template-columns: minmax(0, 3fr) minmax(0, 2.2fr);
-            gap: 32px;
-            align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 28px;
         }
 
         .article-kv {
-            position: relative;
+            width: 100%;
             border-radius: 32px;
             overflow: hidden;
-            background: #f0f0f0;
+            background-color: #f0f0f0;
+            background-size: cover;
+            background-position: center;
             min-height: 260px;
             box-shadow: 0 18px 40px rgba(0,0,0,0.12);
         }
 
-        .article-kv::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            filter: saturate(1.05);
-            transition: transform 0.6s ease;
+        /* タイトル＆メタ */
+        .article-header-block {
+            margin-bottom: 32px;
         }
 
-        .article-kv-img-loaded .article-kv::before {
-            transform: scale(1.02);
-        }
-
-        .article-kv-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.05));
-            mix-blend-mode: multiply;
-        }
-
-        .article-meta-top {
-            position: absolute;
-            left: 20px;
-            top: 18px;
+        .article-meta-row {
             display: flex;
-            gap: 8px;
             flex-wrap: wrap;
-            z-index: 2;
+            gap: 10px 16px;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--color-text-gray);
+            margin-bottom: 8px;
         }
 
-        .kv-pill {
-            font-size: 0.75rem;
+        .article-meta-pill {
             padding: 4px 12px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.18);
-            color: #fff;
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.4);
+            background: #F2F2F7;
+            font-size: 0.78rem;
         }
 
-        .article-meta-bottom {
-            position: absolute;
-            left: 24px;
-            bottom: 22px;
-            right: 24px;
-            z-index: 2;
-            color: #fff;
+        .article-date {
+            font-size: 0.85rem;
         }
 
-        .article-meta-bottom h1 {
-            font-size: 2rem;
-            line-height: 1.25;
-            margin-bottom: 8px;
-            letter-spacing: -0.03em;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.35);
-        }
-
-        .article-meta-bottom p {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .article-header-text {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .article-service {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--color-text-gray);
-        }
-
-        .article-title-big {
+        .article-title {
             font-size: 2.4rem;
             font-weight: 700;
             letter-spacing: -0.04em;
+            margin-bottom: 10px;
         }
 
         .article-lead {
@@ -436,88 +376,38 @@
             color: #4b4b4b;
         }
 
-        .article-meta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 18px;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--color-text-gray);
-        }
-
-        .meta-dot::before {
-            content: "• ";
-        }
-
-        .article-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 6px;
-        }
-
-        .article-tag-pill {
-            font-size: 0.78rem;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: #F2F2F7;
-        }
-
-        .article-body {
-            display: grid;
-            grid-template-columns: minmax(0, 3fr) minmax(0, 1.4fr);
-            gap: 40px;
-        }
-
+        /* 本文 */
         .article-content {
             font-size: 0.98rem;
+            color: #1D1D1F;
         }
 
         .article-content h2 {
             font-size: 1.4rem;
             margin: 28px 0 12px;
         }
+
         .article-content h3 {
             font-size: 1.15rem;
             margin: 20px 0 8px;
         }
+
         .article-content p {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
+
         .article-content ul {
             margin: 8px 0 16px 18px;
         }
 
-        .article-sidebar {
-            font-size: 0.85rem;
-            color: var(--color-text-gray);
+        .article-content li {
+            margin-bottom: 6px;
         }
 
-        .sidebar-card {
-            background: #F5F5F7;
-            border-radius: 20px;
-            padding: 16px 18px;
-            margin-bottom: 16px;
-        }
-
-        .sidebar-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #A1A1A6;
-        }
-
-        .sidebar-main {
-            font-size: 0.9rem;
-            color: #1D1D1F;
-        }
-
-        /* Related */
+        /* 関連記事（そのまま残す） */
         .related-section {
-            margin-top: 64px;
-            padding-top: 32px;
+            margin-top: 56px;
+            padding-top: 28px;
             border-top: 1px solid rgba(0,0,0,0.06);
         }
 
@@ -585,21 +475,25 @@
             border-top: 1px solid #D2D2D7;
             margin-top: 40px;
         }
+
         .footer-container {
             max-width: 1080px;
             margin: 0 auto;
             text-align: center;
         }
+
         .footer-links {
             display: flex;
             justify-content: center;
             gap: 40px;
             margin-bottom: 20px;
         }
+
         .footer-links a {
             font-size: 15px;
             color: #1D1D1F;
         }
+
         .footer-copy {
             font-size: 13px;
             color: #86868B;
@@ -608,16 +502,14 @@
         /* =========================================
            Responsive
            ========================================= */
-        @media (min-width: 769px) {
-            .fixed-header.search-open .search-wrapper {
-                width: 280px !important;
-            }
-        }
-
         @media (max-width: 767px) {
 
+            :root {
+                --spacing-section: 60px;
+            }
+
             .top-header {
-                padding: 10px 16px 12px;
+                padding: 10px 16px;
             }
 
             .nav-left {
@@ -726,6 +618,7 @@
             .menu-btn > span {
                 display: none;
             }
+
             .menu-btn {
                 width: 44px;
                 height: 44px;
@@ -733,6 +626,7 @@
                 border-radius: 999px;
                 justify-content: center;
             }
+
             .menu-line {
                 width: 18px;
             }
@@ -741,27 +635,46 @@
                 padding-top: 96px;
             }
 
-            .article-hero {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .article-title-big {
+            .article-title {
                 font-size: 2rem;
             }
-            .article-body {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
+
             .related-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .footer-links {
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .search-wrapper {
+                width: 280px !important;
+                transform: none !important;
+                transition: none !important;
+            }
+
+            .search-input {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
+
+            .search-icon {
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                position: absolute;
+            }
+
+            .fixed-header.search-open .search-wrapper {
+                width: 280px !important;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- 読書進捗バー -->
-    <div class="reading-progress" id="readingProgress"></div>
 
     <!-- 固定ヘッダー -->
     <div class="fixed-header">
@@ -816,68 +729,37 @@
             <!-- パンくず -->
             <div class="breadcrumb" id="breadcrumb"></div>
 
-            <!-- ヒーロー -->
+            <!-- ヒーロー：写真のみ -->
             <section class="article-hero">
-                <div class="article-kv" id="article-kv">
-                    <div class="article-kv-overlay"></div>
-
-                    <div class="article-meta-top" id="article-meta-top">
-                        <!-- サービス名/tagなど -->
-                    </div>
-
-                    <div class="article-meta-bottom">
-                        <h1 id="article-kv-title">タイトル</h1>
-                        <p id="article-kv-sub">サマリー</p>
-                    </div>
-                </div>
-
-                <div class="article-header-text">
-                    <div class="article-service" id="article-service">SERVICE</div>
-                    <h1 class="article-title-big" id="article-title">記事タイトル</h1>
-                    <p class="article-lead" id="article-lead">
-                        記事のリード文が入ります。
-                    </p>
-
-                    <div class="article-meta-row">
-                        <span id="article-date"></span>
-                        <span class="meta-dot" id="article-reading-time"></span>
-                        <span class="meta-dot" id="article-views"></span>
-                    </div>
-
-                    <div class="article-tags" id="article-tags"></div>
-                </div>
+                <div class="article-kv" id="article-kv"></div>
             </section>
 
-            <!-- 本文＋サイドバー -->
-            <section class="article-body">
-                <article class="article-content" id="article-content">
-                    <!-- JS で本文を注入 / なければプレースホルダー -->
-                </article>
-
-                <aside class="article-sidebar">
-                    <div class="sidebar-card">
-                        <div class="sidebar-label">この記事について</div>
-                        <div class="sidebar-main" id="sidebar-about">
-                            SUBSCOPE 編集部が、サブスクの「いま」をわかりやすく解説します。
-                        </div>
-                    </div>
-                    <div class="sidebar-card">
-                        <div class="sidebar-label">シェア</div>
-                        <div class="sidebar-main">
-                            気に入ったら、友達やSNSでシェアしてみてください。
-                        </div>
-                    </div>
-                </aside>
+            <!-- タイトル＋メタ＋リード -->
+            <section class="article-header-block">
+                <div class="article-meta-row">
+                    <span class="article-meta-pill" id="meta-service"></span>
+                    <span class="article-meta-pill" id="meta-category"></span>
+                    <span class="article-date" id="meta-date"></span>
+                </div>
+                <h1 class="article-title" id="article-title"></h1>
+                <p class="article-lead" id="article-lead"></p>
             </section>
+
+            <!-- 本文 -->
+            <article class="article-content" id="article-content">
+                <!-- JS で注入 -->
+            </article>
 
             <!-- 関連記事 -->
             <section class="related-section reveal" id="related-section">
                 <h2 class="related-title">関連する記事</h2>
                 <div class="related-grid" id="related-grid"></div>
             </section>
+
         </div>
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-links">
@@ -889,7 +771,7 @@
         </div>
     </footer>
 
-    <!-- 共通スクリプト（articles / 検索ロジック） -->
+    <!-- 共通スクリプト（articles / 検索 etc.） -->
     <script src="index.js"></script>
 
     <!-- 検索 UI（スマホの開閉など） -->
@@ -905,7 +787,7 @@
         let isOpen = false;
         const isMobile = () => window.innerWidth <= 767;
 
-        // スマホ：検索バーアニメーション
+        // スマホの検索アニメーション
         searchWrapper.addEventListener("click", function (e) {
             if (!isMobile()) {
                 if (e.target !== searchInput) searchInput.focus();
@@ -924,7 +806,6 @@
             }
         });
 
-        // 画面サイズ変更時リセット
         window.addEventListener("resize", () => {
             if (!isMobile() && isOpen) {
                 fixedHeader.classList.remove("search-open");
@@ -933,7 +814,7 @@
             }
         });
 
-        // ×ボタンの表示切り替え
+        // × ボタン表示切り替え
         if (clearBtn) {
             function updateClearBtn() {
                 if (searchInput.value.trim() === "") {
@@ -959,7 +840,7 @@
     }
     </script>
 
-    <!-- 記事データ読み込み＋演出 -->
+    <!-- 記事データ読み込み -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams(location.search);
@@ -968,78 +849,44 @@
         const list = window.articles || [];
         const article = list.find(a => a.id === id) || list[0];
 
-        const kv = document.getElementById("article-kv");
-        const metaTop = document.getElementById("article-meta-top");
-        const kvTitle = document.getElementById("article-kv-title");
-        const kvSub   = document.getElementById("article-kv-sub");
-
-        const serviceEl = document.getElementById("article-service");
-        const titleEl   = document.getElementById("article-title");
-        const leadEl    = document.getElementById("article-lead");
-        const dateEl    = document.getElementById("article-date");
-        const timeEl    = document.getElementById("article-reading-time");
-        const viewsEl   = document.getElementById("article-views");
-        const tagsWrap  = document.getElementById("article-tags");
-        const contentEl = document.getElementById("article-content");
+        const kv         = document.getElementById("article-kv");
+        const titleEl    = document.getElementById("article-title");
+        const leadEl     = document.getElementById("article-lead");
+        const serviceEl  = document.getElementById("meta-service");
+        const categoryEl = document.getElementById("meta-category");
+        const dateEl     = document.getElementById("meta-date");
+        const contentEl  = document.getElementById("article-content");
         const breadcrumbEl = document.getElementById("breadcrumb");
-        const relatedGrid = document.getElementById("related-grid");
+        const relatedGrid  = document.getElementById("related-grid");
+        const relatedSection = document.getElementById("related-section");
 
         if (!article) {
             contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+            relatedSection.style.display = "none";
             return;
         }
 
         // パンくず
         breadcrumbEl.innerHTML = `
-            <a href="index.html">トップ</a> / 
+            <a href="index.html">トップ</a> /
             <a href="all.html?tab=${encodeURIComponent(article.category || "すべて")}">
                 ${article.category || "その他"}
-            </a> / 
+            </a> /
             <span>${article.title}</span>
         `;
 
-        // KV 背景画像
+        // ヒーロー画像（写真だけ）
         const img = article.image || "images/sample1.jpg";
-        kv.style.setProperty("--kv-image-url", `url('${img}')`);
-        // CSS の ::before に使うため
-        kv.querySelector(".article-kv-overlay").insertAdjacentHTML("afterend", `
-            <style>
-            #article-kv::before { background-image:url('${img}'); }
-            </style>
-        `);
+        kv.style.backgroundImage = `url('${img}')`;
 
         // メタ
-        kvTitle.textContent = article.title || "";
-        kvSub.textContent   = article.description || "";
+        serviceEl.textContent  = article.service  || "SUBSCOPE";
+        categoryEl.textContent = article.category || "その他";
+        dateEl.textContent     = (article.date || "").replace(/-/g, ".");
 
-        metaTop.innerHTML = `
-            <span class="kv-pill">${article.service || "SUBSCOPE"}</span>
-            <span class="kv-pill">${article.category || "その他"}</span>
-        `;
-
-        serviceEl.textContent = article.service || "";
-        titleEl.textContent   = article.title || "";
-        leadEl.textContent    = article.description || "";
-
-        const dateStr = (article.date || "").replace(/-/g, ".");
-        dateEl.textContent = dateStr;
-
-        // 読了時間（ざっくり：本文 or desc の文字数から計算）
-        const textBase = (article.content || article.contentHtml || article.description || "").replace(/<[^>]*>/g, "");
-        const minutes = Math.max(1, Math.round(textBase.length / 500)); // 1分/500文字ぐらい
-        timeEl.textContent = `${minutes}分で読めます`;
-
-        if (article.views != null) {
-            viewsEl.textContent = `閲覧数 ${article.views.toLocaleString()} 回`;
-        } else {
-            viewsEl.textContent = "";
-        }
-
-        // タグ
-        const tags = article.tags || [];
-        if (tags.length) {
-            tagsWrap.innerHTML = tags.map(t => `<span class="article-tag-pill">${t}</span>`).join("");
-        }
+        // タイトル & リード（説明）
+        titleEl.textContent = article.title || "";
+        leadEl.textContent  = article.description || "";
 
         // 本文
         const bodyHtml = article.contentHtml || article.content || "";
@@ -1047,19 +894,19 @@
             contentEl.innerHTML = bodyHtml;
         } else {
             contentEl.innerHTML = `
-                <p>この記事の詳細なコンテンツは現在準備中です。</p>
-                <p>今後、${article.service || "このサービス"} の体験・機能をもっと深く掘り下げた内容を公開予定です。</p>
+                <p>この記事の詳細コンテンツは現在準備中です。</p>
+                <p>今後、${article.service || "このサービス"} の使い方や魅力をより深く解説していきます。</p>
             `;
         }
 
-        // 関連記事
+        // 関連記事（同カテゴリ or 同サービス）
         const related = list
             .filter(a => a.id !== article.id &&
-                         (a.category === article.category || a.service === article.service))
+                (a.category === article.category || a.service === article.service))
             .slice(0, 3);
 
         if (!related.length) {
-            document.getElementById("related-section").style.display = "none";
+            relatedSection.style.display = "none";
         } else {
             relatedGrid.innerHTML = related.map(a => `
                 <div class="related-card" onclick="openArticle('${a.id}')">
@@ -1073,7 +920,7 @@
             `).join("");
         }
 
-        // Reveal animation
+        // スクロールでふわっと出す
         const reveals = document.querySelectorAll(".reveal");
         const io = new IntersectionObserver((entries) => {
             entries.forEach(e => {
@@ -1090,19 +937,5 @@
         window.location.href = "article.html?id=" + encodeURIComponent(id);
     }
     </script>
-
-    <!-- 読書進捗バー制御 -->
-    <script>
-    document.addEventListener("scroll", () => {
-        const progress = document.getElementById("readingProgress");
-        if (!progress) return;
-
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const ratio = docHeight > 0 ? scrollTop / docHeight : 0;
-        progress.style.width = (ratio * 100) + "%";
-    });
-    </script>
-
 </body>
 </html>
