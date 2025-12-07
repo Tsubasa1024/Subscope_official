@@ -76,6 +76,7 @@
 
         /* =========================================
            Fixed Header（検索バー＋SUBSCOPE＋Menu）
+           index.html と同じ仕様
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -91,11 +92,16 @@
         .top-header {
             max-width: var(--container-width);
             margin: 0 auto;
-            padding: 12px 24px;
+            padding: 12px 24px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: relative;
+        }
+
+        .nav-left,
+        .nav-right {
+            pointer-events: auto;
         }
 
         /* 中央 SUBSCOPE ロゴ */
@@ -120,11 +126,7 @@
             cursor: pointer;
         }
 
-        .nav-left,
-        .nav-right {
-            pointer-events: auto;
-        }
-
+        /* Search（PC デフォルト） */
         .search-wrapper {
             width: 280px;
             position: relative;
@@ -140,12 +142,11 @@
             font-size: 0.9rem;
             color: var(--color-text-main);
             outline: none;
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
 
         .search-input:focus {
-            width: 320px;
             background: #fff;
             box-shadow: 0 8px 30px rgba(0,0,0,0.12);
             border-color: rgba(0,0,0,0.1);
@@ -236,43 +237,48 @@
             color: #555;
         }
 
-        /* Menu Button */
+        /* Menu Button（PC・タブレット共通） */
         .menu-btn {
-            background: rgba(255,255,255,0.8);
+            position: relative;
+            background: rgba(255,255,255,0.9);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(0,0,0,0.1);
-            padding: 10px 20px;
-            border-radius: 50px;
+            padding: 12px 24px;
+            border-radius: 999px;
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--color-text-main);
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow: visible;
         }
 
         .menu-btn:hover {
             background: #fff;
-            transform: scale(1.02);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
         .menu-icon-lines {
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
             gap: 4px;
+            transform: translateY(0.5px);
         }
 
         .menu-line {
             width: 16px;
             height: 2px;
+            border-radius: 999px;
             background-color: var(--color-text-main);
-            border-radius: 2px;
         }
 
+        /* Menu オーバーレイ */
         .nav-overlay {
             position: fixed;
             top: 72px;
@@ -339,12 +345,6 @@
             letter-spacing: -0.03em;
         }
 
-        .ranking-sub {
-            font-size: 0.98rem;
-            color: var(--color-text-gray);
-            max-width: 520px;
-        }
-
         .period-toggle {
             margin-top: 12px;
             display: flex;
@@ -372,185 +372,126 @@
         /* =========================================
            ランキング本体
            ========================================= */
-        /* ランキング切り替え時のアニメーション用 */
-.ranking-animate > * {
-    opacity: 0;
-    animation: fadeUp 0.45s ease forwards;
-}
 
-/* 下からフワッと出てくる */
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(18px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-        /* 1位：ヒーロー大カード */
-.rank-hero {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    gap: 20px;
-    padding: 24px;
-    border-radius: 28px;
-    background: #fff;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-    cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-    margin-bottom: 20px;
-}
-
-.rank-hero:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.12);
-}
-
-.rank-hero-thumb {
-    width: 260px;
-    height: 160px;
-    border-radius: 20px;
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-}
-
-.rank-hero-content {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.rank-hero-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    line-height: 1.35;
-}
-
-.rank-hero-desc {
-    font-size: 1rem;
-    color: #555;
-}
-
-.rank-hero-meta {
-    margin-top: 8px;
-    font-size: 0.9rem;
-    color: #86868B;
-    display: flex;
-    gap: 16px;
-}
-
-/* 2・3位：中カード */
-.rank-mid {
-    display: flex;
-    gap: 16px;
-    padding: 18px;
-    border-radius: 24px;
-    background: #fff;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.05);
-    cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-    margin-bottom: 14px;
-}
-
-.rank-mid:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
-}
-
-.rank-mid-thumb {
-    width: 150px;
-    height: 90px;
-    border-radius: 16px;
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-}
-
-.rank-mid-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-.rank-mid-desc {
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.rank-mid-meta {
-    margin-top: 6px;
-    font-size: 0.8rem;
-    color: #86868B;
-    display: flex;
-    gap: 12px;
-}
-
-/* バッジを大きくする用 */
-.rank-badge-large {
-    width: 54px;
-    height: 54px;
-    font-size: 1.2rem;
-}
-
-.rank-badge-medium {
-    width: 44px;
-    height: 44px;
-    font-size: 1rem;
-}
-
-        .ranking-section {
-            padding: 16px 0 80px;
+        /* 期間切り替え時のふわっとアニメーション */
+        .ranking-animate > * {
+            opacity: 0;
+            animation: fadeUp 0.45s ease forwards;
         }
 
-        .ranking-top3 {
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 1位：ヒーロー大カード（PC 基準） */
+        .rank-hero {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            gap: 20px;
+            padding: 24px;
+            border-radius: 28px;
+            background: #fff;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .rank-hero:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+        }
+
+        .rank-hero-thumb {
+            width: 260px;
+            height: 160px;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .rank-hero-content {
             display: flex;
             flex-direction: column;
-            gap: 18px;
-            margin-bottom: 32px;
+            gap: 6px;
         }
 
-        .ranking-card {
+        .rank-hero-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .rank-hero-desc {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .rank-hero-meta {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #86868B;
             display: flex;
-            align-items: stretch;
             gap: 16px;
-            padding: 16px 18px;
+        }
+
+        /* 2・3位：中カード（PC 基準） */
+        .rank-mid {
+            display: flex;
+            gap: 16px;
+            padding: 18px;
             border-radius: 24px;
             background: #fff;
             box-shadow: 0 10px 26px rgba(0,0,0,0.05);
             cursor: pointer;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            margin-bottom: 14px;
+            position: relative;
         }
 
-        .ranking-card:hover {
+        .rank-mid:hover {
             transform: translateY(-3px);
-            box-shadow: 0 16px 36px rgba(0,0,0,0.08);
-            background: #F9F9FB;
+            box-shadow: 0 14px 32px rgba(0,0,0,0.08);
         }
 
-        /* 1位だけ少し大きく */
-        .ranking-top3 .ranking-card:first-child {
-            padding: 22px 22px;
-        }
-
-        .ranking-top3 .ranking-card:first-child .ranking-thumb {
+        .rank-mid-thumb {
             width: 150px;
-            height: 96px;
+            height: 90px;
+            border-radius: 16px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
         }
 
-        .ranking-top3 .ranking-card:first-child .ranking-title-text {
-            font-size: 1.25rem;
+        .rank-mid-title {
+            font-size: 1.2rem;
+            font-weight: 700;
         }
 
-        /* 2位・3位もほんの少しだけボリュームアップ */
-        .ranking-top3 .ranking-card:nth-child(2),
-        .ranking-top3 .ranking-card:nth-child(3) {
-            padding: 18px 20px;
+        .rank-mid-desc {
+            font-size: 0.9rem;
+            color: #555;
         }
 
+        .rank-mid-meta {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #86868B;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ランクバッジ */
         .rank-badge {
             width: 40px;
             height: 40px;
@@ -563,6 +504,18 @@
             justify-content: center;
             font-size: 1.1rem;
             flex-shrink: 0;
+        }
+
+        .rank-badge-large {
+            width: 54px;
+            height: 54px;
+            font-size: 1.2rem;
+        }
+
+        .rank-badge-medium {
+            width: 44px;
+            height: 44px;
+            font-size: 1rem;
         }
 
         /* 🥇 金・銀・銅バッジ */
@@ -579,13 +532,15 @@
             box-shadow: 0 0 0 2px rgba(205, 127, 50, 0.4);
         }
 
-        .ranking-thumb {
-            width: 110px;
-            height: 72px;
-            border-radius: 16px;
-            background-size: cover;
-            background-position: center;
-            flex-shrink: 0;
+        .ranking-section {
+            padding: 16px 0 80px;
+        }
+
+        .ranking-top3 {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 32px;
         }
 
         .ranking-content {
@@ -604,47 +559,6 @@
             letter-spacing: 0.05em;
         }
 
-        .ranking-title-text {
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1.3;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .ranking-desc {
-            font-size: 0.9rem;
-            color: #555;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .ranking-meta {
-            margin-top: 4px;
-            font-size: 0.8rem;
-            color: var(--color-text-gray);
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        /* 4位・5位用：カード風（2位・3位っぽい） */
-        .ranking-rest .ranking-card-sub {
-            margin-bottom: 18px;
-        }
-
-        .ranking-rest .ranking-card-sub .ranking-thumb {
-            width: 120px;
-            height: 80px;
-        }
-
-        /* 6位以降のリスト */
         .ranking-rest {
             border-top: 1px solid #E5E5EA;
             padding-top: 16px;
@@ -778,58 +692,63 @@
         /* =========================================
            Responsive
            ========================================= */
-        @media (max-width: 768px) {
-            /* ===== スマホ版：1位のヒーローカードを中カードサイズに変更 ===== */
-    /* ===== スマホ版：1～3位を同じサイズ・縦レイアウト ===== */
-    .rank-hero,
-    .rank-mid {
-        flex-direction: column !important;   /* 上：画像 → 下：文字 */
-        align-items: flex-start !important;
-        padding: 16px !important;
-        gap: 10px !important;
-        border-radius: 20px !important;
-        position: relative !important;
-    }
 
-    /* 画像を全幅にする */
-    .rank-hero-thumb,
-    .rank-mid-thumb {
-        width: 100% !important;
-        height: 180px !important;
-        border-radius: 16px !important;
-        background-size: cover;
-        background-position: center;
-    }
+        /* PC / ラージタブレット */
+        @media (min-width: 769px) {
+            .search-wrapper {
+                width: 280px !important;
+                transform: none !important;
+                transition: none !important;
+            }
 
-    /* テキストを下にまとめる */
-    .rank-hero-content,
-    .ranking-content {
-        width: 100% !important;
-        margin-top: 8px !important;
-    }
+            .search-input {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
 
-    .rank-hero-title,
-    .rank-mid-title {
-        font-size: 1.2rem !important;
-        line-height: 1.4 !important;
-    }
+            .search-icon {
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                position: absolute;
+            }
 
-    .rank-hero-desc,
-    .rank-mid-desc {
-        font-size: 0.92rem !important;
-        line-height: 1.45 !important;
-        color: #444 !important;
-    }
+            .fixed-header.search-open .search-wrapper {
+                width: 280px !important;
+            }
+        }
 
-    /* バッジを画像左上に固定 */
-    .rank-badge-large,
-    .rank-badge-medium {
-        position: absolute !important;
-        top: 12px;
-        left: 12px;
-        z-index: 10;
-    }
+        /* iPad（縦横）をタブレット扱いに */
+        @media (min-width: 768px) and (max-width: 1024px) and (pointer: coarse) {
+            .search-wrapper {
+                width: 280px !important;
+                transition: none !important;
+                transform: none !important;
+            }
 
+            .search-input {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
+
+            .search-icon {
+                position: absolute !important;
+                left: 16px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+            }
+
+            .fixed-header.search-open .search-wrapper {
+                width: 280px !important;
+            }
+
+            .fixed-header.search-open .nav-center {
+                display: block !important;
+            }
+        }
+
+        /* スマホ */
+        @media (max-width: 767px) {
 
             :root {
                 --spacing-section: 60px;
@@ -839,13 +758,146 @@
                 padding: 10px 16px;
             }
 
+            /* 検索ボタン（丸） */
+            .nav-left {
+                display: flex;
+                align-items: center;
+            }
+
+            .nav-left .search-wrapper {
+                transform: translateY(-2px);
+            }
+
             .search-wrapper {
+                width: 44px;
+                height: 44px;
+                border-radius: 999px;
+                border: 2px solid #e5e5e7;
+                background: #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+                overflow: hidden;
+                transition:
+                    width 0.35s ease,
+                    box-shadow 0.3s ease,
+                    border 0.3s ease,
+                    background 0.3s ease;
+            }
+
+            .search-input {
                 width: 100%;
-                max-width: 300px;
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                font-size: 0.9rem;
+                color: var(--color-text-main);
+                background: transparent;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.25s ease;
+            }
+
+            .search-icon {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 22px;
+                height: 22px;
+                color: #a7a7aa;
+                transition: transform 0.25s ease;
+            }
+
+            .clear-btn {
+                display: none;
+            }
+
+            /* 検索オープン時：ロゴ消してバーを伸ばす */
+            .fixed-header.search-open .nav-center {
+                display: none;
+            }
+
+            .fixed-header.search-open .nav-left {
+                flex: 1 1 auto;
+            }
+
+            .fixed-header.search-open .search-wrapper {
+                width: 100%;
+                max-width: 100%;
+                border: none;
+                box-shadow: none;
+                justify-content: flex-start;
+                background: transparent;
+            }
+
+            .fixed-header.search-open .search-input {
+                opacity: 1;
+                pointer-events: auto;
+                padding: 10px 40px 10px 44px;
+                border-radius: 999px;
+                border: 1px solid rgba(0,0,0,0.1);
+                background: #fff;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            }
+
+            .fixed-header.search-open .search-icon {
+                position: absolute;
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .fixed-header.search-open .clear-btn {
+                display: block;
+                right: 18px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 22px;
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                text-align: center;
             }
 
             .search-results-container {
                 padding: 0 16px 12px;
+            }
+
+            /* Menu ボタンをアイコンだけに */
+            .menu-btn > span {
+                display: none;
+            }
+
+            .menu-btn {
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                border-radius: 999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+            }
+
+            .menu-icon-lines {
+                flex-direction: column;
+                gap: 4px;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .menu-line {
+                width: 18px;
+                height: 2px;
+                background-color: var(--color-text-main);
+                border-radius: 2px;
+            }
+
+            .nav-overlay {
+                right: 16px;
             }
 
             .ranking-hero {
@@ -857,14 +909,57 @@
                 font-size: 2rem;
             }
 
-            .ranking-top3 .ranking-card:first-child .ranking-thumb {
-                width: 130px;
-                height: 84px;
-            }
-
             .footer-links {
                 gap: 24px;
                 flex-wrap: wrap;
+            }
+
+            /* ▼▼ スマホ版 ランキングカード：画像上／テキスト下、1〜3位同サイズ ▼▼ */
+            .rank-hero,
+            .rank-mid {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 16px !important;
+                gap: 10px !important;
+                border-radius: 20px !important;
+                position: relative !important;
+            }
+
+            .rank-hero-thumb,
+            .rank-mid-thumb {
+                width: 100% !important;
+                height: 180px !important;
+                border-radius: 16px !important;
+                background-size: cover;
+                background-position: center;
+            }
+
+            .rank-hero-content,
+            .ranking-content {
+                width: 100% !important;
+                margin-top: 8px !important;
+            }
+
+            .rank-hero-title,
+            .rank-mid-title {
+                font-size: 1.2rem !important;
+                line-height: 1.4 !important;
+            }
+
+            .rank-hero-desc,
+            .rank-mid-desc {
+                font-size: 0.92rem !important;
+                line-height: 1.45 !important;
+                color: #444 !important;
+            }
+
+            /* バッジを画像左上に */
+            .rank-badge-large,
+            .rank-badge-medium {
+                position: absolute !important;
+                top: 12px;
+                left: 12px;
+                z-index: 10;
             }
         }
     </style>
@@ -973,154 +1068,222 @@
         </div>
     </footer>
 
-    <!-- 検索・Menu・スクロールリビール用（index.js 共通） -->
+    <!-- 共通 JS（articles データ・検索結果描画・toggleMenu など） -->
     <script src="index.js"></script>
 
     <!-- ランキング生成用スクリプト -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    // index.js で作ったデータを取得
-    const articles = window.articles || [];
-    if (!articles.length) return;
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const articles = window.articles || [];
+        if (!articles.length) return;
 
-    const top3El = document.getElementById("ranking-top3");
-    const restEl = document.getElementById("ranking-rest");
-    const periodBtns = document.querySelectorAll(".period-btn");
+        const top3El = document.getElementById("ranking-top3");
+        const restEl = document.getElementById("ranking-rest");
+        const periodBtns = document.querySelectorAll(".period-btn");
 
-    if (!top3El || !restEl) return;
+        if (!top3El || !restEl) return;
 
-    // 初期は ALL
-    let currentPeriod = "all";
+        let currentPeriod = "all";
 
-    // period に応じて閲覧数を取り出す
-    function getViews(a, period) {
-        if (!a) return 0;
-        const p = (period || "all").toLowerCase();
-
-        switch (p) {
-            case "day":
-                return a.views_day ?? a.views ?? 0;
-            case "week":
-                return a.views_week ?? a.views ?? 0;
-            case "month":
-                return a.views_month ?? a.views ?? 0;
-            case "all":
-            default:
-                return a.views ?? 0;
+        function getViews(a, period) {
+            if (!a) return 0;
+            const p = (period || "all").toLowerCase();
+            switch (p) {
+                case "day":
+                    return a.views_day ?? a.views ?? 0;
+                case "week":
+                    return a.views_week ?? a.views ?? 0;
+                case "month":
+                    return a.views_month ?? a.views ?? 0;
+                case "all":
+                default:
+                    return a.views ?? 0;
+            }
         }
-    }
 
-    function getSortedArticles() {
-        return [...articles].sort(
-            (a, b) => getViews(b, currentPeriod) - getViews(a, currentPeriod)
-        );
-    }
+        function getSortedArticles() {
+            return [...articles].sort(
+                (a, b) => getViews(b, currentPeriod) - getViews(a, currentPeriod)
+            );
+        }
 
-function renderRanking() {
-    const sorted = getSortedArticles();
+        function renderRanking() {
+            const sorted = getSortedArticles();
 
-    const hero = sorted[0];            // 1位
-    const mids = sorted.slice(1, 3);   // 2位・3位
-    const rest = sorted.slice(3, 20);  // 4位以降
+            const hero = sorted[0];            // 1位
+            const mids = sorted.slice(1, 3);   // 2位・3位
+            const rest = sorted.slice(3, 20);  // 4位以降
 
-    // ------- 1位：ヒーロー大カード -------
-    top3El.innerHTML = "";
+            top3El.innerHTML = "";
 
-    if (hero) {
-        const viewsHero = getViews(hero, currentPeriod);
-        top3El.innerHTML += `
-            <div class="rank-hero" onclick="window.location.href='article.html?id=${encodeURIComponent(hero.id)}'">
-                <div class="rank-badge rank-1 rank-badge-large">1</div>
-                <div class="rank-hero-thumb" style="background-image:url('${hero.image || "images/sample1.jpg"}');"></div>
-                <div class="rank-hero-content">
-                    <div class="ranking-service">${(hero.service || "").toUpperCase()}</div>
-                    <div class="rank-hero-title">${hero.title || ""}</div>
-                    <div class="rank-hero-desc">${hero.description || ""}</div>
-                    <div class="rank-hero-meta">
-                        <span>${hero.category || ""}</span>
-                        <span>閲覧数 ${viewsHero}</span>
+            // 1位
+            if (hero) {
+                const viewsHero = getViews(hero, currentPeriod);
+                top3El.innerHTML += `
+                    <div class="rank-hero" onclick="window.location.href='article.html?id=${encodeURIComponent(hero.id)}'">
+                        <div class="rank-badge rank-1 rank-badge-large">1</div>
+                        <div class="rank-hero-thumb" style="background-image:url('${hero.image || "images/sample1.jpg"}');"></div>
+                        <div class="rank-hero-content">
+                            <div class="ranking-service">${(hero.service || "").toUpperCase()}</div>
+                            <div class="rank-hero-title">${hero.title || ""}</div>
+                            <div class="rank-hero-desc">${hero.description || ""}</div>
+                            <div class="rank-hero-meta">
+                                <span>${hero.category || ""}</span>
+                                <span>閲覧数 ${viewsHero}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        `;
-    }
+                `;
+            }
 
-    // ------- 2位・3位：中カード -------
-    mids.forEach((a, index) => {
-        if (!a) return;
-        const rank = index + 2; // 2 or 3
-        const views = getViews(a, currentPeriod);
+            // 2・3位
+            mids.forEach((a, index) => {
+                if (!a) return;
+                const rank = index + 2;
+                const views = getViews(a, currentPeriod);
 
-        top3El.innerHTML += `
-            <div class="rank-mid" onclick="window.location.href='article.html?id=${encodeURIComponent(a.id)}'">
-                <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
-                <div class="rank-mid-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-                <div class="ranking-content">
-                    <div class="ranking-service">${(a.service || "").toUpperCase()}</div>
-                    <div class="rank-mid-title">${a.title || ""}</div>
-                    <div class="rank-mid-desc">${a.description || ""}</div>
-                    <div class="rank-mid-meta">
-                        <span>${a.category || ""}</span>
-                        <span>閲覧数 ${views}</span>
+                top3El.innerHTML += `
+                    <div class="rank-mid" onclick="window.location.href='article.html?id=${encodeURIComponent(a.id)}'">
+                        <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
+                        <div class="rank-mid-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                        <div class="ranking-content">
+                            <div class="ranking-service">${(a.service || "").toUpperCase()}</div>
+                            <div class="rank-mid-title">${a.title || ""}</div>
+                            <div class="rank-mid-desc">${a.description || ""}</div>
+                            <div class="rank-mid-meta">
+                                <span>${a.category || ""}</span>
+                                <span>閲覧数 ${views}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        `;
+                `;
+            });
+
+            // 4位以降
+            restEl.innerHTML = "";
+            rest.forEach((a, index) => {
+                const rank = index + 4;
+                const views = getViews(a, currentPeriod);
+
+                const row = document.createElement("div");
+                row.className = "ranking-row";
+                row.innerHTML = `
+                    <div class="ranking-row-rank">${rank}</div>
+                    <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                    <div class="ranking-row-main">
+                        <div class="ranking-row-title">${a.title || ""}</div>
+                        <div class="ranking-row-meta">
+                            <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
+                            <span>${a.category || ""}</span>
+                            <span>閲覧数 ${views}</span>
+                        </div>
+                    </div>
+                `;
+                row.addEventListener("click", () => {
+                    if (a.id) {
+                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                    }
+                });
+                restEl.appendChild(row);
+            });
+
+            // アニメーション付与
+            [top3El, restEl].forEach(el => {
+                el.classList.remove("ranking-animate");
+                void el.offsetWidth;
+                el.classList.add("ranking-animate");
+            });
+        }
+
+        // 期間ボタン
+        periodBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                periodBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                currentPeriod = btn.dataset.period || "all";
+                renderRanking();
+            });
+        });
+
+        // 初期表示
+        renderRanking();
     });
+    </script>
 
-    // ------- 4位以降：小カード -------
-    restEl.innerHTML = "";
-    rest.forEach((a, index) => {
-        const rank = index + 4;
-        const views = getViews(a, currentPeriod);
+    <!-- 検索バー開閉（index.html と同じ） -->
+    <script>
+    window.addEventListener("DOMContentLoaded", function () {
+        const fixedHeader  = document.querySelector(".fixed-header");
+        const searchWrapper = document.querySelector(".search-wrapper");
+        const searchInput   = document.getElementById("searchInput");
 
-        const row = document.createElement("div");
-        row.className = "ranking-row";
-        row.innerHTML = `
-            <div class="ranking-row-rank">${rank}</div>
-            <div class="ranking-row-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-            <div class="ranking-row-main">
-                <div class="ranking-row-title">${a.title || ""}</div>
-                <div class="ranking-row-meta">
-                    <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
-                    <span>${a.category || ""}</span>
-                    <span>閲覧数 ${views}</span>
-                </div>
-            </div>
-        `;
-        row.addEventListener("click", () => {
-            if (a.id) {
-                window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+        if (!fixedHeader || !searchWrapper || !searchInput) return;
+
+        let isOpen = false;
+        const isMobile = () => window.innerWidth <= 767;
+
+        searchWrapper.addEventListener("click", function (e) {
+            // PC / iPad はそのままフォーカスだけ
+            if (!isMobile()) {
+                if (e.target !== searchInput) {
+                    searchInput.focus();
+                }
+                return;
+            }
+
+            // スマホ：タップで開閉
+            if (isOpen && e.target === searchInput) return;
+
+            if (!isOpen) {
+                fixedHeader.classList.add("search-open");
+                isOpen = true;
+                setTimeout(() => searchInput.focus(), 80);
+            } else {
+                fixedHeader.classList.remove("search-open");
+                isOpen = false;
+                searchInput.blur();
             }
         });
-        restEl.appendChild(row);
-    });
 
-    // 🔥 ここで毎回アニメーションをかけ直す
-    [top3El, restEl].forEach(el => {
-        el.classList.remove("ranking-animate");
-        void el.offsetWidth;          // 一度リフローさせてリセット
-        el.classList.add("ranking-animate");
-    });
-}
-
-
-    // 期間ボタン
-    periodBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            periodBtns.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-
-            currentPeriod = btn.dataset.period || "all";
-            renderRanking();
+        // 画面サイズ変更時にリセット
+        window.addEventListener("resize", () => {
+            if (!isMobile() && isOpen) {
+                fixedHeader.classList.remove("search-open");
+                isOpen = false;
+                searchInput.blur();
+            }
         });
     });
+    </script>
 
-    // 初期表示
-    renderRanking();
-});
-</script>
+    <!-- × ボタン制御 -->
+    <script>
+    window.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const clearBtn = document.getElementById("clear-btn");
 
+        if (!searchInput || !clearBtn) return;
+
+        function updateClearBtn() {
+            if (searchInput.value.trim() === "") {
+                clearBtn.style.display = "none";
+            } else {
+                clearBtn.style.display = "block";
+            }
+        }
+
+        searchInput.addEventListener("input", updateClearBtn);
+
+        clearBtn.addEventListener("click", function () {
+            searchInput.value = "";
+            updateClearBtn();
+            searchInput.focus();
+        });
+
+        updateClearBtn();
+    });
+    </script>
 
 </body>
 </html>
