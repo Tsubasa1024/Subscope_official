@@ -19,9 +19,17 @@ function mapCmsArticle(item) {
     return {
         id: item.id,
         title: item.title || "",
-        description: item.content ? stripHtml(item.content).slice(0, 80) + "…" : "",
-        category: item.category ? (item.category.name || item.category.id || "") : "",
-        service: "",          // 今は使ってない。あとでフィールド追加したら入れる
+        description: item.content
+            ? stripHtml(item.content).slice(0, 80) + "…"
+            : "",
+
+        // ★ microCMS のフィールドIDそのまま使う
+        // セレクトフィールド「カテゴリー」 → "音楽" などの文字列
+        category: item.category || "",
+
+        // テキストフィールド「サービス名」 → "Apple Music" など
+        service: item.service || "",
+
         tags: [],
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
@@ -29,6 +37,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 
 // 一覧取得
 async function loadArticles() {
@@ -484,3 +493,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     initScrollReveal();
     initAllPage();
 });
+
