@@ -3,8 +3,8 @@
 // =====================================
 window.articles = [];
 
-const SERVICE_ID = "subscope";           // 左上に出てるサービスID
-const API_KEY    = "YOUR_API_KEY";       // 読み取り用 APIキー（ここだけ書き換える）
+const SERVICE_ID = "subscope";               // サービスID
+const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";           // ← ここを自分のキーに書き換える
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
 
 // HTML → プレーンテキスト（description 用）
@@ -14,24 +14,23 @@ function stripHtml(html) {
     return tmp.textContent || tmp.innerText || "";
 }
 
-// microCMS の 1件 を SUBSCOPE 形式に変換
+// microCMS の1件を SUBSCOPE 形式に変換
 function mapCmsArticle(item) {
     return {
         id: item.id,
         title: item.title || "",
-        // content から80文字だけ抜き出してリード文にする
         description: item.content ? stripHtml(item.content).slice(0, 80) + "…" : "",
         category: item.category ? (item.category.name || item.category.id || "") : "",
-        service: "",          // いまは未使用。後で microCMS にフィールド追加したらここに入れる
-        tags: [],             // 同上
+        service: "",          // 今は使ってない。あとでフィールド追加したら入れる
+        tags: [],
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
-        views: 0,             // 将来 PV カウントを入れたいなら microCMS に数値フィールド追加
+        views: 0,
         contentHtml: item.content || ""
     };
 }
 
-// 記事一覧を microCMS から取得（トップ・一覧・検索で共通）
+// 一覧取得
 async function loadArticles() {
     if (window.articles && window.articles.length > 0) {
         return window.articles;
@@ -59,7 +58,6 @@ async function loadArticles() {
     return window.articles;
 }
 
-// 安全に articles を読むヘルパー
 function getArticles() {
     return window.articles || [];
 }
@@ -82,13 +80,12 @@ function normalizeText(str) {
 }
 
 // =====================================
-// 4. ヒーロー記事（今は「最新日付」を使う）
+// 4. ヒーロー記事（最新日付）
 // =====================================
 function renderHero() {
     const list = getArticles();
     if (!heroContainer || list.length === 0) return;
 
-    // date の新しい順にソートして先頭をヒーローに
     const sorted = [...list].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
     );
@@ -111,7 +108,7 @@ function renderHero() {
 }
 
 // =====================================
-// 5. 最新記事グリッド（トップ用）
+// 5. 最新記事グリッド
 // =====================================
 function renderLatest(limit = 6) {
     if (!latestGrid) return;
@@ -369,7 +366,7 @@ function initSearch() {
 }
 
 // =====================================
-// 9. 「すべての記事」ページ用の一覧描画
+// 9. 「すべての記事」ページ
 // =====================================
 function renderAllArticles(list) {
     const grid =
@@ -400,7 +397,7 @@ function initAllPage() {
     const grid =
         document.getElementById("all-articles-grid") ||
         document.getElementById("all-grid");
-    if (!grid) return; // all.html じゃないページ
+    if (!grid) return;
 
     const list = getArticles();
     const params = new URLSearchParams(location.search);
@@ -411,11 +408,9 @@ function initAllPage() {
         return list.filter((a) => a.category === cat);
     }
 
-    // 初期表示
     const initial = filterByCategory(tab);
     renderAllArticles(initial);
 
-    // タブボタン（data-category-tab属性が付いている前提）
     const tabs = document.querySelectorAll("[data-category-tab]");
     tabs.forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -480,18 +475,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     heroContainer   = document.getElementById("most-viewed-content");
     latestGrid      = document.getElementById("latest-grid");
 
-    // ★ まず microCMS から記事一覧を取得
     await loadArticles();
 
-    // トップページ系
     renderHero();
     renderLatest();
     initCarousel3D();
-
-    // 共通機能
     initSearch();
     initScrollReveal();
-
-    // すべての記事ページ用
     initAllPage();
 });
