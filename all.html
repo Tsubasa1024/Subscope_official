@@ -848,10 +848,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ① microCMS から記事を読み込む（まだなら）
     if (typeof loadArticles === "function" &&
         (!window.articles || window.articles.length === 0)) {
-        await loadArticles();   // ← index.js のやつを待つ
+        await loadArticles();
     }
 
-    // ② 記事一覧を取得
+    // ② 記事一覧
     const all = window.articles || [];
 
     // URL パラメータからタブを取得
@@ -862,7 +862,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const gridEl = document.getElementById("all-grid");
     if (!tabsEl || !gridEl) return;
 
-    // 表示したいカテゴリ（microCMS の名前と合わせる）
+    // 表示したいカテゴリ（タブのラベル）
     const categories = [
         "すべて",
         "音楽",
@@ -875,7 +875,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         "その他"
     ];
 
-    // ③ タブを描画
+    // CMS から返ってくる category の ID → 日本語ラベルの対応
+    // ※ここは microCMS 側の ID に合わせておいてね
+    const CATEGORY_LABELS = {
+        music: "音楽",
+        movie: "映画・ドラマ",
+        study: "学習・資格",
+        health: "健康・フィットネス",
+        game: "ゲーム・エンタメ",
+        life: "生活・ライフスタイル",
+        ai: "AI・ツール",
+        other: "その他"
+    };
+
+    // 記事オブジェクトから「日本語のカテゴリ名」を取り出す関数
+    function getCategoryLabel(article) {
+        // すでに categoryName をつけている場合
+        if (article.categoryName) return article.categoryName;
+
+        const cat = article.category;
+
+        // 文字列の場合（例: "music"）
+        if (typeof cat === "string") {
+            return CATEGORY_LABELS[cat] || cat;
+        }
+
+        // オブジェクトの場合（例: { id: "music", name: "音楽" }）
+        if (cat && typeof cat === "object") {
+            if (cat.name) return cat.name;
+            if (cat.id) return CATEGORY_LABELS[cat.id] || cat.id;
+        }
+
+        return "";
+    }
+
+    // ③ タブ描画
     tabsEl.innerHTML = categories
         .map(c => `
             <button class="tab ${c === tabParam ? "active" : ""}"
@@ -885,10 +919,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         `)
         .join("");
 
-    // ④ 記事をカテゴリでフィルタ
+    // ④ カテゴリでフィルタ
     function filterByCategory(cat) {
         if (cat === "すべて") return all;
-        return all.filter(a => a.category === cat);
+        return all.filter(a => getCategoryLabel(a) === cat);
     }
 
     function renderList(list) {
@@ -924,7 +958,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     tabButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const cat = btn.getAttribute("data-category-tab");
-            // URL も更新（リロードしても同じタブになる）
             const encoded = encodeURIComponent(cat);
             history.replaceState(null, "", "all.html?tab=" + encoded);
 
