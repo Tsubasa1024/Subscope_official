@@ -1071,26 +1071,37 @@
     <!-- 共通 JS（articles データ・検索結果描画・toggleMenu など） -->
     <script src="index.js"></script>
 
-    <!-- ランキング生成用スクリプト -->
+    <!-- ランキング生成用スクリプト（カテゴリ分けナシ・microCMS対応版） -->
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const articles = window.articles || [];
+    document.addEventListener("DOMContentLoaded", async () => {
+        // ① まず microCMS から記事を確実に読み込む
+        if (typeof loadArticles === "function") {
+            await loadArticles();
+        }
+
+        // index.js の getArticles があればそれ優先
+        const articles = (typeof getArticles === "function")
+            ? getArticles()
+            : (window.articles || []);
+
         if (!articles.length) return;
 
-        const top3El = document.getElementById("ranking-top3");
-        const restEl = document.getElementById("ranking-rest");
+        const top3El    = document.getElementById("ranking-top3");
+        const restEl    = document.getElementById("ranking-rest");
         const periodBtns = document.querySelectorAll(".period-btn");
 
         if (!top3El || !restEl) return;
 
         let currentPeriod = "all";
 
+        // ② 閲覧数を期間別で取る（フィールドが無い場合は views を使う）
         function getViews(a, period) {
             if (!a) return 0;
             const p = (period || "all").toLowerCase();
+
             switch (p) {
                 case "day":
-                    return a.views_day ?? a.views ?? 0;
+                    return a.views_day  ?? a.views ?? 0;
                 case "week":
                     return a.views_week ?? a.views ?? 0;
                 case "month":
@@ -1101,24 +1112,33 @@
             }
         }
 
+        // ③ 今選択中の期間でソート（カテゴリでは分けない）
         function getSortedArticles() {
             return [...articles].sort(
                 (a, b) => getViews(b, currentPeriod) - getViews(a, currentPeriod)
             );
         }
 
+        // ④ ランキング描画（1〜3位＋4位以降）
         function renderRanking() {
             const sorted = getSortedArticles();
 
-            const hero = sorted[0];            // 1位
-            const mids = sorted.slice(1, 3);   // 2位・3位
-            const rest = sorted.slice(3, 20);  // 4位以降
+            const hero = sorted[0];           // 1位
+            const mids = sorted.slice(1, 3);  // 2・3位
+            const rest = sorted.slice(3, 20); // 4位〜
 
             top3El.innerHTML = "";
+            restEl.innerHTML = "";
 
-            // 1位
+            // 共通：カテゴリ表示用（index.js の categoryName を優先）
+            const getCategoryLabel = (a) =>
+                (a && (a.categoryName || a.category || "")) || "";
+
+            // --- 1位カード ---
             if (hero) {
-                const viewsHero = getViews(hero, currentPeriod);
+                const viewsHero     = getViews(hero, currentPeriod);
+                const categoryLabel = getCategoryLabel(hero);
+
                 top3El.innerHTML += `
                     <div class="rank-hero" onclick="window.location.href='article.html?id=${encodeURIComponent(hero.id)}'">
                         <div class="rank-badge rank-1 rank-badge-large">1</div>
@@ -1128,7 +1148,7 @@
                             <div class="rank-hero-title">${hero.title || ""}</div>
                             <div class="rank-hero-desc">${hero.description || ""}</div>
                             <div class="rank-hero-meta">
-                                <span>${hero.category || ""}</span>
+                                <span>${categoryLabel}</span>
                                 <span>閲覧数 ${viewsHero}</span>
                             </div>
                         </div>
@@ -1136,11 +1156,12 @@
                 `;
             }
 
-            // 2・3位
+            // --- 2・3位カード ---
             mids.forEach((a, index) => {
                 if (!a) return;
-                const rank = index + 2;
-                const views = getViews(a, currentPeriod);
+                const rank          = index + 2;
+                const views         = getViews(a, currentPeriod);
+                const categoryLabel = getCategoryLabel(a);
 
                 top3El.innerHTML += `
                     <div class="rank-mid" onclick="window.location.href='article.html?id=${encodeURIComponent(a.id)}'">
@@ -1151,7 +1172,7 @@
                             <div class="rank-mid-title">${a.title || ""}</div>
                             <div class="rank-mid-desc">${a.description || ""}</div>
                             <div class="rank-mid-meta">
-                                <span>${a.category || ""}</span>
+                                <span>${categoryLabel}</span>
                                 <span>閲覧数 ${views}</span>
                             </div>
                         </div>
@@ -1159,11 +1180,11 @@
                 `;
             });
 
-            // 4位以降
-            restEl.innerHTML = "";
+            // --- 4位以降 ---
             rest.forEach((a, index) => {
-                const rank = index + 4;
-                const views = getViews(a, currentPeriod);
+                const rank          = index + 4;
+                const views         = getViews(a, currentPeriod);
+                const categoryLabel = getCategoryLabel(a);
 
                 const row = document.createElement("div");
                 row.className = "ranking-row";
@@ -1174,28 +1195,29 @@
                         <div class="ranking-row-title">${a.title || ""}</div>
                         <div class="ranking-row-meta">
                             <span class="ranking-row-service">${(a.service || "").toUpperCase()}</span>
-                            <span>${a.category || ""}</span>
+                            <span>${categoryLabel}</span>
                             <span>閲覧数 ${views}</span>
                         </div>
                     </div>
                 `;
                 row.addEventListener("click", () => {
                     if (a.id) {
-                        window.location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+                        window.location.href =
+                            `article.html?id=${encodeURIComponent(a.id)}`;
                     }
                 });
                 restEl.appendChild(row);
             });
 
-            // アニメーション付与
+            // ふわっとアニメーションかけ直し
             [top3El, restEl].forEach(el => {
                 el.classList.remove("ranking-animate");
-                void el.offsetWidth;
+                void el.offsetWidth; // reflow
                 el.classList.add("ranking-animate");
             });
         }
 
-        // 期間ボタン
+        // ⑤ 期間ボタン（DAY / WEEK / MONTH / ALL）
         periodBtns.forEach(btn => {
             btn.addEventListener("click", () => {
                 periodBtns.forEach(b => b.classList.remove("active"));
@@ -1206,10 +1228,11 @@
             });
         });
 
-        // 初期表示
+        // ⑥ 初期表示（ALL）
         renderRanking();
     });
     </script>
+
 
     <!-- 検索バー開閉（index.html と同じ） -->
     <script>
