@@ -2,7 +2,18 @@
 // 1. microCMS から記事を読む設定
 // =====================================
 window.articles = [];
-
+// 英語ID → 日本語ラベル
+const CATEGORY_LABELS = {
+    music: "音楽",
+    movie: "映画・ドラマ",
+    study: "学習・資格",
+    health: "健康・フィットネス",
+    fitness: "健康・フィットネス",
+    game: "ゲーム・エンタメ",
+    life: "生活・ライフスタイル",
+    ai: "AI・ツール",
+    other: "その他"
+};
 const SERVICE_ID = "subscope";               // サービスID
 const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";           // ← ここを自分のキーに書き換える
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
@@ -16,6 +27,25 @@ function stripHtml(html) {
 
 // microCMS の1件を SUBSCOPE 形式に変換
 function mapCmsArticle(item) {
+    const rawCat = item.category;   // microCMS の category フィールド
+
+    let categoryId = "";
+    let categoryName = "";
+
+    if (typeof rawCat === "string") {
+        // "music" / "音楽" など
+        categoryId = rawCat;
+        categoryName = CATEGORY_LABELS[rawCat] || rawCat;
+    } else if (rawCat && typeof rawCat === "object") {
+        // { id: "music", name: "音楽" } みたいな形にも対応
+        if (rawCat.id) categoryId = rawCat.id;
+        if (rawCat.name) categoryName = rawCat.name;
+
+        if (!categoryName && categoryId) {
+            categoryName = CATEGORY_LABELS[categoryId] || categoryId;
+        }
+    }
+
     return {
         id: item.id,
         title: item.title || "",
@@ -23,9 +53,11 @@ function mapCmsArticle(item) {
             ? stripHtml(item.content).slice(0, 80) + "…"
             : "",
 
-        // ★ microCMS のフィールドIDそのまま使う
-        // セレクトフィールド「カテゴリー」 → "音楽" などの文字列
-        category: item.category || "",
+        // 🔸 ID（"music" とか）。フィルタなどに使う用
+        category: categoryId,
+
+        // 🔸 表示用の日本語ラベル（"音楽" など）
+        categoryName: categoryName,
 
         // テキストフィールド「サービス名」 → "Apple Music" など
         service: item.service || "",
@@ -37,6 +69,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 
 
 // 一覧取得
@@ -106,7 +139,7 @@ function renderHero() {
             <div class="featured-content">
                 <div class="featured-meta">
                     <span class="tag">${featured.service || "SUBSCOPE"}</span>
-                    <span>${featured.category || ""}</span>
+                    <span>${featured.categoryName || featured.category || ""}</span>
                 </div>
                 <h2 class="featured-title">${featured.title}</h2>
                 <p class="featured-desc">${featured.description}</p>
@@ -493,4 +526,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     initScrollReveal();
     initAllPage();
 });
+
 
