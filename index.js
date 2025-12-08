@@ -15,22 +15,28 @@ function stripHtml(html) {
 }
 
 // microCMS の1件を SUBSCOPE 形式に変換
-// ※ microCMS の「カテゴリー」フィールドは
-//   - テキスト: "音楽"
-//   - もしくは { id: "music", name: "音楽" }
-// どっちでも動くようにしてある
 function mapCmsArticle(item) {
-    const rawCat = item.category;
+    const rawCat = item.category;   // microCMS の「カテゴリー」フィールド
 
     let category = "";
 
+    // 1) 文字列パターン（普通はこれ）
     if (typeof rawCat === "string") {
-        // microCMS が "音楽" を返す
-        category = rawCat;
-    } else if (rawCat && typeof rawCat === "object") {
-        // オブジェクト形式の場合（保険）
-        category = rawCat.name || rawCat.id || "";
+        category = rawCat.trim();   // "音楽" など
     }
+    // 2) オブジェクトパターン（保険）
+    else if (rawCat && typeof rawCat === "object") {
+        category = (rawCat.name || rawCat.id || "").trim();
+    }
+
+    // 3) まだ空っぽなら、とりあえず “音楽” にしてしまう（今は Apple Music 記事だけなので）
+    //   他のカテゴリ記事を増やすときに、ここを消してもOK
+    if (!category) {
+        category = "音楽";
+    }
+
+    // デバッグ用：ブラウザのコンソールに出して中身確認できる
+    console.log("[mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
 
     return {
         id: item.id,
@@ -39,9 +45,9 @@ function mapCmsArticle(item) {
             ? stripHtml(item.content).slice(0, 80) + "…"
             : "",
 
-        // ← もう日本語が入っている！
-        category: category,
-        categoryName: category,
+        // ここを統一ルールにする
+        category: category,      // フィルタ用
+        categoryName: category,  // 表示用
 
         service: item.service || "",
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
@@ -50,6 +56,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 
 // 一覧取得
 async function loadArticles() {
@@ -445,4 +452,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
