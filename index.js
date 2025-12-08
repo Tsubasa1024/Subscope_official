@@ -1,64 +1,33 @@
 // =====================================
-// 記事データ
+// 記事データを外部 JSON から読み込む（GIZMODO 入口）
 // =====================================
-window.articles = [
-    {
-        id: "apple-music-latest",
-        title: "Apple Music の最新機能まとめ",
-        description: "空間オーディオ、ロスレス、オートミックスなど Apple Music の最新機能を徹底解説。",
-        service: "Apple Music",
-        tags: ["音楽", "ストリーミング", "ハイレゾ"],
-        category: "音楽",                 // ← そのまま「音楽」
-        date: "2025-12-01",
-        image: "images/sample1.jpg",
-        views: 320
-    },
-    {
-        id: "netflix-2025-best",
-        title: "Netflix 2025年おすすめ作品",
-        description: "2025年に絶対観ておきたい Netflix オリジナル作品を厳選紹介。",
-        service: "Netflix",
-        tags: ["映画", "ドラマ", "VOD"],
-        category: "映画・ドラマ",         // ← 「映像」→「映画・ドラマ」
-        date: "2025-11-28",
-        image: "images/sample2.jpg",
-        views: 280
-    },
-    {
-        id: "subscription-comparison",
-        title: "人気サブスク徹底比較ガイド",
-        description: "音楽・映像・学習系など主要サブスクサービスを横断比較。あなたに合う1本を見つけよう。",
-        service: "All",
-        tags: ["比較", "ガイド"],
-        category: "生活・ライフスタイル", // ← 横断比較なのでここを採用
-        date: "2025-11-20",
-        image: "images/sample3.jpg",
-        views: 400
-    },
-    {
-        id: "spotify-vs-applemusic",
-        title: "Spotify vs Apple Music",
-        description: "音質、料金、レコメンド精度まで。2大音楽サブスクを本音レビュー。",
-        service: "Spotify",
-        tags: ["音楽", "比較"],
-        category: "音楽",                 // ← 音楽ジャンルでOK
-        date: "2025-11-10",
-        image: "images/sample4.jpg",
-        views: 250
-    },
-    {
-        id: "study-apps-best",
-        title: "勉強がはかどる学習系サブスク5選",
-        description: "TOEIC 対策から資格勉強まで。学生にも社会人にも刺さる学習系サブスクをピックアップ。",
-        service: "Study",
-        tags: ["学習", "教育", "TOEIC"],
-        category: "学習・資格",           // ← 「学習」→「学習・資格」
-        date: "2025-11-05",
-        image: "images/sample5.jpg",
-        views: 150
-    }
-];
+window.articles = [];
 
+// 記事一覧を読み込む（最初に1回だけ）
+async function loadArticles() {
+    if (window.articles && window.articles.length > 0) {
+        return window.articles;
+    }
+
+    try {
+        const res = await fetch("articles.json", { cache: "no-store" });
+        if (!res.ok) {
+            throw new Error("HTTP error " + res.status);
+        }
+        const data = await res.json();
+        window.articles = Array.isArray(data) ? data : [];
+    } catch (e) {
+        console.error("記事データの読み込みに失敗しました", e);
+        window.articles = window.articles || [];
+    }
+
+    return window.articles;
+}
+
+// 安全に articles を取るヘルパー
+function getArticles() {
+    return window.articles || [];
+}
 
 // =====================================
 // DOM 用の変数
@@ -84,9 +53,10 @@ function normalizeText(str) {
 // ヒーロー記事（もっとも閲覧数が多い記事）
 // =====================================
 function renderHero() {
-    if (!heroContainer || articles.length === 0) return;
+    const list = getArticles();
+    if (!heroContainer || list.length === 0) return;
 
-    const featured = [...articles].sort((a, b) => b.views - a.views)[0];
+    const featured = [...list].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
 
     heroContainer.innerHTML = `
         <article class="featured-card" style="background-image:url('${featured.image}')"
@@ -110,7 +80,8 @@ function renderHero() {
 function renderLatest(limit = 6) {
     if (!latestGrid) return;
 
-    const sorted = [...articles].sort(
+    const list = getArticles();
+    const sorted = [...list].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
     );
 
@@ -137,8 +108,6 @@ function renderLatest(limit = 6) {
 
 // =====================================
 // 3D カルーセル（おすすめ記事）
-//   - カードクリックで記事へ
-//   - 自動スクロール付き
 // =====================================
 function initCarousel3D() {
     const carousel = document.querySelector(".carousel3d");
@@ -149,11 +118,14 @@ function initCarousel3D() {
     const nextBtn = carousel.querySelector(".carousel3d-nav-next");
     if (!items.length || !prevBtn || !nextBtn) return;
 
+    const list = getArticles();
+    if (!list.length) return;
+
     const total = items.length;
     let currentIndex = 0;
 
     // articles からおすすめ記事を取得（先頭から total 件）
-    const recommend = articles.slice(0, total);
+    const recommend = list.slice(0, total);
 
     // カード中身を注入 & クリックで記事ページへ
     items.forEach((item, i) => {
@@ -202,21 +174,16 @@ function initCarousel3D() {
         updatePositions();
     }
 
-    // =========================
-    // 自動スクロール（常に回る）
-    // =========================
+    // 自動スクロール
     let autoTimer = null;
 
     function startAutoScroll() {
-        // いったん止めてから再スタート
         if (autoTimer) clearInterval(autoTimer);
-        autoTimer = setInterval(goNext, 4000); // 4秒ごとに次へ
+        autoTimer = setInterval(goNext, 4000);
     }
 
-    // 最初に自動スクロールを開始
     startAutoScroll();
 
-    // ボタン操作したら一旦動かしてカウントもリセット
     nextBtn.addEventListener("click", () => {
         goNext();
         startAutoScroll();
@@ -227,39 +194,42 @@ function initCarousel3D() {
         startAutoScroll();
     });
 
-    // マウスホバーで止めたりはしない（スマホでも安定して回すため）
-    // 初期配置
-    updatePositions();
-    
-     // ======================================
-    // スワイプ操作対応（スマホ・iPad）
-    // ======================================
+    // スワイプ操作
     let touchStartX = 0;
     let touchEndX = 0;
     const SWIPE_THRESHOLD = 40;
-
     const carouselInner = carousel.querySelector(".carousel3d-inner");
 
     if (carouselInner) {
-        carouselInner.addEventListener("touchstart", (e) => {
-            touchStartX = e.touches[0].clientX;
-        }, { passive: true });
+        carouselInner.addEventListener(
+            "touchstart",
+            (e) => {
+                touchStartX = e.touches[0].clientX;
+            },
+            { passive: true }
+        );
 
-        carouselInner.addEventListener("touchend", (e) => {
-            touchEndX = e.changedTouches[0].clientX;
+        carouselInner.addEventListener(
+            "touchend",
+            (e) => {
+                touchEndX = e.changedTouches[0].clientX;
 
-            const diff = touchEndX - touchStartX;
+                const diff = touchEndX - touchStartX;
 
-            if (diff > SWIPE_THRESHOLD) {
-                goPrev();
-                startAutoScroll();
-            } else if (diff < -SWIPE_THRESHOLD) {
-                goNext();
-                startAutoScroll();
-            }
-        }, { passive: true });
+                if (diff > SWIPE_THRESHOLD) {
+                    goPrev();
+                    startAutoScroll();
+                } else if (diff < -SWIPE_THRESHOLD) {
+                    goNext();
+                    startAutoScroll();
+                }
+            },
+            { passive: true }
+        );
     }
 
+    // 初期配置
+    updatePositions();
 }
 
 // =====================================
@@ -319,20 +289,19 @@ function calcArticleScore(article, tokens) {
 
 function searchArticles(query) {
     if (!searchResultsEl) {
-        // 安全対策：検索結果エリアが無いページでは何もしない
         return;
     }
 
     const q = query.trim();
     if (!q) {
-        // 何も入力されていないときは検索結果を消す
         searchResultsEl.innerHTML = "";
         return;
     }
 
     const tokens = q.split(/\s+/);
+    const list = getArticles();
 
-    const scored = articles
+    const scored = list
         .map((article) => {
             const score = calcArticleScore(article, tokens);
             return { article, score };
@@ -369,7 +338,6 @@ function searchArticles(query) {
 function initSearch() {
     if (!searchInput) return;
 
-    // searchResultsEl が存在しないページなら、自動で作る
     if (!searchResultsEl) {
         const container = document.createElement("div");
         container.className = "search-results-container";
@@ -378,13 +346,11 @@ function initSearch() {
         searchResultsEl = container.querySelector("#searchResults");
     }
 
-    // 入力のたびに検索
     searchInput.addEventListener("input", (e) => {
         const value = e.target.value;
         searchArticles(value);
     });
 
-    // Enter で検索確定（挙動は input と同じだが、将来拡張用）
     searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -392,7 +358,6 @@ function initSearch() {
         }
     });
 
-    // クリアボタン
     if (clearBtn) {
         clearBtn.addEventListener("click", () => {
             searchInput.value = "";
@@ -422,7 +387,6 @@ function smoothScroll(targetSelector) {
     });
 }
 
-// HTML から呼べるようにグローバルへ
 window.toggleMenu = toggleMenu;
 window.smoothScroll = smoothScroll;
 
@@ -453,20 +417,20 @@ function initScrollReveal() {
 // =====================================
 // 初期化
 // =====================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     searchInput     = document.getElementById("searchInput");
     clearBtn        = document.getElementById("clear-btn");
     searchResultsEl = document.getElementById("searchResults");
     heroContainer   = document.getElementById("most-viewed-content");
     latestGrid      = document.getElementById("latest-grid");
 
+    // ★ ここで記事データを fetch
+    await loadArticles();
+
+    // 記事データが入ったあとに描画系を実行
     renderHero();
     renderLatest();
     initCarousel3D();
     initSearch();
     initScrollReveal();
 });
-
-
-
-
