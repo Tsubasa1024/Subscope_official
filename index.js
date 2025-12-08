@@ -52,55 +52,6 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
-
-
-// microCMS の1件を SUBSCOPE 形式に変換
-function mapCmsArticle(item) {
-    const rawCat = item.category;   // microCMS の category フィールド
-
-    let categoryId = "";
-    let categoryName = "";
-
-    if (typeof rawCat === "string") {
-        // "music" / "音楽" など
-        categoryId = rawCat;
-        categoryName = CATEGORY_LABELS[rawCat] || rawCat;
-    } else if (rawCat && typeof rawCat === "object") {
-        // { id: "music", name: "音楽" } みたいな形にも対応
-        if (rawCat.id) categoryId = rawCat.id;
-        if (rawCat.name) categoryName = rawCat.name;
-
-        if (!categoryName && categoryId) {
-            categoryName = CATEGORY_LABELS[categoryId] || categoryId;
-        }
-    }
-
-    return {
-        id: item.id,
-        title: item.title || "",
-        description: item.content
-            ? stripHtml(item.content).slice(0, 80) + "…"
-            : "",
-
-        // 🔸 ID（"music" とか）。フィルタなどに使う用
-        category: categoryId,
-
-        // 🔸 表示用の日本語ラベル（"音楽" など）
-        categoryName: categoryName,
-
-        // テキストフィールド「サービス名」 → "Apple Music" など
-        service: item.service || "",
-
-        tags: [],
-        date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
-        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
-        views: 0,
-        contentHtml: item.content || ""
-    };
-}
-
-
-
 // 一覧取得
 async function loadArticles() {
     if (window.articles && window.articles.length > 0) {
@@ -555,6 +506,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initScrollReveal();
     initAllPage();
 });
+
 
 
 
