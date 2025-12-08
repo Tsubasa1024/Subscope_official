@@ -923,15 +923,15 @@ if (serviceEl) {
         }
 
         // 関連記事（同じカテゴリ or 同じサービス）
-        const related = list
-            .filter(a =>
-                a.id !== article.id &&
-                (
-                    (a.categoryName || a.category) === categoryLabel
-                    a.service === article.service
-                )
-            )
-            .slice(0, 3);
+       const related = list
+    .filter(a =>
+        a.id !== article.id &&
+        (
+            (a.categoryName || a.category) === categoryLabel ||
+            a.service === article.service
+        )
+    )
+    .slice(0, 3);
 
         if (!related.length) {
             if (relatedSection) relatedSection.style.display = "none";
