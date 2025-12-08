@@ -894,8 +894,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ④ カテゴリでフィルタ
 function filterByCategory(cat) {
     if (cat === "すべて") return all;
-
-    return all.filter(a => a.categoryName === cat);
+    return all.filter(a => a.category === cat);  // ← ここポイント！
 }
 
     function renderList(list) {
