@@ -842,7 +842,6 @@
     });
     </script>
 
-<!-- すべての記事 タブ＆一覧描画 -->
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
     // ① microCMS から記事を読み込む（まだなら）
@@ -862,7 +861,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const gridEl = document.getElementById("all-grid");
     if (!tabsEl || !gridEl) return;
 
-    // 表示したいカテゴリ（タブのラベル）
+    // 表示したいタブのラベル
     const categories = [
         "すべて",
         "音楽",
@@ -875,38 +874,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         "その他"
     ];
 
-    // CMS から返ってくる category の ID → 日本語ラベルの対応
-    // ※ここは microCMS 側の ID に合わせておいてね
-    const CATEGORY_LABELS = {
-        music: "音楽",
-        movie: "映画・ドラマ",
-        study: "学習・資格",
-        health: "健康・フィットネス",
-        game: "ゲーム・エンタメ",
-        life: "生活・ライフスタイル",
-        ai: "AI・ツール",
-        other: "その他"
-    };
-
-    // 記事オブジェクトから「日本語のカテゴリ名」を取り出す関数
+    // 記事から「表示用カテゴリ名」を取る関数
     function getCategoryLabel(article) {
-        // すでに categoryName をつけている場合
-        if (article.categoryName) return article.categoryName;
-
-        const cat = article.category;
-
-        // 文字列の場合（例: "music"）
-        if (typeof cat === "string") {
-            return CATEGORY_LABELS[cat] || cat;
-        }
-
-        // オブジェクトの場合（例: { id: "music", name: "音楽" }）
-        if (cat && typeof cat === "object") {
-            if (cat.name) return cat.name;
-            if (cat.id) return CATEGORY_LABELS[cat.id] || cat.id;
-        }
-
-        return "";
+        return article.categoryName || article.category || "その他";
     }
 
     // ③ タブ描画
@@ -950,7 +920,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("");
     }
 
-    // 最初のタブ
+    // 最初のタブ（URL ?tab=〇〇 を優先）
     renderList(filterByCategory(tabParam));
 
     // ⑤ タブクリックで切り替え
