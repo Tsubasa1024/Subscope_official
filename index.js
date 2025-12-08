@@ -1,7 +1,7 @@
 // =====================================
 // 1. microCMS から記事を読む設定
 // =====================================
-window.articles = [];
+window.articles = window.articles || [];
 
 const SERVICE_ID = "subscope";
 const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
@@ -15,21 +15,24 @@ function stripHtml(html) {
 }
 
 // microCMS の1件を SUBSCOPE 形式に変換
+// ※ microCMS の「カテゴリー」フィールドは
+//   - テキスト: "音楽"
+//   - もしくは { id: "music", name: "音楽" }
+// どっちでも動くようにしてある
 function mapCmsArticle(item) {
-    // --- カテゴリを安全に取り出す ---
-    let categoryId = "";
-    let categoryName = "";
+    const rawCat = item.category;
 
-    const rawCat = item.category;   // ← microCMS のフィールドID「category」
+    let categoryId = "";
+    let categoryLabel = "";
 
     if (typeof rawCat === "string") {
-        // 例: "音楽" とか "music"
-        categoryId = rawCat;
-        categoryName = rawCat;      // すでに日本語ならそのまま
+        // 例: "音楽" のように日本語で入れている場合
+        categoryId   = rawCat;
+        categoryLabel = rawCat;
     } else if (rawCat && typeof rawCat === "object") {
-        // 例: { id: "music", name: "音楽" } みたいな場合の保険
+        // 例: { id: "music", name: "音楽" } など
         categoryId   = rawCat.id    || rawCat.value || "";
-        categoryName = rawCat.name  || rawCat.label || categoryId;
+        categoryLabel = rawCat.name || rawCat.label || categoryId;
     }
 
     return {
@@ -38,13 +41,14 @@ function mapCmsArticle(item) {
         description: item.content
             ? stripHtml(item.content).slice(0, 80) + "…"
             : "",
+        // カテゴリ
+        categoryId,                 // ID 用（フィルタなど）
+        categoryName: categoryLabel, // 表示用の日本語
+        category: categoryId,       // 互換用
 
-        // ★ここだけ増やす
-        categoryId,
-        categoryName,
-        category: categoryName,   // 既存コード用に一応残しておく
-
+        // サービス名（Apple Music など）
         service: item.service || "",
+
         tags: [],
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
@@ -52,6 +56,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 // 一覧取得
 async function loadArticles() {
     if (window.articles && window.articles.length > 0) {
@@ -388,71 +393,7 @@ function initSearch() {
 }
 
 // =====================================
-// 9. 「すべての記事」ページ
-// =====================================
-function renderAllArticles(list) {
-    const grid =
-        document.getElementById("all-articles-grid") ||
-        document.getElementById("all-grid");
-    if (!grid) return;
-
-    grid.innerHTML = list
-        .map(
-            (a) => `
-        <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(
-            a.id
-        )}'">
-            <div class="card-image" style="background-image:url('${a.image}')"></div>
-            <div class="card-body">
-                <div class="card-service">${a.service || "SUBSCOPE"}</div>
-                <h3 class="card-title">${a.title}</h3>
-                <p class="card-desc">${a.description}</p>
-                <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
-            </div>
-        </article>
-    `
-        )
-        .join("");
-}
-
-function initAllPage() {
-    const grid =
-        document.getElementById("all-articles-grid") ||
-        document.getElementById("all-grid");
-    if (!grid) return;
-
-    const list = getArticles();
-    const params = new URLSearchParams(location.search);
-    const tab = params.get("tab") || "すべて";
-
-    function filterByCategory(cat) {
-    if (cat === "すべて") return list;
-
-    // 「音楽」みたいなタブのラベルと、
-    // categoryName（日本語） or category（直接日本語を入れてる場合）を比較
-    return list.filter((a) => {
-        const label = a.categoryName || a.category || "";
-        return label === cat;
-    });
-}   
-    const initial = filterByCategory(tab);
-    renderAllArticles(initial);
-
-    const tabs = document.querySelectorAll("[data-category-tab]");
-    tabs.forEach((btn) => {
-        btn.addEventListener("click", () => {
-            const cat = btn.getAttribute("data-category-tab");
-            const filtered = filterByCategory(cat);
-            renderAllArticles(filtered);
-
-            tabs.forEach((b) => b.classList.remove("is-active"));
-            btn.classList.add("is-active");
-        });
-    });
-}
-
-// =====================================
-// 10. Menu / スクロールリビール
+// 9. Menu / スクロールリビール
 // =====================================
 function toggleMenu() {
     const overlay = document.getElementById("nav-overlay");
@@ -493,7 +434,7 @@ function initScrollReveal() {
 }
 
 // =====================================
-// 11. 初期化
+// 10. 初期化（トップページ / 共通）
 // =====================================
 document.addEventListener("DOMContentLoaded", async () => {
     searchInput     = document.getElementById("searchInput");
@@ -509,11 +450,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     initCarousel3D();
     initSearch();
     initScrollReveal();
-    initAllPage();
 });
-
-
-
-
-
-
