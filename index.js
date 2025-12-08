@@ -1,36 +1,71 @@
 // =====================================
-// 記事データを外部 JSON から読み込む（GIZMODO 入口）
+// 1. microCMS から記事を読む設定
 // =====================================
 window.articles = [];
 
-// 記事一覧を読み込む（最初に1回だけ）
+const SERVICE_ID = "subscope";           // 左上に出てるサービスID
+const API_KEY    = "YOUR_API_KEY";       // 読み取り用 APIキー（ここだけ書き換える）
+const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
+
+// HTML → プレーンテキスト（description 用）
+function stripHtml(html) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html || "";
+    return tmp.textContent || tmp.innerText || "";
+}
+
+// microCMS の 1件 を SUBSCOPE 形式に変換
+function mapCmsArticle(item) {
+    return {
+        id: item.id,
+        title: item.title || "",
+        // content から80文字だけ抜き出してリード文にする
+        description: item.content ? stripHtml(item.content).slice(0, 80) + "…" : "",
+        category: item.category ? (item.category.name || item.category.id || "") : "",
+        service: "",          // いまは未使用。後で microCMS にフィールド追加したらここに入れる
+        tags: [],             // 同上
+        date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
+        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
+        views: 0,             // 将来 PV カウントを入れたいなら microCMS に数値フィールド追加
+        contentHtml: item.content || ""
+    };
+}
+
+// 記事一覧を microCMS から取得（トップ・一覧・検索で共通）
 async function loadArticles() {
     if (window.articles && window.articles.length > 0) {
         return window.articles;
     }
 
     try {
-        const res = await fetch("articles.json", { cache: "no-store" });
+        const res = await fetch(`${ENDPOINT}?limit=100`, {
+            headers: {
+                "X-MICROCMS-API-KEY": API_KEY
+            }
+        });
+
         if (!res.ok) {
             throw new Error("HTTP error " + res.status);
         }
+
         const data = await res.json();
-        window.articles = Array.isArray(data) ? data : [];
+        const contents = data.contents || [];
+        window.articles = contents.map(mapCmsArticle);
     } catch (e) {
-        console.error("記事データの読み込みに失敗しました", e);
-        window.articles = window.articles || [];
+        console.error("microCMS から記事一覧の取得に失敗:", e);
+        window.articles = [];
     }
 
     return window.articles;
 }
 
-// 安全に articles を取るヘルパー
+// 安全に articles を読むヘルパー
 function getArticles() {
     return window.articles || [];
 }
 
 // =====================================
-// DOM 用の変数
+// 2. DOM 変数
 // =====================================
 let searchInput;
 let clearBtn;
@@ -39,32 +74,33 @@ let heroContainer;
 let latestGrid;
 
 // =====================================
-// テキスト正規化（小文字化＋スペース除去）
+// 3. テキスト正規化
 // =====================================
 function normalizeText(str) {
     if (!str) return "";
-    return str
-        .toString()
-        .toLowerCase()
-        .replace(/\s+/g, "");
+    return str.toString().toLowerCase().replace(/\s+/g, "");
 }
 
 // =====================================
-// ヒーロー記事（もっとも閲覧数が多い記事）
+// 4. ヒーロー記事（今は「最新日付」を使う）
 // =====================================
 function renderHero() {
     const list = getArticles();
     if (!heroContainer || list.length === 0) return;
 
-    const featured = [...list].sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+    // date の新しい順にソートして先頭をヒーローに
+    const sorted = [...list].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+    );
+    const featured = sorted[0];
 
     heroContainer.innerHTML = `
         <article class="featured-card" style="background-image:url('${featured.image}')"
                  onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
             <div class="featured-content">
                 <div class="featured-meta">
-                    <span class="tag">${featured.service}</span>
-                    <span>${featured.category}</span>
+                    <span class="tag">${featured.service || "SUBSCOPE"}</span>
+                    <span>${featured.category || ""}</span>
                 </div>
                 <h2 class="featured-title">${featured.title}</h2>
                 <p class="featured-desc">${featured.description}</p>
@@ -75,7 +111,7 @@ function renderHero() {
 }
 
 // =====================================
-// 最新記事（date でソートして上位を表示）
+// 5. 最新記事グリッド（トップ用）
 // =====================================
 function renderLatest(limit = 6) {
     if (!latestGrid) return;
@@ -84,7 +120,6 @@ function renderLatest(limit = 6) {
     const sorted = [...list].sort(
         (a, b) => new Date(b.date) - new Date(a.date)
     );
-
     const target = sorted.slice(0, limit);
 
     latestGrid.innerHTML = target
@@ -95,10 +130,10 @@ function renderLatest(limit = 6) {
         )}'">
             <div class="card-image" style="background-image:url('${a.image}')"></div>
             <div class="card-body">
-                <div class="card-service">${a.service}</div>
+                <div class="card-service">${a.service || "SUBSCOPE"}</div>
                 <h3 class="card-title">${a.title}</h3>
                 <p class="card-desc">${a.description}</p>
-                <div class="card-date">${a.date}</div>
+                <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
             </div>
         </article>
     `
@@ -107,7 +142,7 @@ function renderLatest(limit = 6) {
 }
 
 // =====================================
-// 3D カルーセル（おすすめ記事）
+// 6. 3D カルーセル（おすすめ）
 // =====================================
 function initCarousel3D() {
     const carousel = document.querySelector(".carousel3d");
@@ -123,11 +158,8 @@ function initCarousel3D() {
 
     const total = items.length;
     let currentIndex = 0;
-
-    // articles からおすすめ記事を取得（先頭から total 件）
     const recommend = list.slice(0, total);
 
-    // カード中身を注入 & クリックで記事ページへ
     items.forEach((item, i) => {
         const a = recommend[i % recommend.length];
 
@@ -149,18 +181,13 @@ function initCarousel3D() {
 
     function updatePositions() {
         items.forEach((item, i) => {
-            item.className = "carousel3d-item"; // いったんリセット
+            item.className = "carousel3d-item";
             const offset = (i - currentIndex + total) % total;
 
-            if (offset === 0) {
-                item.classList.add("is-center");
-            } else if (offset === 1) {
-                item.classList.add("is-right");
-            } else if (offset === total - 1) {
-                item.classList.add("is-left");
-            } else {
-                item.classList.add("is-back");
-            }
+            if (offset === 0) item.classList.add("is-center");
+            else if (offset === 1) item.classList.add("is-right");
+            else if (offset === total - 1) item.classList.add("is-left");
+            else item.classList.add("is-back");
         });
     }
 
@@ -174,27 +201,23 @@ function initCarousel3D() {
         updatePositions();
     }
 
-    // 自動スクロール
     let autoTimer = null;
-
     function startAutoScroll() {
         if (autoTimer) clearInterval(autoTimer);
         autoTimer = setInterval(goNext, 4000);
     }
 
     startAutoScroll();
-
     nextBtn.addEventListener("click", () => {
         goNext();
         startAutoScroll();
     });
-
     prevBtn.addEventListener("click", () => {
         goPrev();
         startAutoScroll();
     });
 
-    // スワイプ操作
+    // スワイプ対応
     let touchStartX = 0;
     let touchEndX = 0;
     const SWIPE_THRESHOLD = 40;
@@ -213,9 +236,7 @@ function initCarousel3D() {
             "touchend",
             (e) => {
                 touchEndX = e.changedTouches[0].clientX;
-
                 const diff = touchEndX - touchStartX;
-
                 if (diff > SWIPE_THRESHOLD) {
                     goPrev();
                     startAutoScroll();
@@ -228,15 +249,12 @@ function initCarousel3D() {
         );
     }
 
-    // 初期配置
     updatePositions();
 }
 
 // =====================================
-// 最強検索ロジック
+// 7. 検索ロジック
 // =====================================
-
-// 記事1件ごとのスコア計算
 function calcArticleScore(article, tokens) {
     const title = normalizeText(article.title);
     const desc = normalizeText(article.description);
@@ -251,46 +269,32 @@ function calcArticleScore(article, tokens) {
 
         let matched = false;
 
-        // タイトル優先
         if (title.includes(token)) {
             totalScore += 50;
             matched = true;
         }
-
-        // 説明
         if (desc.includes(token)) {
             totalScore += 25;
             matched = true;
         }
-
-        // サービス名
         if (service.includes(token)) {
             totalScore += 15;
             matched = true;
         }
-
-        // タグ
         if (tags.includes(token)) {
             totalScore += 15;
             matched = true;
         }
 
-        // どこにもヒットしない → この記事は不採用（AND 検索）
-        if (!matched) {
-            return 0;
-        }
+        if (!matched) return 0;
     }
 
-    // 人気度を少し加点
     totalScore += (article.views || 0) * 0.05;
-
     return totalScore;
 }
 
 function searchArticles(query) {
-    if (!searchResultsEl) {
-        return;
-    }
+    if (!searchResultsEl) return;
 
     const q = query.trim();
     if (!q) {
@@ -309,15 +313,14 @@ function searchArticles(query) {
         .filter((item) => item.score > 0)
         .sort((a, b) => b.score - a.score);
 
-    if (scored.length === 0) {
+    if (!scored.length) {
         searchResultsEl.innerHTML =
             `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
         return;
     }
 
     searchResultsEl.innerHTML = scored
-        .map(({ article }) => {
-            return `
+        .map(({ article }) => `
             <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(
                 article.id
             )}'">
@@ -327,13 +330,12 @@ function searchArticles(query) {
                     <p>${article.description}</p>
                 </div>
             </div>
-        `;
-        })
+        `)
         .join("");
 }
 
 // =====================================
-// 検索イベント紐付け
+// 8. 検索イベント紐付け
 // =====================================
 function initSearch() {
     if (!searchInput) return;
@@ -347,8 +349,7 @@ function initSearch() {
     }
 
     searchInput.addEventListener("input", (e) => {
-        const value = e.target.value;
-        searchArticles(value);
+        searchArticles(e.target.value);
     });
 
     searchInput.addEventListener("keydown", (e) => {
@@ -368,31 +369,88 @@ function initSearch() {
 }
 
 // =====================================
-// Menu / スムーススクロール
+// 9. 「すべての記事」ページ用の一覧描画
+// =====================================
+function renderAllArticles(list) {
+    const grid =
+        document.getElementById("all-articles-grid") ||
+        document.getElementById("all-grid");
+    if (!grid) return;
+
+    grid.innerHTML = list
+        .map(
+            (a) => `
+        <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(
+            a.id
+        )}'">
+            <div class="card-image" style="background-image:url('${a.image}')"></div>
+            <div class="card-body">
+                <div class="card-service">${a.service || "SUBSCOPE"}</div>
+                <h3 class="card-title">${a.title}</h3>
+                <p class="card-desc">${a.description}</p>
+                <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
+            </div>
+        </article>
+    `
+        )
+        .join("");
+}
+
+function initAllPage() {
+    const grid =
+        document.getElementById("all-articles-grid") ||
+        document.getElementById("all-grid");
+    if (!grid) return; // all.html じゃないページ
+
+    const list = getArticles();
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab") || "すべて";
+
+    function filterByCategory(cat) {
+        if (cat === "すべて") return list;
+        return list.filter((a) => a.category === cat);
+    }
+
+    // 初期表示
+    const initial = filterByCategory(tab);
+    renderAllArticles(initial);
+
+    // タブボタン（data-category-tab属性が付いている前提）
+    const tabs = document.querySelectorAll("[data-category-tab]");
+    tabs.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const cat = btn.getAttribute("data-category-tab");
+            const filtered = filterByCategory(cat);
+            renderAllArticles(filtered);
+
+            tabs.forEach((b) => b.classList.remove("is-active"));
+            btn.classList.add("is-active");
+        });
+    });
+}
+
+// =====================================
+// 10. Menu / スクロールリビール
 // =====================================
 function toggleMenu() {
     const overlay = document.getElementById("nav-overlay");
     if (!overlay) return;
     overlay.classList.toggle("open");
 }
+window.toggleMenu = toggleMenu;
 
 function smoothScroll(targetSelector) {
     const el = document.querySelector(targetSelector);
     if (!el) return;
     const rectTop = el.getBoundingClientRect().top + window.scrollY;
-    const offset = 80; // 固定ヘッダー分
+    const offset = 80;
     window.scrollTo({
         top: rectTop - offset,
         behavior: "smooth"
     });
 }
-
-window.toggleMenu = toggleMenu;
 window.smoothScroll = smoothScroll;
 
-// =====================================
-// スクロールリビール（.reveal 用）
-// =====================================
 function initScrollReveal() {
     const targets = document.querySelectorAll(".reveal");
     if (!targets.length) return;
@@ -406,16 +464,14 @@ function initScrollReveal() {
                 }
             });
         },
-        {
-            threshold: 0.15
-        }
+        { threshold: 0.15 }
     );
 
     targets.forEach((el) => observer.observe(el));
 }
 
 // =====================================
-// 初期化
+// 11. 初期化
 // =====================================
 document.addEventListener("DOMContentLoaded", async () => {
     searchInput     = document.getElementById("searchInput");
@@ -424,13 +480,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     heroContainer   = document.getElementById("most-viewed-content");
     latestGrid      = document.getElementById("latest-grid");
 
-    // ★ ここで記事データを fetch
+    // ★ まず microCMS から記事一覧を取得
     await loadArticles();
 
-    // 記事データが入ったあとに描画系を実行
+    // トップページ系
     renderHero();
     renderLatest();
     initCarousel3D();
+
+    // 共通機能
     initSearch();
     initScrollReveal();
+
+    // すべての記事ページ用
+    initAllPage();
 });
