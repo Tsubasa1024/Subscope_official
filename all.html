@@ -876,7 +876,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 記事から「表示用カテゴリ名」を取る関数
     function getCategoryLabel(article) {
-        return article.categoryName || article.category || "その他";
+        // index.js 側で category に日本語が入っているので
+        // そのまま返すだけでOK
+        return article.category || "";
     }
 
     // ③ タブ描画
