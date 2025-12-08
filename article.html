@@ -914,7 +914,20 @@ if (serviceEl) {
 
         // タイトル & リード
         if (titleEl) titleEl.textContent = article.title || "";
-        if (leadEl)  leadEl.textContent  = article.description || "";
+        if (leadEl) {
+    // 本文 HTML から最初の <p> を抜き出してリードにする
+    const tmp = document.createElement("div");
+    tmp.innerHTML = article.contentHtml || article.content || "";
+    const firstP = tmp.querySelector("p");
+
+    if (firstP) {
+        leadEl.textContent = firstP.textContent;
+    } else {
+        // 念のため、なかったときだけ description を使う
+        leadEl.textContent = article.description || "";
+    }
+}
+
 
         // 本文
         if (contentEl) {
