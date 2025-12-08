@@ -901,24 +901,16 @@ dateEl.textContent     = (article.date || "").replace(/-/g, ".");
             kv.style.backgroundImage = `url('${img}')`;
         }
 
-        // メタ情報
-        const serviceName = article.service || article.serviceName || "";
-        if (serviceEl) {
-            if (serviceName) {
-                serviceEl.textContent = serviceName;
-                serviceEl.style.display = "inline-block";
-            } else {
-                serviceEl.style.display = "none";
-            }
-        }
-
-        if (categoryEl) {
-            categoryEl.textContent = categoryText;
-        }
-
-        if (dateEl) {
-            dateEl.textContent = (article.date || "").replace(/-/g, ".");
-        }
+// メタ情報
+const serviceName = article.service || article.serviceName || "";
+if (serviceEl) {
+    if (serviceName) {
+        serviceEl.textContent = serviceName;
+        serviceEl.style.display = "inline-block";
+    } else {
+        serviceEl.style.display = "none";
+    }
+}
 
         // タイトル & リード
         if (titleEl) titleEl.textContent = article.title || "";
