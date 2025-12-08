@@ -842,42 +842,57 @@
     });
     </script>
 
-    <!-- すべての記事 タブ＆一覧描画 -->
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const all = window.articles || [];
+<!-- すべての記事 タブ＆一覧描画 -->
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    // ① microCMS から記事を読み込む（まだなら）
+    if (typeof loadArticles === "function" &&
+        (!window.articles || window.articles.length === 0)) {
+        await loadArticles();   // ← index.js のやつを待つ
+    }
 
-        const url = new URLSearchParams(window.location.search);
-        const tabParam = url.get("tab") || "すべて";
+    // ② 記事一覧を取得
+    const all = window.articles || [];
 
-        const tabsEl = document.getElementById("tabs");
-        const gridEl = document.getElementById("all-grid");
-        if (!tabsEl || !gridEl) return;
+    // URL パラメータからタブを取得
+    const url = new URLSearchParams(window.location.search);
+    const tabParam = url.get("tab") || "すべて";
 
-        const categories = [
-            "すべて",
-            "音楽",
-            "映画・ドラマ",
-            "学習・資格",
-            "健康・フィットネス",
-            "ゲーム・エンタメ",
-            "生活・ライフスタイル",
-            "AI・ツール",
-            "その他"
-        ];
+    const tabsEl = document.getElementById("tabs");
+    const gridEl = document.getElementById("all-grid");
+    if (!tabsEl || !gridEl) return;
 
-        tabsEl.innerHTML = categories
-            .map(c => `
-                <button class="tab ${c === tabParam ? "active" : ""}"
-                        onclick="changeTab('${c}')">${c}</button>
-            `)
-            .join("");
+    // 表示したいカテゴリ（microCMS の名前と合わせる）
+    const categories = [
+        "すべて",
+        "音楽",
+        "映画・ドラマ",
+        "学習・資格",
+        "健康・フィットネス",
+        "ゲーム・エンタメ",
+        "生活・ライフスタイル",
+        "AI・ツール",
+        "その他"
+    ];
 
-        const filtered = tabParam === "すべて"
-            ? all
-            : all.filter(a => a.category === tabParam);
+    // ③ タブを描画
+    tabsEl.innerHTML = categories
+        .map(c => `
+            <button class="tab ${c === tabParam ? "active" : ""}"
+                    data-category-tab="${c}">
+                ${c}
+            </button>
+        `)
+        .join("");
 
-        if (!filtered.length) {
+    // ④ 記事をカテゴリでフィルタ
+    function filterByCategory(cat) {
+        if (cat === "すべて") return all;
+        return all.filter(a => a.category === cat);
+    }
+
+    function renderList(list) {
+        if (!list.length) {
             gridEl.innerHTML = `
                 <div class="empty-message">
                     まだ記事がありません。
@@ -886,7 +901,7 @@
             return;
         }
 
-        gridEl.innerHTML = filtered
+        gridEl.innerHTML = list
             .map(a => `
                 <div class="article-card" onclick="openArticle('${a.id}')">
                     <div class="card-image" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
@@ -899,21 +914,36 @@
                 </div>
             `)
             .join("");
+    }
+
+    // 最初のタブ
+    renderList(filterByCategory(tabParam));
+
+    // ⑤ タブクリックで切り替え
+    const tabButtons = tabsEl.querySelectorAll(".tab");
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const cat = btn.getAttribute("data-category-tab");
+            // URL も更新（リロードしても同じタブになる）
+            const encoded = encodeURIComponent(cat);
+            history.replaceState(null, "", "all.html?tab=" + encoded);
+
+            tabButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            renderList(filterByCategory(cat));
+        });
     });
+});
 
-    function changeTab(cat) {
-        const encoded = encodeURIComponent(cat);
-        window.location.href = "all.html?tab=" + encoded;
-    }
+function openArticle(id) {
+    window.location.href = "article.html?id=" + encodeURIComponent(id);
+}
 
-    function openArticle(id) {
-        window.location.href = "article.html?id=" + encodeURIComponent(id);
-    }
-
-    function toggleMenu() {
-        const nav = document.getElementById("nav-overlay");
-        if (nav) nav.classList.toggle("open");
-    }
-    </script>
+function toggleMenu() {
+    const nav = document.getElementById("nav-overlay");
+    if (nav) nav.classList.toggle("open");
+}
+</script>
 </body>
 </html>
