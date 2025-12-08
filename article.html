@@ -875,22 +875,25 @@
             return;
         }
 
-        // ▼ ここが肝心：記事から「日本語カテゴリ」を決める
-        const categoryText =
-            article.categoryName ||   // index.js で付けた名前があれば最優先
-            article.category    ||    // それが無ければ category の文字列
-            "その他";
+// ===== カテゴリー（日本語ラベル） =====
+const categoryLabel =
+    article.categoryName ||   // index.js でつけた表示用
+    article.category    ||    // 直接文字列で入れている場合
+    "その他";
 
-        // パンくず
-        if (breadcrumbEl) {
-            breadcrumbEl.innerHTML = `
-                <a href="index.html">トップ</a> /
-                <a href="all.html?tab=${encodeURIComponent(categoryText)}">
-                    ${categoryText}
-                </a> /
-                <span>${article.title || ""}</span>
-            `;
-        }
+// パンくず
+breadcrumbEl.innerHTML = `
+    <a href="index.html">トップ</a> /
+    <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">
+        ${categoryLabel}
+    </a> /
+    <span>${article.title}</span>
+`;
+
+// メタ
+serviceEl.textContent  = article.service || "SUBSCOPE";
+categoryEl.textContent = categoryLabel;
+dateEl.textContent     = (article.date || "").replace(/-/g, ".");
 
         // ヒーロー画像
         if (kv) {
