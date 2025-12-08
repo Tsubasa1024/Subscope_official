@@ -14,21 +14,22 @@ function stripHtml(html) {
     return tmp.textContent || tmp.innerText || "";
 }
 
-// ★ microCMS の1件を SUBSCOPE 形式に変換
+// microCMS の1件を SUBSCOPE 形式に変換
 function mapCmsArticle(item) {
-    // --- カテゴリーを安全に取り出す ---
-    let categoryLabel = "";
+    // --- カテゴリを安全に取り出す ---
+    let categoryId = "";
+    let categoryName = "";
 
-    const rawCat = item.category; // microCMS のフィールドID「category」
+    const rawCat = item.category;   // ← microCMS のフィールドID「category」
 
     if (typeof rawCat === "string") {
         // 例: "音楽" とか "music"
-        categoryLabel = rawCat;
+        categoryId = rawCat;
+        categoryName = rawCat;      // すでに日本語ならそのまま
     } else if (rawCat && typeof rawCat === "object") {
-        // 例: { id: "music", name: "音楽" } みたいな形の保険
-        if (rawCat.name) categoryLabel = rawCat.name;
-        else if (rawCat.value) categoryLabel = rawCat.value;
-        else if (rawCat.id) categoryLabel = rawCat.id;
+        // 例: { id: "music", name: "音楽" } みたいな場合の保険
+        categoryId   = rawCat.id    || rawCat.value || "";
+        categoryName = rawCat.name  || rawCat.label || categoryId;
     }
 
     return {
@@ -38,12 +39,12 @@ function mapCmsArticle(item) {
             ? stripHtml(item.content).slice(0, 80) + "…"
             : "",
 
-        // ★ここを「日本語のカテゴリ名」に統一
-        category: categoryLabel || "",
+        // ★ここだけ増やす
+        categoryId,
+        categoryName,
+        category: categoryName,   // 既存コード用に一応残しておく
 
-        // microCMS の「サービス名」テキストフィールド
         service: item.service || "",
-
         tags: [],
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
@@ -51,6 +52,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 
 // microCMS の1件を SUBSCOPE 形式に変換
 function mapCmsArticle(item) {
@@ -553,6 +555,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initScrollReveal();
     initAllPage();
 });
+
 
 
 
