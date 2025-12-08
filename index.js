@@ -2,20 +2,9 @@
 // 1. microCMS から記事を読む設定
 // =====================================
 window.articles = [];
-// 英語ID → 日本語ラベル
-const CATEGORY_LABELS = {
-    music: "音楽",
-    movie: "映画・ドラマ",
-    study: "学習・資格",
-    health: "健康・フィットネス",
-    fitness: "健康・フィットネス",
-    game: "ゲーム・エンタメ",
-    life: "生活・ライフスタイル",
-    ai: "AI・ツール",
-    other: "その他"
-};
-const SERVICE_ID = "subscope";               // サービスID
-const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";           // ← ここを自分のキーに書き換える
+
+const SERVICE_ID = "subscope";
+const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
 
 // HTML → プレーンテキスト（description 用）
@@ -23,6 +12,44 @@ function stripHtml(html) {
     const tmp = document.createElement("div");
     tmp.innerHTML = html || "";
     return tmp.textContent || tmp.innerText || "";
+}
+
+// ★ microCMS の1件を SUBSCOPE 形式に変換
+function mapCmsArticle(item) {
+    // --- カテゴリーを安全に取り出す ---
+    let categoryLabel = "";
+
+    const rawCat = item.category; // microCMS のフィールドID「category」
+
+    if (typeof rawCat === "string") {
+        // 例: "音楽" とか "music"
+        categoryLabel = rawCat;
+    } else if (rawCat && typeof rawCat === "object") {
+        // 例: { id: "music", name: "音楽" } みたいな形の保険
+        if (rawCat.name) categoryLabel = rawCat.name;
+        else if (rawCat.value) categoryLabel = rawCat.value;
+        else if (rawCat.id) categoryLabel = rawCat.id;
+    }
+
+    return {
+        id: item.id,
+        title: item.title || "",
+        description: item.content
+            ? stripHtml(item.content).slice(0, 80) + "…"
+            : "",
+
+        // ★ここを「日本語のカテゴリ名」に統一
+        category: categoryLabel || "",
+
+        // microCMS の「サービス名」テキストフィールド
+        service: item.service || "",
+
+        tags: [],
+        date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
+        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
+        views: 0,
+        contentHtml: item.content || ""
+    };
 }
 
 // microCMS の1件を SUBSCOPE 形式に変換
@@ -526,5 +553,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     initScrollReveal();
     initAllPage();
 });
+
 
 
