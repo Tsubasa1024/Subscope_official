@@ -22,17 +22,14 @@ function stripHtml(html) {
 function mapCmsArticle(item) {
     const rawCat = item.category;
 
-    let categoryId = "";
-    let categoryLabel = "";
+    let category = "";
 
     if (typeof rawCat === "string") {
-        // 例: "音楽" のように日本語で入れている場合
-        categoryId   = rawCat;
-        categoryLabel = rawCat;
+        // microCMS が "音楽" を返す
+        category = rawCat;
     } else if (rawCat && typeof rawCat === "object") {
-        // 例: { id: "music", name: "音楽" } など
-        categoryId   = rawCat.id    || rawCat.value || "";
-        categoryLabel = rawCat.name || rawCat.label || categoryId;
+        // オブジェクト形式の場合（保険）
+        category = rawCat.name || rawCat.id || "";
     }
 
     return {
@@ -41,15 +38,12 @@ function mapCmsArticle(item) {
         description: item.content
             ? stripHtml(item.content).slice(0, 80) + "…"
             : "",
-        // カテゴリ
-        categoryId,                 // ID 用（フィルタなど）
-        categoryName: categoryLabel, // 表示用の日本語
-        category: categoryId,       // 互換用
 
-        // サービス名（Apple Music など）
+        // ← もう日本語が入っている！
+        category: category,
+        categoryName: category,
+
         service: item.service || "",
-
-        tags: [],
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
         views: 0,
@@ -451,3 +445,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
