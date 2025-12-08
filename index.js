@@ -426,10 +426,15 @@ function initAllPage() {
     const tab = params.get("tab") || "すべて";
 
     function filterByCategory(cat) {
-        if (cat === "すべて") return list;
-        return list.filter((a) => a.category === cat);
-    }
+    if (cat === "すべて") return list;
 
+    // 「音楽」みたいなタブのラベルと、
+    // categoryName（日本語） or category（直接日本語を入れてる場合）を比較
+    return list.filter((a) => {
+        const label = a.categoryName || a.category || "";
+        return label === cat;
+    });
+}   
     const initial = filterByCategory(tab);
     renderAllArticles(initial);
 
@@ -506,6 +511,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initScrollReveal();
     initAllPage();
 });
+
 
 
 
