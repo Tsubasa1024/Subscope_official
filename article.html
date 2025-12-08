@@ -892,13 +892,20 @@
         const categoryId    = article.category || "";
         const categoryLabel = getCategoryLabel(categoryId) || "その他";
 
-        // ===== パンくず =====
-        const tabLabel = categoryLabel || "すべて";
-        breadcrumbEl.innerHTML = `
-            <a href="index.html">トップ</a> /
-            <a href="all.html?tab=${encodeURIComponent(tabLabel)}">${tabLabel}</a> /
-            <span>${article.title || ""}</span>
-        `;
+    // パンくず
+    breadcrumbEl.innerHTML = `
+        <a href="index.html">トップ</a> /
+        <a href="all.html?tab=${encodeURIComponent(article.category || "すべて")}">
+            ${article.category || "その他"}
+        </a> /
+        <span>${article.title}</span>
+    `;
+
+    // メタ
+    serviceEl.textContent  = article.service || "SUBSCOPE";
+    categoryEl.textContent = article.category || "その他";
+    dateEl.textContent     = (article.date || "").replace(/-/g, ".");
+
 
         // ===== ヒーロー画像 =====
         const img = article.image || "images/sample1.jpg";
