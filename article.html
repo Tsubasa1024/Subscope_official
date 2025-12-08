@@ -73,7 +73,7 @@
         }
 
         /* =========================================
-           Fixed Header（all.html / index.html と同じ）
+           Fixed Header
            ========================================= */
         .fixed-header {
             position: fixed;
@@ -89,12 +89,10 @@
         .top-header {
             max-width: var(--container-width);
             margin: 0 auto;
-            padding: 12px 24px;
-            padding-bottom: 16px;
+            padding: 12px 24px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: visible;
         }
 
         .nav-left,
@@ -305,7 +303,7 @@
         }
 
         /* =========================================
-           Article Layout（ブログっぽく）
+           Article Layout
            ========================================= */
         main {
             padding-top: 104px;
@@ -404,7 +402,7 @@
             margin-bottom: 6px;
         }
 
-        /* 関連記事（そのまま残す） */
+        /* 関連記事 */
         .related-section {
             margin-top: 56px;
             padding-top: 28px;
@@ -841,107 +839,130 @@
     </script>
 
     <!-- 記事データ読み込み -->
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(location.search);
+        const id = params.get("id");
 
-    // まだ記事が読み込まれていなければ microCMS から取得
-    if (!window.articles || window.articles.length === 0) {
-        if (typeof loadArticles === "function") {
-            await loadArticles();   // ← index.js のやつを待つ
-        }
-    }
-
-    const list = window.articles || [];
-    const article = list.find(a => a.id === id) || list[0];
-
-    const kv             = document.getElementById("article-kv");
-    const titleEl        = document.getElementById("article-title");
-    const leadEl         = document.getElementById("article-lead");
-    const serviceEl      = document.getElementById("meta-service");
-    const categoryEl     = document.getElementById("meta-category");
-    const dateEl         = document.getElementById("meta-date");
-    const contentEl      = document.getElementById("article-content");
-    const breadcrumbEl   = document.getElementById("breadcrumb");
-    const relatedGrid    = document.getElementById("related-grid");
-    const relatedSection = document.getElementById("related-section");
-
-    if (!article) {
-        contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
-        relatedSection.style.display = "none";
-        return;
-    }
-
-    // パンくず
-    breadcrumbEl.innerHTML = `
-        <a href="index.html">トップ</a> /
-        <a href="all.html?tab=${encodeURIComponent(article.category || "すべて")}">
-            ${article.category || "その他"}
-        </a> /
-        <span>${article.title}</span>
-    `;
-
-    // ヒーロー画像
-    const img = article.image || "images/sample1.jpg";
-    kv.style.backgroundImage = `url('${img}')`;
-
-    // メタ
-    serviceEl.textContent  = article.service || "SUBSCOPE";
-    categoryEl.textContent = article.category || "その他";
-    dateEl.textContent     = (article.date || "").replace(/-/g, ".");
-
-    // タイトル & リード
-    titleEl.textContent = article.title || "";
-    leadEl.textContent  = article.description || "";
-
-    // 本文
-    const bodyHtml = article.contentHtml || article.content || "";
-    if (bodyHtml) {
-        contentEl.innerHTML = bodyHtml;
-    } else {
-        contentEl.innerHTML = `
-            <p>この記事の詳細コンテンツは現在準備中です。</p>
-        `;
-    }
-
-    // 関連記事（同カテゴリ or 同サービス）
-    const related = list
-        .filter(a => a.id !== article.id &&
-            (a.category === article.category || a.service === article.service))
-        .slice(0, 3);
-
-    if (!related.length) {
-        relatedSection.style.display = "none";
-    } else {
-        relatedGrid.innerHTML = related.map(a => `
-            <div class="related-card" onclick="openArticle('${a.id}')">
-                <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-                <div class="related-body">
-                    <div class="related-service">${a.service || ""}</div>
-                    <div class="related-title-text">${a.title || ""}</div>
-                    <div class="related-date">${(a.date || "").replace(/-/g,".")}</div>
-                </div>
-            </div>
-        `).join("");
-    }
-
-    // スクロールでふわっと出す
-    const reveals = document.querySelectorAll(".reveal");
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) {
-                e.target.classList.add("active");
-                io.unobserve(e.target);
+        // まだ記事が読み込まれていなければ microCMS から取得
+        if (!window.articles || window.articles.length === 0) {
+            if (typeof loadArticles === "function") {
+                await loadArticles();   // index.js のロードを待つ
             }
-        });
-    }, { threshold: 0.1 });
-    reveals.forEach(el => io.observe(el));
-});
+        }
 
-function openArticle(id) {
-    window.location.href = "article.html?id=" + encodeURIComponent(id);
-}
-</script>
+        const list = window.articles || [];
+        const article = list.find(a => a.id === id) || list[0];
+
+        const kv             = document.getElementById("article-kv");
+        const titleEl        = document.getElementById("article-title");
+        const leadEl         = document.getElementById("article-lead");
+        const serviceEl      = document.getElementById("meta-service");
+        const categoryEl     = document.getElementById("meta-category");
+        const dateEl         = document.getElementById("meta-date");
+        const contentEl      = document.getElementById("article-content");
+        const breadcrumbEl   = document.getElementById("breadcrumb");
+        const relatedGrid    = document.getElementById("related-grid");
+        const relatedSection = document.getElementById("related-section");
+
+        if (!article) {
+            contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+            relatedSection.style.display = "none";
+            return;
+        }
+
+        // カテゴリーID → 日本語ラベル
+        const CATEGORY_LABELS = {
+            music: "音楽",
+            movie: "映画・ドラマ",
+            study: "学習・資格",
+            health: "健康・フィットネス",
+            game: "ゲーム・エンタメ",
+            life: "生活・ライフスタイル",
+            ai: "AI・ツール",
+            other: "その他"
+        };
+
+        function getCategoryLabel(cat) {
+            if (!cat) return "";
+            // すでに日本語が入っている場合はそのまま
+            if (CATEGORY_LABELS[cat]) return CATEGORY_LABELS[cat];
+            return cat;
+        }
+
+        const categoryId    = article.category || "";
+        const categoryLabel = getCategoryLabel(categoryId) || "その他";
+
+        // パンくず
+        const tabLabel = categoryLabel || "すべて";
+        breadcrumbEl.innerHTML = `
+            <a href="index.html">トップ</a> /
+            <a href="all.html?tab=${encodeURIComponent(tabLabel)}">
+                ${tabLabel}
+            </a> /
+            <span>${article.title || ""}</span>
+        `;
+
+        // ヒーロー画像
+        const img = article.image || "images/sample1.jpg";
+        kv.style.backgroundImage = `url('${img}')`;
+
+        // メタ
+        serviceEl.textContent  = article.service || "SUBSCOPE";
+        categoryEl.textContent = categoryLabel;
+        dateEl.textContent     = (article.date || "").replace(/-/g, ".");
+
+        // タイトル & リード
+        titleEl.textContent = article.title || "";
+        leadEl.textContent  = article.description || "";
+
+        // 本文
+        const bodyHtml = article.contentHtml || article.content || "";
+        if (bodyHtml) {
+            contentEl.innerHTML = bodyHtml;
+        } else {
+            contentEl.innerHTML = `
+                <p>この記事の詳細コンテンツは現在準備中です。</p>
+            `;
+        }
+
+        // 関連記事（同じ categoryId または同じ service）
+        const related = list
+            .filter(a => a.id !== article.id &&
+                (a.category === categoryId || a.service === article.service))
+            .slice(0, 3);
+
+        if (!related.length) {
+            relatedSection.style.display = "none";
+        } else {
+            relatedGrid.innerHTML = related.map(a => `
+                <div class="related-card" onclick="openArticle('${a.id}')">
+                    <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                    <div class="related-body">
+                        <div class="related-service">${a.service || ""}</div>
+                        <div class="related-title-text">${a.title || ""}</div>
+                        <div class="related-date">${(a.date || "").replace(/-/g,".")}</div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        // スクロールでふわっと出す
+        const reveals = document.querySelectorAll(".reveal");
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add("active");
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => io.observe(el));
+    });
+
+    function openArticle(id) {
+        window.location.href = "article.html?id=" + encodeURIComponent(id);
+    }
+    </script>
 </body>
 </html>
