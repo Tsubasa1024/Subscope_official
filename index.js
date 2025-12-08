@@ -42,7 +42,7 @@ function mapCmsArticle(item) {
         id: item.id,
         title: item.title || "",
         description: item.content
-            ? stripHtml(item.content).slice(0, 80) + "…"
+            ? stripHtml(item.content)
             : "",
 
         // ここを統一ルールにする
@@ -452,5 +452,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
