@@ -892,16 +892,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         .join("");
 
     // ④ カテゴリでフィルタ
-   function filterByCategory(cat) {
+function filterByCategory(cat) {
     if (cat === "すべて") return all;
 
-    // 「音楽」「映画・ドラマ」などタブのラベルと、
-    // 記事オブジェクトの categoryName / category を比較
-    return all.filter(a => {
-        const label = a.categoryName || a.category || "";
-        return label === cat;
-    });
+    return all.filter(a => a.categoryName === cat);
 }
+
     function renderList(list) {
         if (!list.length) {
             gridEl.innerHTML = `
