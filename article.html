@@ -774,6 +774,201 @@
 
     <!-- 検索 UI（スマホの開閉など） -->
     <script>
+    window.addEventListener("DOMContentLoaded", function () {
+        const fixedHeader  = document.querySelector(".fixed-header");
+        const searchWrapper = document.querySelector(".search-wrapper");
+        const searchInput   = document.getElementById("searchInput");
+        const clearBtn      = document.getElementById("clear-btn");
+
+        if (!fixedHeader || !searchWrapper || !searchInput) return;
+
+        let isOpen = false;
+        const isMobile = () => window.innerWidth <= 767;
+
+        // スマホの検索アニメーション
+        searchWrapper.addEventListener("click", function (e) {
+            if (!isMobile()) {
+                if (e.target !== searchInput) searchInput.focus();
+                return;
+            }
+            if (isOpen && e.target === searchInput) return;
+
+            if (!isOpen) {
+                fixedHeader.classList.add("search-open");
+                isOpen = true;
+                setTimeout(() => searchInput.focus(), 80);
+            } else {
+                fixedHeader.classList.remove("search-open");
+                isOpen = false;
+                searchInput.blur();
+            }
+        });
+
+        window.addEventListener("resize", () => {
+            if (!isMobile() && isOpen) {
+                fixedHeader.classList.remove("search-open");
+                isOpen = false;
+                searchInput.blur();
+            }
+        });
+
+        // × ボタン表示切り替え
+        if (clearBtn) {
+            function updateClearBtn() {
+                if (searchInput.value.trim() === "") {
+                    clearBtn.style.display = "none";
+                } else {
+                    clearBtn.style.display = "block";
+                }
+            }
+            searchInput.addEventListener("input", updateClearBtn);
+            clearBtn.addEventListener("click", () => {
+                searchInput.value = "";
+                searchInput.dispatchEvent(new Event("input"));
+                updateClearBtn();
+                searchInput.focus();
+            });
+            updateClearBtn();
+        }
+    });
+
+    function toggleMenu() {
+        const nav = document.getElementById("nav-overlay");
+        if (nav) nav.classList.toggle("open");
+    }
+    </script>
+
+    <!-- 記事データ読み込み -->
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(location.search);
+        const id = params.get("id");
+
+        // まだ記事が読み込まれていなければ microCMS から取得
+        if (!window.articles || window.articles.length === 0) {
+            if (typeof loadArticles === "function") {
+                await loadArticles();   // index.js のロードを待つ
+            }
+        }
+
+        const list = window.articles || [];
+        const article = list.find(a => a.id === id) || list[0];
+
+        const kv             = document.getElementById("article-kv");
+        const titleEl        = document.getElementById("article-title");
+        const leadEl         = document.getElementById("article-lead");
+        const serviceEl      = document.getElementById("meta-service");
+        const categoryEl     = document.getElementById("meta-category");
+        const dateEl         = document.getElementById("meta-date");
+        const contentEl      = document.getElementById("article-content");
+        const breadcrumbEl   = document.getElementById("breadcrumb");
+        const relatedGrid    = document.getElementById("related-grid");
+        const relatedSection = document.getElementById("related-section");
+
+        if (!article) {
+            contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+            relatedSection.style.display = "none";
+            return;
+        }
+
+        // ===== カテゴリーID → 日本語ラベル =====
+        const CATEGORY_LABELS = {
+            music:  "音楽",
+            movie:  "映画・ドラマ",
+            study:  "学習・資格",
+            health: "健康・フィットネス",
+            game:   "ゲーム・エンタメ",
+            life:   "生活・ライフスタイル",
+            ai:     "AI・ツール",
+            other:  "その他"
+        };
+
+        function getCategoryLabel(cat) {
+            if (!cat) return "";
+            if (CATEGORY_LABELS[cat]) return CATEGORY_LABELS[cat]; // ID→日本語
+            return cat; // すでに日本語ならそのまま
+        }
+
+        const categoryId    = article.category || "";
+        const categoryLabel = getCategoryLabel(categoryId) || "その他";
+
+        // ===== パンくず =====
+        const tabLabel = categoryLabel || "すべて";
+        breadcrumbEl.innerHTML = `
+            <a href="index.html">トップ</a> /
+            <a href="all.html?tab=${encodeURIComponent(tabLabel)}">${tabLabel}</a> /
+            <span>${article.title || ""}</span>
+        `;
+
+        // ===== ヒーロー画像 =====
+        const img = article.image || "images/sample1.jpg";
+        kv.style.backgroundImage = `url('${img}')`;
+
+        // ===== メタ情報 =====
+        const serviceName = article.service || article.serviceName || "";
+        if (serviceName) {
+            serviceEl.textContent = serviceName;
+            serviceEl.style.display = "inline-block";
+        } else {
+            serviceEl.style.display = "none"; // 空ならピル非表示
+        }
+
+        categoryEl.textContent = categoryLabel;
+        dateEl.textContent     = (article.date || "").replace(/-/g, ".");
+
+        // ===== タイトル & リード =====
+        titleEl.textContent = article.title || "";
+        leadEl.textContent  = article.description || "";
+
+        // ===== 本文 =====
+        const bodyHtml = article.contentHtml || article.content || "";
+        if (bodyHtml) {
+            contentEl.innerHTML = bodyHtml;
+        } else {
+            contentEl.innerHTML = `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+        }
+
+        // ===== 関連記事（同じカテゴリ or 同じサービス） =====
+        const related = list
+            .filter(a => a.id !== article.id &&
+                (a.category === categoryId || a.service === article.service))
+            .slice(0, 3);
+
+        if (!related.length) {
+            relatedSection.style.display = "none";
+        } else {
+            relatedGrid.innerHTML = related.map(a => `
+                <div class="related-card" onclick="openArticle('${a.id}')">
+                    <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+                    <div class="related-body">
+                        <div class="related-service">${a.service || ""}</div>
+                        <div class="related-title-text">${a.title || ""}</div>
+                        <div class="related-date">${(a.date || "").replace(/-/g,".")}</div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        // ===== スクロールでふわっと出す =====
+        const reveals = document.querySelectorAll(".reveal");
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add("active");
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => io.observe(el));
+    });
+
+    function openArticle(id) {
+        window.location.href = "article.html?id=" + encodeURIComponent(id);
+    }
+    </script>
+</body>
+</html>
+
 article.html
 </body>
 </html>
