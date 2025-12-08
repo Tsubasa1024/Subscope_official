@@ -847,11 +847,11 @@
         // まだ記事が読み込まれていなければ microCMS から取得
         if (!window.articles || window.articles.length === 0) {
             if (typeof loadArticles === "function") {
-                await loadArticles();   // index.js のロードを待つ
+                await loadArticles();
             }
         }
 
-        const list = window.articles || [];
+        const list    = window.articles || [];
         const article = list.find(a => a.id === id) || list[0];
 
         const kv             = document.getElementById("article-kv");
@@ -866,84 +866,81 @@
         const relatedSection = document.getElementById("related-section");
 
         if (!article) {
-            contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
-            relatedSection.style.display = "none";
+            if (contentEl) {
+                contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+            }
+            if (relatedSection) {
+                relatedSection.style.display = "none";
+            }
             return;
         }
 
-        // ===== カテゴリーID → 日本語ラベル =====
-        const CATEGORY_LABELS = {
-            music:  "音楽",
-            movie:  "映画・ドラマ",
-            study:  "学習・資格",
-            health: "健康・フィットネス",
-            game:   "ゲーム・エンタメ",
-            life:   "生活・ライフスタイル",
-            ai:     "AI・ツール",
-            other:  "その他"
-        };
+        // ▼ ここが肝心：記事から「日本語カテゴリ」を決める
+        const categoryText =
+            article.categoryName ||   // index.js で付けた名前があれば最優先
+            article.category    ||    // それが無ければ category の文字列
+            "その他";
 
-        function getCategoryLabel(cat) {
-            if (!cat) return "";
-            if (CATEGORY_LABELS[cat]) return CATEGORY_LABELS[cat]; // ID→日本語
-            return cat; // すでに日本語ならそのまま
+        // パンくず
+        if (breadcrumbEl) {
+            breadcrumbEl.innerHTML = `
+                <a href="index.html">トップ</a> /
+                <a href="all.html?tab=${encodeURIComponent(categoryText)}">
+                    ${categoryText}
+                </a> /
+                <span>${article.title || ""}</span>
+            `;
         }
 
-        const categoryId    = article.category || "";
-        const categoryLabel = getCategoryLabel(categoryId) || "その他";
+        // ヒーロー画像
+        if (kv) {
+            const img = article.image || "images/sample1.jpg";
+            kv.style.backgroundImage = `url('${img}')`;
+        }
 
-    // パンくず
-    breadcrumbEl.innerHTML = `
-        <a href="index.html">トップ</a> /
-        <a href="all.html?tab=${encodeURIComponent(article.category || "すべて")}">
-            ${article.category || "その他"}
-        </a> /
-        <span>${article.title}</span>
-    `;
-
-    // メタ
-    serviceEl.textContent  = article.service || "SUBSCOPE";
-    categoryEl.textContent = article.category || "その他";
-    dateEl.textContent     = (article.date || "").replace(/-/g, ".");
-
-
-        // ===== ヒーロー画像 =====
-        const img = article.image || "images/sample1.jpg";
-        kv.style.backgroundImage = `url('${img}')`;
-
-        // ===== メタ情報 =====
+        // メタ情報
         const serviceName = article.service || article.serviceName || "";
-        if (serviceName) {
-            serviceEl.textContent = serviceName;
-            serviceEl.style.display = "inline-block";
-        } else {
-            serviceEl.style.display = "none"; // 空ならピル非表示
+        if (serviceEl) {
+            if (serviceName) {
+                serviceEl.textContent = serviceName;
+                serviceEl.style.display = "inline-block";
+            } else {
+                serviceEl.style.display = "none";
+            }
         }
 
-        categoryEl.textContent = categoryLabel;
-        dateEl.textContent     = (article.date || "").replace(/-/g, ".");
-
-        // ===== タイトル & リード =====
-        titleEl.textContent = article.title || "";
-        leadEl.textContent  = article.description || "";
-
-        // ===== 本文 =====
-        const bodyHtml = article.contentHtml || article.content || "";
-        if (bodyHtml) {
-            contentEl.innerHTML = bodyHtml;
-        } else {
-            contentEl.innerHTML = `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+        if (categoryEl) {
+            categoryEl.textContent = categoryText;
         }
 
-        // ===== 関連記事（同じカテゴリ or 同じサービス） =====
+        if (dateEl) {
+            dateEl.textContent = (article.date || "").replace(/-/g, ".");
+        }
+
+        // タイトル & リード
+        if (titleEl) titleEl.textContent = article.title || "";
+        if (leadEl)  leadEl.textContent  = article.description || "";
+
+        // 本文
+        if (contentEl) {
+            const bodyHtml = article.contentHtml || article.content || "";
+            contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+        }
+
+        // 関連記事（同じカテゴリ or 同じサービス）
         const related = list
-            .filter(a => a.id !== article.id &&
-                (a.category === categoryId || a.service === article.service))
+            .filter(a =>
+                a.id !== article.id &&
+                (
+                    (a.categoryName || a.category) === categoryText ||
+                    a.service === article.service
+                )
+            )
             .slice(0, 3);
 
         if (!related.length) {
-            relatedSection.style.display = "none";
-        } else {
+            if (relatedSection) relatedSection.style.display = "none";
+        } else if (relatedGrid) {
             relatedGrid.innerHTML = related.map(a => `
                 <div class="related-card" onclick="openArticle('${a.id}')">
                     <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
@@ -956,7 +953,7 @@
             `).join("");
         }
 
-        // ===== スクロールでふわっと出す =====
+        // スクロールでふわっと出す
         const reveals = document.querySelectorAll(".reveal");
         const io = new IntersectionObserver((entries) => {
             entries.forEach(e => {
@@ -973,9 +970,6 @@
         window.location.href = "article.html?id=" + encodeURIComponent(id);
     }
     </script>
-</body>
-</html>
-
 article.html
 </body>
 </html>
