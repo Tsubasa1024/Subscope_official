@@ -38,24 +38,27 @@ function mapCmsArticle(item) {
     // デバッグ用：ブラウザのコンソールに出して中身確認できる
     console.log("[mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
 
-    return {
-        id: item.id,
-        title: item.title || "",
-        description: item.content
-            ? stripHtml(item.content).slice(0, 80) + "…"
+return {
+    id: item.id,
+    title: item.title || "",
+
+    // ★ microCMS の「説明文・リード文（description）」を最優先で使う
+    description: item.description
+        ? item.description                     // 説明文・リード文
+        : item.content
+            ? stripHtml(item.content).slice(0, 80) + "…"  // 古い記事など説明文が無いときだけ本文から作る
             : "",
 
-        // ここを統一ルールにする
-        category: category,      // フィルタ用
-        categoryName: category,  // 表示用
+    category: category,      // フィルタ用
+    categoryName: category,  // 表示用
 
-        service: item.service || "",
-        date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
-        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
-        views: 0,
-        contentHtml: item.content || ""
-    };
-}
+    service: item.service || "",
+    date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
+    image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
+    views: 0,
+    contentHtml: item.content || ""
+};
+
 
 
 // 一覧取得
@@ -452,6 +455,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
