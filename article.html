@@ -729,21 +729,23 @@
             <!-- パンくず -->
             <div class="breadcrumb" id="breadcrumb"></div>
 
-            <!-- ヒーロー：写真のみ -->
-            <section class="article-hero">
-                <div class="article-kv" id="article-kv"></div>
-            </section>
+<!-- タイトル＋メタ＋リード（先に表示） -->
+<section class="article-header-block">
+    <div class="article-meta-row">
+        <span class="article-meta-pill" id="meta-service"></span>
+        <span class="article-meta-pill" id="meta-category"></span>
+        <span class="article-date" id="meta-date"></span>
+    </div>
 
-            <!-- タイトル＋メタ＋リード -->
-            <section class="article-header-block">
-                <div class="article-meta-row">
-                    <span class="article-meta-pill" id="meta-service"></span>
-                    <span class="article-meta-pill" id="meta-category"></span>
-                    <span class="article-date" id="meta-date"></span>
-                </div>
-                <h1 class="article-title" id="article-title"></h1>
-                <p class="article-lead" id="article-lead"></p>
-            </section>
+    <h1 class="article-title" id="article-title"></h1>
+    <p class="article-lead" id="article-lead"></p>
+</section>
+
+<!-- ヒーロー写真（後に表示） -->
+<section class="article-hero">
+    <div class="article-kv" id="article-kv"></div>
+</section>
+
 
             <!-- 本文 -->
             <article class="article-content" id="article-content">
