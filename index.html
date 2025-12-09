@@ -389,6 +389,13 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.15);
             transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+        /* PC版：featured-card の左余白と文章位置を完全一致させるオプション */
+@media (min-width: 1025px) {
+    .featured-content {
+        margin-left: 40px !important; /* featured-card の padding-left と揃える */
+    }
+}
+
         
         .featured-card:hover {
             transform: scale(1.005);
