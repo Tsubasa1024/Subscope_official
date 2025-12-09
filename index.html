@@ -389,13 +389,6 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.15);
             transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        /* PC版：featured-card の左余白と文章位置を完全一致させるオプション */
-@media (min-width: 1025px) {
-    .featured-content {
-        margin-left: 40px !important; /* featured-card の padding-left と揃える */
-    }
-}
-
         
         .featured-card:hover {
             transform: scale(1.005);
@@ -415,15 +408,6 @@
             width: 100%;
             max-width: 800px;
         }
-        
-        /* PC版：文章幅を固定して左と同じ余白で改行 */
-@media (min-width: 1025px) {
-    .featured-content {
-        max-width: 600px; /* 文章幅固定 */
-        margin-left: 40px !important;  /* ← 画像左の余白と揃える */
-        margin-right: auto !important;
-    }
-}
 
         .featured-meta {
             font-size: 1rem;
@@ -457,13 +441,13 @@
     font-size: 0.85rem !important; /* 元: 1rem */
 }
 
-/* ▼▼ 写真の下半分に文字を寄せる ▼▼ */
+/* ▼▼ 写真の下半分に文字を寄せる ＋ PC版の幅を固定 ▼▼ */
 .featured-content {
     position: absolute;
-    bottom: 40px;   /* 写真の下に寄せる距離（調整可能）*/
-    left: 40px;
-    right: 40px;
+    bottom: 40px;          /* 下からの距離 */
+    left: 40px;            /* カードの左余白と揃える */
     z-index: 2;
+    max-width: 600px;      /* ★ここで文章の横幅を固定（600px前後がちょうどいい） */
 }
 
 /* ▼▼ グラデーションを強めて下側を読みやすくする ▼▼ */
