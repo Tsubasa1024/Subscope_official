@@ -408,10 +408,13 @@
             width: 100%;
             max-width: 800px;
         }
+        
         /* PC版：文章幅を固定して左と同じ余白で改行 */
 @media (min-width: 1025px) {
     .featured-content {
-        max-width: 600px; /* ←黄金比：調整OK */
+        max-width: 600px; /* 文章幅固定 */
+        margin-left: 40px !important;  /* ← 画像左の余白と揃える */
+        margin-right: auto !important;
     }
 }
 
