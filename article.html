@@ -692,6 +692,80 @@
                 width: 280px !important;
             }
         }
+        /* ================================
+   スマホ用：タイトル・リード・本文の余白最適化
+================================ */
+@media (max-width: 767px) {
+
+    /* 横の余白を少しだけタイトに */
+    .container {
+        padding: 0 16px;
+    }
+
+    /* ヘッダーから本編への入り方 */
+    main {
+        padding-top: 96px;
+    }
+
+    /* メタ情報（カテゴリ・日付）まわり */
+    .article-header-block {
+        margin-top: 8px;
+        margin-bottom: 8px;   /* メタ → ヒーローまでの大枠 */
+    }
+
+    .article-meta-row {
+        margin-bottom: 4px;
+        font-size: 0.8rem;
+    }
+
+    /* タイトル */
+    .article-title {
+        font-size: 1.7rem;    /* ちょい小さめで読みやすく */
+        line-height: 1.35;
+        margin-bottom: 6px;   /* タイトル → リードの距離 */
+    }
+
+    /* 説明文（リード文） */
+    .article-lead {
+        font-size: 0.98rem;
+        line-height: 1.7;
+        color: #4b4b4b;
+        margin-top: 0;
+        margin-bottom: 18px;  /* リード → 画像の距離（重要） */
+    }
+
+    /* ヒーロー画像の上下の余白＆比率 */
+    .article-hero {
+        margin: 0 0 20px;     /* リードのすぐ下に来て、本文とも詰まりすぎない */
+        height: 220px;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .article-kv {
+        min-height: 100%;
+        box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+    }
+
+    /* 本文の行間・段落間 */
+    .article-content {
+        font-size: 0.98rem;
+        line-height: 1.8;
+    }
+
+    .article-content p {
+        margin-bottom: 18px;  /* 段落ごとにちゃんと区切り感 */
+    }
+
+    .article-content h2 {
+        margin: 28px 0 12px;
+    }
+
+    .article-content h3 {
+        margin: 20px 0 8px;
+    }
+}
+
     </style>
 </head>
 <body>
