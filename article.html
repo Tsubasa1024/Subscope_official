@@ -916,14 +916,20 @@ if (serviceEl) {
 if (titleEl) titleEl.textContent = article.title || "";
 
 if (leadEl) {
-    // microCMS の「説明文・リード文」を優先して使う
-    const leadText =
-        article.lead ||          // フィールドID が lead の場合
-        article.description ||   // フィールドID が description の場合
-        "";
+    // microCMS の「説明文・リード文（description）」を優先して使う
+    const leadFromCms = (article.description || "").trim();
 
-    leadEl.textContent = leadText;
+    if (leadFromCms) {
+        leadEl.textContent = leadFromCms;
+    } else {
+        // もし description が空なら、今まで通り本文の最初の <p> をリードにする
+        const tmp = document.createElement("div");
+        tmp.innerHTML = article.contentHtml || article.content || "";
+        const firstP = tmp.querySelector("p");
+        leadEl.textContent = firstP ? firstP.textContent : "";
+    }
 }
+
 
 
 
