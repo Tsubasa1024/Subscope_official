@@ -58,7 +58,7 @@ return {
     views: 0,
     contentHtml: item.content || ""
 };
-
+}
 
 
 // 一覧取得
@@ -455,6 +455,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
