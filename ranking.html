@@ -961,6 +961,16 @@
                 left: 12px;
                 z-index: 10;
             }
+            /* スマホ：ランキングの説明文を途中で「…」にする */
+.rank-hero-desc,
+.rank-mid-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;      /* 表示したい行数。2や4に変えてもOK */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
         }
     </style>
 </head>
