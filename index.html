@@ -862,6 +862,15 @@
            Responsive（スマホ）
            ========================================= */
         @media (max-width: 767px) {
+              /* タイトルとボタンの間に余白 */
+ .featured-title {
+      margin-bottom: 16px !important; /* ← 好きな値に調整OK */
+  }
+
+  /* ボタンを少し下げる */
+  .btn-read {
+      margin-top: 8px !important;
+  }
 
             /* iPad をスマホ扱いから除外する（予備） */
             @media (min-width: 600px) and (max-width: 1024px) and (pointer: coarse) {
