@@ -1173,6 +1173,18 @@
     font-size: 0.9rem !important;
     padding: 10px 20px !important;
   }
+/* ============================
+   スマホのヒーロー文字に左右の余白を付ける
+   ============================ */
+@media (max-width: 767px) {
+  .featured-content {
+    padding-left: 16px !important;   /* 左に余白 */
+    padding-right: 16px !important;  /* 右に余白 */
+    left: 0 !important;               /* 不要な left を消す */
+    right: 0 !important;              /* 不要な right を消す */
+    width: 100% !important;           /* 全体幅を使う */
+    box-sizing: border-box !important;/* 余白を含めて幅計算 → はみ出し防止 */
+  }
 }
     </style>
 </head>
