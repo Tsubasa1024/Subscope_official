@@ -16,24 +16,39 @@ function stripHtml(html) {
 
 // microCMS の1件を SUBSCOPE 形式に変換
 function mapCmsArticle(item) {
-    const rawCat = item.category;   // microCMS の「カテゴリー」フィールド
-
+    const rawCat = item.category;
     let category = "";
 
-    // 1) 文字列パターン（普通はこれ）
     if (typeof rawCat === "string") {
-        category = rawCat.trim();   // "音楽" など
-    }
-    // 2) オブジェクトパターン（保険）
-    else if (rawCat && typeof rawCat === "object") {
+        category = rawCat.trim();
+    } else if (rawCat && typeof rawCat === "object") {
         category = (rawCat.name || rawCat.id || "").trim();
     }
+    if (!category) category = "音楽";
 
-    // 3) まだ空っぽなら、とりあえず “音楽” にしてしまう（今は Apple Music 記事だけなので）
-    //   他のカテゴリ記事を増やすときに、ここを消してもOK
-    if (!category) {
-        category = "音楽";
-    }
+    console.log("[mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
+
+    return {
+        id: item.id,
+        title: item.title || "",
+
+        // ★ microCMS の「説明文・リード文（description）」を最優先で使う
+        description: item.description
+            ? item.description
+            : item.content
+                ? stripHtml(item.content).slice(0, 80) + "…"
+                : "",
+
+        category: category,
+        categoryName: category,
+
+        service: item.service || "",
+        date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
+        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
+        views: 0,
+        contentHtml: item.content || ""
+    };
+}
 
     // デバッグ用：ブラウザのコンソールに出して中身確認できる
     console.log("[mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
@@ -455,6 +470,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
