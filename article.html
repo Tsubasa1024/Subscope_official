@@ -648,6 +648,20 @@
                 flex-wrap: wrap;
             }
         }
+@media (max-width: 767px) {
+    .article-hero {
+        height: 220px;  /* ← 横長にしたい高さ。調整できる */
+        overflow: hidden;
+        border-radius: 20px;
+    }
+
+    .article-hero img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+}
 
         @media (min-width: 768px) {
             .search-wrapper {
