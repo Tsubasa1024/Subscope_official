@@ -441,14 +441,23 @@
     font-size: 0.85rem !important; /* 元: 1rem */
 }
 
-/* ▼▼ 写真の下半分に文字を寄せる ＋ PC版の幅を固定 ▼▼ */
+/* ▼▼ 写真の下半分に文字を寄せる（共通） ▼▼ */
 .featured-content {
     position: absolute;
-    bottom: 40px;          /* 下からの距離 */
-    left: 40px;            /* カードの左余白と揃える */
+    bottom: 40px;
+    left: 40px;   /* 左側の余白 */
+    right: 40px;  /* ★右側にも同じ余白 → 右端までテキストが広がる */
     z-index: 2;
-    max-width: 600px;      /* ★ここで文章の横幅を固定（600px前後がちょうどいい） */
 }
+
+/* PC版：幅制限を外してフルに使う */
+@media (min-width: 1025px) {
+  .featured-content {
+    max-width: none;   /* 600px制限を解除 */
+    width: auto;
+  }
+}
+
 
 /* ▼▼ グラデーションを強めて下側を読みやすくする ▼▼ */
 .featured-card::before {
