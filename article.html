@@ -1109,20 +1109,6 @@ if (serviceEl) {
         serviceEl.style.display = "none";
     }
 }
-        // 著者表示
-const authorBox   = document.getElementById("article-author");
-const authorImg   = document.getElementById("author-avatar");
-const authorName  = document.getElementById("author-name");
-
-if (article.author) {
-    authorImg.src = article.authorImage || "images/default-author.png";
-    authorName.textContent = article.authorName || "";
-    authorBox.style.display = "flex";
-} else {
-    authorBox.style.display = "none";
-}
-
-
 /* ==========================
    著者（名前＋顔＋プロフィールリンク）
    microCMS想定：
