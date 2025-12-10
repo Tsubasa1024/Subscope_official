@@ -950,40 +950,49 @@
                     border 0.3s ease,
                     background 0.3s ease;
             }
+@media (max-width: 767px) {
 
-            /* 最初は透明＆クリック不可 */
-            .search-input {
-                width: 100%;
-                box-shadow: none;
-                border: none;
-                padding: 0;
-                font-size: 0.9rem;
-                color: var(--color-text-main);
-                background: transparent;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.25s ease;
-            }
-                .search-item p {
+    /* 最初は透明＆クリック不可 */
+    .search-input {
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        font-size: 0.9rem;
+        color: var(--color-text-main);
+        background: transparent;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    /* ▼ 検索結果の説明文を2行で省略（スマホだけ） ▼ */
+    .search-item p {
         display: -webkit-box;
         -webkit-line-clamp: 2;       /* 表示する行数（2行） */
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-}
 
-            /* 🔍 をど真ん中に */
-            .search-icon {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                width: 22px;
-                height: 22px;
-                color: #a7a7aa;
-                transition: transform 0.25s ease;
-            }
+    /* 🔍 をど真ん中に（これはスマホ用の指定） */
+    .search-icon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+        color: #a7a7aa;
+        transition: transform 0.25s ease;
+    }
+
+    .clear-btn {
+        display: none;
+    }
+
+    ...（この下のスマホ用CSSが続く）...
+}  /* ← @media の閉じカッコは一番最後に1個だけ */
 
             .clear-btn {
                 display: none;
