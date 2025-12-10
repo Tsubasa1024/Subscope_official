@@ -61,7 +61,7 @@ async function loadArticles() {
     }
 
     try {
-        const res = await fetch(`${ENDPOINT}?limit=100`, {
+        const res = await fetch(`${ENDPOINT}?limit=100&depth=2`, {
             headers: {
                 "X-MICROCMS-API-KEY": API_KEY
             }
@@ -448,6 +448,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
