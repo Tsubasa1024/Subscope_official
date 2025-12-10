@@ -931,6 +931,38 @@
                 transform: translateY(-2px);
             }
 
+        /* =========================================
+           Responsive（スマホ）
+           ========================================= */
+        @media (max-width: 767px) {
+            /* タイトルとボタンの間に余白 */
+            .featured-title {
+                margin-bottom: 16px !important;
+            }
+
+            /* ボタンを少し下げる */
+            .btn-read {
+                margin-top: 8px !important;
+            }
+
+            :root {
+                --spacing-section: 60px;
+            }
+
+            .top-header {
+                padding: 10px 16px;
+            }
+
+            .nav-left {
+                display: flex;
+                align-items: center;
+            }
+
+            /* 丸い検索ボタンを少しだけ上げる */
+            .nav-left .search-wrapper {
+                transform: translateY(-2px);
+            }
+
             /* 🔍 丸ボタン → 伸びる用 */
             .search-wrapper {
                 width: 44px;
@@ -950,46 +982,90 @@
                     border 0.3s ease,
                     background 0.3s ease;
             }
-@media (max-width: 767px) {
 
-    /* 最初は透明＆クリック不可 */
-    .search-input {
-        width: 100%;
-        box-shadow: none;
-        border: none;
-        padding: 0;
-        font-size: 0.9rem;
-        color: var(--color-text-main);
-        background: transparent;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.25s ease;
-    }
+            /* 最初は透明＆クリック不可 */
+            .search-input {
+                width: 100%;
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                font-size: 0.9rem;
+                color: var(--color-text-main);
+                background: transparent;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.25s ease;
+            }
 
-    /* ▼ 検索結果の説明文を2行で省略（スマホだけ） ▼ */
-    .search-item p {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;       /* 表示する行数（2行） */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+            /* ▼ 検索結果の説明文を2行で省略（スマホだけ） ▼ */
+            .search-item p {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-    /* 🔍 をど真ん中に（これはスマホ用の指定） */
-    .search-icon {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 22px;
-        height: 22px;
-        color: #a7a7aa;
-        transition: transform 0.25s ease;
-    }
+            /* 🔍 をど真ん中に（丸ボタン状態） */
+            .search-icon {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 22px;
+                height: 22px;
+                color: #a7a7aa;
+                transition: transform 0.25s ease;
+            }
 
-    .clear-btn {
-        display: none;
-    }
+            .clear-btn {
+                display: none;
+            }
+
+            /* 検索オープン時：ロゴ非表示＆バー拡張 */
+            .fixed-header.search-open .nav-center {
+                display: none;
+            }
+
+            .fixed-header.search-open .nav-left {
+                flex: 1 1 auto;
+            }
+
+            .fixed-header.search-open .search-wrapper {
+                width: 100%;
+                max-width: 100%;
+                border: none;
+                box-shadow: none;
+                justify-content: flex-start;
+                background: transparent;
+            }
+
+            .fixed-header.search-open .search-input {
+                opacity: 1;
+                pointer-events: auto;
+                padding: 10px 40px 10px 44px;
+                border-radius: 999px;
+                border: 1px solid rgba(0,0,0,0.1);
+                background: #fff;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            }
+
+            .fixed-header.search-open .search-icon {
+                position: absolute;
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .fixed-header.search-open .clear-btn {
+                display: block;
+                right: 18px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .search-results-container {
+
 
     ...（この下のスマホ用CSSが続く）...
 }  /* ← @media の閉じカッコは一番最後に1個だけ */
