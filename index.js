@@ -39,19 +39,25 @@ function mapCmsArticle(item) {
 
     console.log("[article.js mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
 
-    return {
-        id: item.id,
-        title: item.title || "",
-        description: item.description || "",
-        category,
-        categoryName: category,
-        service: item.service || "",
-        date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
-        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
-        views: 0,
-        contentHtml: item.content || ""
-    };
-}
+return {
+    id: item.id,
+    title: item.title || "",
+    description: item.description || "",
+    category,
+    categoryName: category,
+    service: item.service || "",
+    date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
+    image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
+    views: 0,
+    contentHtml: item.content || "",
+
+    // ★★★ ここが最重要追加部 ★★★
+    author: item.author || null,                         // 参照データ（name / avatar / id が入る）
+    authorName: item.author?.name || "",                // 保険
+    authorImage: item.author?.avatar?.url || "",        // 保険
+    authorId: item.author?.id || "",                    // 著者ページリンク用
+};
+
 
 
 // 一覧取得
@@ -448,6 +454,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
