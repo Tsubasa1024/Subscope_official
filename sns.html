@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNSリンク | SUBSCOPE</title>
+    <title>SNS | SUBSCOPE</title>
     <style>
         /* =========================================
            Global Styles & Variables
@@ -348,13 +348,23 @@
         }
 
         /* =========================================
-           SNS Section
+           SNS タイトルセクション（他ページと統一）
            ========================================= */
-        .sns-hero {
-            padding-top: 110px;
-            padding-bottom: 40px;
+        .all-hero-section {
+            padding-top: 96px;
+            padding-bottom: 32px;
         }
 
+        .all-title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        /* =========================================
+           SNS Section
+           ========================================= */
         .sns-lead {
             font-size: 0.98rem;
             color: var(--color-text-gray);
@@ -388,8 +398,8 @@
             width: 44px;
             height: 44px;
             border-radius: 999px;
-    background: #ffffff;                     /* 白にする */
-    border: 1px solid rgba(0,0,0,0.08);      /* うっすら枠線（おしゃれ系） */
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.08);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -634,9 +644,13 @@
                 padding: 0 16px 12px;
             }
 
-            .sns-hero {
+            .all-hero-section {
                 padding-top: 90px;
-                padding-bottom: 32px;
+                padding-bottom: 24px;
+            }
+
+            .all-title {
+                font-size: 2rem;
             }
 
             .sns-grid {
@@ -756,14 +770,22 @@
 
     <!-- SNS ページ本体 -->
     <main>
-        <section class="section sns-hero">
-            <div class="container reveal">
-                <h2 class="section-title">SNS</h2>
-                <p class="sns-lead">
-                    SUBSCOPE の最新記事やアップデート、ちょっとした裏話などは、各種 SNS でも発信しています。<br>
-                    好きなプラットフォームでフォローして、いつでも “サブスクの今” をチェックしよう。
-                </p>
+        <!-- タイトルセクション -->
+        <section class="all-hero-section">
+            <div class="container">
+                <div class="reveal active">
+                    <h1 class="all-title">SNS</h1>
+                    <p class="sns-lead">
+                        SUBSCOPE の最新記事やアップデート、ちょっとした裏話などは、各種 SNS でも発信しています。<br>
+                        好きなプラットフォームでフォローして、いつでも “サブスクの今” をチェックしよう。
+                    </p>
+                </div>
+            </div>
+        </section>
 
+        <!-- カード一覧 -->
+        <section class="section">
+            <div class="container reveal">
                 <div class="sns-grid">
                     <!-- Instagram -->
                     <a href="https://instagram.com/あなたのアカウント" target="_blank" class="sns-card">
@@ -874,6 +896,11 @@
             }
         });
     });
+
+    function toggleMenu() {
+        const nav = document.getElementById("nav-overlay");
+        if (nav) nav.classList.toggle("open");
+    }
     </script>
 
     <!-- × ボタンの表示切り替え -->
