@@ -1208,11 +1208,18 @@
     line-height: 1.3;
   }
 
-  /* 説明文 → ボタンの距離を、上と同じ8pxに揃える */
+  /* 説明文 → 2行で…に＋余白 */
   .featured-desc {
-    display: block !important;        /* 非表示になってた場合に備えて */
+    font-size: 0.9rem !important;
+    line-height: 1.45 !important;
     margin-bottom: 8px !important;
+
+    display: -webkit-box !important;  /* ★ 2行省略に必須 */
+    -webkit-line-clamp: 2;            /* ★ 行数指定 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
+
 
   .btn-read {
     margin-top: 0 !important;         /* 余白は全部 .featured-desc 側で管理 */
