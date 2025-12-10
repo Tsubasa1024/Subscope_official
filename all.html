@@ -92,12 +92,10 @@
         .top-header {
             max-width: var(--container-width);
             margin: 0 auto;
-            padding: 12px 24px;
-            padding-bottom: 16px;
+            padding: 12px 24px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: visible;
         }
 
         .nav-left,
@@ -412,7 +410,6 @@
             max-width: 1080px;
             margin: 0 auto;
             text-align: center;
-            font-family: var(--font-family);
         }
 
         .footer-links {
@@ -439,7 +436,7 @@
         }
 
         /* =========================================
-           ここから all.html 固有のスタイル
+           all.html 固有のスタイル
            ========================================= */
         .all-hero-section {
             padding-top: 96px;
@@ -499,9 +496,14 @@
             max-width: 520px;
         }
 
-        .all-search-input {
+        .all-search-input-wrapper {
+            position: relative;
             flex: 1;
-            padding: 10px 14px;
+        }
+
+        .all-search-input {
+            width: 100%;
+            padding: 10px 36px 10px 14px; /* 右に×分スペース */
             border-radius: 999px;
             border: 1px solid var(--color-border);
             font-size: 0.95rem;
@@ -514,6 +516,19 @@
             border-color: #000;
             box-shadow: 0 0 0 1px #000;
             background: #fff;
+        }
+
+        .all-clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            line-height: 1;
+            color: #999;
+            cursor: pointer;
+            user-select: none;
+            display: none; /* 入力時にだけ表示 */
         }
 
         .all-search-button {
@@ -615,7 +630,6 @@
                 transition: opacity 0.25s ease;
             }
 
-            /* 🔍 丸ボタン真ん中のアイコン */
             .search-icon {
                 position: absolute;
                 left: 50%;
@@ -627,7 +641,6 @@
                 transition: transform 0.25s ease;
             }
 
-            /* 検索結果の説明文を2行で… */
             .search-item p {
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
@@ -640,7 +653,6 @@
                 display: none;
             }
 
-            /* 検索オープン時の挙動 */
             .fixed-header.search-open .nav-center {
                 display: none;
             }
@@ -691,7 +703,6 @@
                 padding: 0 16px 12px;
             }
 
-            /* カード1列レイアウト */
             .grid-layout {
                 grid-template-columns: 1fr;
             }
@@ -700,7 +711,6 @@
                 right: 16px;
             }
 
-            /* Menu ボタンをアイコンだけに */
             .menu-btn > span {
                 display: none;
             }
@@ -830,13 +840,16 @@
                 <!-- 🔍 すべての記事専用 検索フォーム -->
                 <section class="all-search-section">
                     <form id="allSearchForm" class="all-search-form">
-                        <input
-                            type="search"
-                            id="allSearchInput"
-                            class="all-search-input"
-                            placeholder="キーワードで記事を検索"
-                            autocomplete="off"
-                        />
+                        <div class="all-search-input-wrapper">
+                            <input
+                                type="search"
+                                id="allSearchInput"
+                                class="all-search-input"
+                                placeholder="キーワードで記事を検索"
+                                autocomplete="off"
+                            />
+                            <span id="allClearBtn" class="all-clear-btn">×</span>
+                        </div>
                         <button type="submit" class="all-search-button">検索</button>
                     </form>
                     <p id="allSearchInfo" class="all-search-info"></p>
@@ -872,7 +885,7 @@
     <!-- 共通スクリプト（articles / 検索ロジックなど） -->
     <script src="index.js"></script>
 
-    <!-- スマホ検索アニメーション -->
+    <!-- スマホ検索アニメーション（ヘッダー検索） -->
     <script>
     window.addEventListener("DOMContentLoaded", function () {
         const fixedHeader  = document.querySelector(".fixed-header");
@@ -912,7 +925,7 @@
     });
     </script>
 
-    <!-- × ボタン表示切り替え -->
+    <!-- ヘッダー × ボタン表示切り替え -->
     <script>
     window.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
@@ -939,7 +952,7 @@
     });
     </script>
 
-    <!-- すべての記事：タブ＋検索ロジック -->
+    <!-- すべての記事：タブ＋検索ロジック（all 用 × ボタン込み） -->
     <script>
     document.addEventListener("DOMContentLoaded", async () => {
         // microCMS から記事を読み込む（まだなら）
@@ -955,6 +968,7 @@
         const allSearchForm  = document.getElementById("allSearchForm");
         const allSearchInput = document.getElementById("allSearchInput");
         const allSearchInfo  = document.getElementById("allSearchInfo");
+        const allClearBtn    = document.getElementById("allClearBtn");
 
         if (!tabsEl || !gridEl) return;
 
@@ -1024,6 +1038,16 @@
             });
         }
 
+        // all 検索用 × ボタン表示制御
+        function updateAllClearBtn() {
+            if (!allClearBtn || !allSearchInput) return;
+            if (allSearchInput.value.trim() === "") {
+                allClearBtn.style.display = "none";
+            } else {
+                allClearBtn.style.display = "block";
+            }
+        }
+
         // タブ描画
         tabsEl.innerHTML = categories
             .map(c => `
@@ -1053,11 +1077,12 @@
             if (allSearchInfo) allSearchInfo.textContent = "";
         }
 
+        updateAllClearBtn();
+
         // タブクリックでカテゴリ切り替え（search は解除）
         tabButtons.forEach(btn => {
             btn.addEventListener("click", () => {
                 const cat = btn.getAttribute("data-category-tab");
-                // URL パラメータを書き換え（search は消す）
                 const newParams = new URLSearchParams(window.location.search);
                 newParams.set("tab", cat);
                 newParams.delete("search");
@@ -1074,10 +1099,18 @@
                 }
 
                 renderList(filterByCategory(cat));
+                updateAllClearBtn();
             });
         });
 
-        // すべての記事用 検索フォームから検索
+        // all 検索 input 入力時：× ボタン表示切り替え
+        if (allSearchInput) {
+            allSearchInput.addEventListener("input", () => {
+                updateAllClearBtn();
+            });
+        }
+
+        // all 検索フォーム送信
         if (allSearchForm && allSearchInput) {
             allSearchForm.addEventListener("submit", (e) => {
                 e.preventDefault();
@@ -1107,6 +1140,34 @@
                     } else {
                         allSearchInfo.textContent = "";
                     }
+                }
+
+                updateAllClearBtn();
+            });
+        }
+
+        // all × ボタンのクリックイベント
+        if (allClearBtn && allSearchInput) {
+            allClearBtn.addEventListener("click", () => {
+                allSearchInput.value = "";
+                updateAllClearBtn();
+
+                // URL の search を削除して tab を「すべて」に
+                const newParams = new URLSearchParams(window.location.search);
+                newParams.delete("search");
+                newParams.set("tab", "すべて");
+                history.replaceState(null, "", "all.html?" + newParams.toString());
+
+                // タブ「すべて」をアクティブに
+                tabButtons.forEach(b => {
+                    b.classList.toggle("active", b.getAttribute("data-category-tab") === "すべて");
+                });
+
+                // 記事リストを「すべて」にリセット
+                renderList(filterByCategory("すべて"));
+
+                if (allSearchInfo) {
+                    allSearchInfo.textContent = "";
                 }
             });
         }
