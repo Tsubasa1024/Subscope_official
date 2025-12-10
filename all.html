@@ -518,24 +518,23 @@
             background: #fff;
         }
 
-/* 🔥 スマホ版だけ × ボタンを押しやすく＆JSで表示制御 */
-.all-clear-btn {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 36px;
-    height: 36px;
-    font-size: 22px;
-    line-height: 1;
-    color: #999;
-    border-radius: 50%;
-    display: none;              /* ← これが超重要（JSで表示制御） */
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
+        /* all 検索の × ボタン（PC＆スマホ共通のベース） */
+        .all-clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            line-height: 1;
+            color: #999;
+            border-radius: 50%;
+            display: none;              /* JS で flex に切り替える */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
 
         .all-search-button {
             padding: 9px 20px;
@@ -760,56 +759,42 @@
             .all-title {
                 font-size: 2rem;
             }
-@media (max-width: 767px) {
 
-    /* ここは既存のスマホ用いろいろの中に追加でOK */
+            /* 🔍 すべての記事 検索フォーム：スマホは横並びレイアウトに */
+            .all-search-form {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+                max-width: 100%;
+            }
 
-    /* 🔍 すべての記事 検索フォーム：スマホは横並びレイアウトに */
-    .all-search-form {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        max-width: 100%;
-    }
+            .all-search-input-wrapper {
+                flex: 1 1 auto;
+            }
 
-    .all-search-input-wrapper {
-        flex: 1 1 auto;
-    }
+            .all-search-input {
+                width: 100%;
+                font-size: 0.9rem;
+                padding: 10px 36px 10px 14px; /* 右に×ぶんスペース */
+            }
 
-    .all-search-input {
-        width: 100%;
-        font-size: 0.9rem;
-        padding: 10px 36px 10px 14px; /* 右に×ぶんスペース */
-    }
+            .all-search-button {
+                flex: 0 0 96px;
+                height: 40px;
+                padding: 0 16px;
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
 
-    .all-clear-btn {
-        right: 10px;
-        font-size: 18px;
-    }
-
-    .all-search-button {
-        flex: 0 0 96px;       /* ボタン側はちょい細め固定幅 */
-        height: 40px;
-        padding: 0 16px;
-        font-size: 0.9rem;
-        white-space: nowrap;  /* 「検索」が折れないように */
-    }
-}
-/* 🔥 スマホ版だけ × ボタンを押しやすくする */
-.all-clear-btn {
-    right: 6px;               /* 位置をちょい内側へ */
-    width: 36px;              /* タップ判定を広くする */
-    height: 36px;
-    font-size: 22px;          /* × を少し大きく */
-    display: flex !important; /* 表示時は flex で中央寄せ */
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;       /* 押しやすい丸 */
-    cursor: pointer;
-}
-
+            /* 🔥 スマホ版だけ × ボタンを押しやすくする */
+            .all-clear-btn {
+                right: 6px;
+                width: 36px;
+                height: 36px;
+                font-size: 22px;
+            }
         }
     </style>
 </head>
@@ -1091,7 +1076,7 @@
             if (allSearchInput.value.trim() === "") {
                 allClearBtn.style.display = "none";
             } else {
-                allClearBtn.style.display = "block";
+                allClearBtn.style.display = "flex"; // ← flex にして中央寄せ
             }
         }
 
