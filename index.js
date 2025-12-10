@@ -7,16 +7,14 @@ const SERVICE_ID = "subscope";
 const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
 
-// HTML → プレーンテキスト（description 用）
 function mapCmsArticle(item) {
     const rawCat = item.category;
     let category = "";
 
-    // ★ ① 配列パターン（カテゴリー複数選択など）
+    // ★ 配列パターン（microCMS が [ { name, id } ] を返すやつ）
     if (Array.isArray(rawCat)) {
         if (rawCat.length > 0 && rawCat[0]) {
             const first = rawCat[0];
-            // first がオブジェクト { name, id } の想定
             category = (
                 first.name ||
                 first.id ||
@@ -24,11 +22,11 @@ function mapCmsArticle(item) {
             ).toString().trim();
         }
 
-    // ★ ② 文字列パターン
+    // ★ 文字列パターン
     } else if (typeof rawCat === "string") {
         category = rawCat.trim();
 
-    // ★ ③ オブジェクトパターン（単一選択）
+    // ★ オブジェクトパターン
     } else if (rawCat && typeof rawCat === "object") {
         category = (
             rawCat.name ||
@@ -37,20 +35,15 @@ function mapCmsArticle(item) {
         ).toString().trim();
     }
 
-    // 何も取れなかった場合だけデフォルト
-    if (!category) category = "音楽";
+    if (!category) category = "音楽";   // 何もなかったときだけ音楽
 
-    console.log("[mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
+    console.log("[article.js mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
 
     return {
         id: item.id,
         title: item.title || "",
-        description: item.description
-            ? item.description
-            : item.content
-                ? stripHtml(item.content).slice(0, 80) + "…"
-                : "",
-        category: category,
+        description: item.description || "",
+        category,
         categoryName: category,
         service: item.service || "",
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
@@ -59,6 +52,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 
 // 一覧取得
 async function loadArticles() {
@@ -454,6 +448,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
