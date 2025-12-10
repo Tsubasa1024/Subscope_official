@@ -1186,6 +1186,33 @@
     box-sizing: border-box !important;/* 余白を含めて幅計算 → はみ出し防止 */
   }
 }
+    /* ================================
+   スマホ版：ヒーローカードの余白を揃える
+   ================================ */
+@media (max-width: 767px) {
+
+  /* ジャンル(SUBSCOPE / 音楽) → タイトルの距離 */
+  .featured-meta {
+    margin-bottom: 8px !important;
+  }
+
+  /* タイトルの下はそのままでもOKなので軽くだけ */
+  .featured-title {
+    margin-bottom: 8px !important;
+    line-height: 1.3;
+  }
+
+  /* 説明文 → ボタンの距離を、上と同じ8pxに揃える */
+  .featured-desc {
+    display: block !important;        /* 非表示になってた場合に備えて */
+    margin-bottom: 8px !important;
+  }
+
+  .btn-read {
+    margin-top: 0 !important;         /* 余白は全部 .featured-desc 側で管理 */
+  }
+}
+
     </style>
 </head>
 <body>
