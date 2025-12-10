@@ -754,15 +754,44 @@
             .all-title {
                 font-size: 2rem;
             }
+@media (max-width: 767px) {
 
-            .all-search-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
+    /* ここは既存のスマホ用いろいろの中に追加でOK */
 
-            .all-search-button {
-                width: 100%;
-            }
+    /* 🔍 すべての記事 検索フォーム：スマホは横並びレイアウトに */
+    .all-search-form {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .all-search-input-wrapper {
+        flex: 1 1 auto;
+    }
+
+    .all-search-input {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 10px 36px 10px 14px; /* 右に×ぶんスペース */
+    }
+
+    .all-clear-btn {
+        right: 10px;
+        font-size: 18px;
+    }
+
+    .all-search-button {
+        flex: 0 0 96px;       /* ボタン側はちょい細め固定幅 */
+        height: 40px;
+        padding: 0 16px;
+        font-size: 0.9rem;
+        white-space: nowrap;  /* 「検索」が折れないように */
+    }
+}
+
         }
     </style>
 </head>
