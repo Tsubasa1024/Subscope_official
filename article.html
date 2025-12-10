@@ -337,9 +337,10 @@
         }
 
         /* タイトル＆メタ */
-.article-header-block {
-    margin-bottom: 0;  /* ← ここを 0 にする */
-}
+        .article-header-block {
+            margin-bottom: 0;
+        }
+
         .article-meta-row {
             display: flex;
             flex-wrap: wrap;
@@ -368,13 +369,12 @@
             margin-bottom: 10px;
         }
 
-.article-lead {
-    font-size: 1rem;
-    color: #4b4b4b;
-    margin-top: 4px;      /* タイトルとの距離（お好みで調整OK） */
-    margin-bottom: 30px;  /* ← 本文との“区切り”になる余白 */
-}
-
+        .article-lead {
+            font-size: 1rem;
+            color: #4b4b4b;
+            margin-top: 4px;
+            margin-bottom: 30px;
+        }
 
         /* 本文 */
         .article-content {
@@ -417,20 +417,21 @@
             margin-bottom: 20px;
         }
 
+        /* PCデフォルト：3列風（flex） */
         .related-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 24px;
         }
 
         .related-card {
-            flex: 0 0 calc((100% - 48px) / 3); /* 3列固定 */
             border-radius: 20px;
             background: #fff;
             overflow: hidden;
             box-shadow: 0 8px 20px rgba(0,0,0,0.04);
             cursor: pointer;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
+            flex: 0 0 calc((100% - 48px) / 3);
+            max-width: calc((100% - 48px) / 3);
         }
 
         .related-card:hover {
@@ -499,7 +500,8 @@
             font-size: 13px;
             color: #86868B;
         }
-                /* ================================
+
+        /* ================================
            著者（名前＋顔）
         ================================ */
         .article-author {
@@ -540,7 +542,6 @@
                 font-size: 0.85rem;
             }
         }
-
 
         /* =========================================
            Responsive
@@ -604,14 +605,15 @@
                 height: 22px;
                 color: #a7a7aa;
             }
-    .search-item p {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;       /* 表示する行数（2行） */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
+
+            .search-item p {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
             .clear-btn {
                 display: none;
             }
@@ -689,35 +691,79 @@
                 font-size: 2rem;
             }
 
-            .related-grid {
-                grid-template-columns: 1fr;
-            }
-
             .footer-links {
                 gap: 24px;
                 flex-wrap: wrap;
             }
-        }
-@media (max-width: 767px) {
-    .article-hero {
-        height: 220px;  /* ← 横長にしたい高さ。調整できる */
-        overflow: hidden;
-        border-radius: 20px;
-    }
 
-    .article-hero img {
-        height: 100%;
-        width: 100%;
-        object-fit: cover;
-        object-position: center;
-    }
-}
-        @media (max-width: 767px) {
-    .article-title {
-        font-size: 1.6rem; /* ← 今より少し小さく。1.4rem もアリ */
-        line-height: 1.3;
-    }
-}
+            /* スマホ：関連記事は1列表示 */
+            .related-grid {
+                flex-direction: column;
+            }
+
+            .related-card {
+                flex: 1 1 auto;
+                max-width: 100%;
+            }
+
+            /* スマホ：タイトル・リード・本文の余白最適化 */
+            .container {
+                padding: 0 16px;
+            }
+
+            .article-header-block {
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+
+            .article-meta-row {
+                margin-bottom: 4px;
+                font-size: 0.8rem;
+            }
+
+            .article-title {
+                font-size: 1.7rem;
+                line-height: 1.35;
+                margin-bottom: 6px;
+            }
+
+            .article-lead {
+                font-size: 0.98rem;
+                line-height: 1.7;
+                color: #4b4b4b;
+                margin-top: 0;
+                margin-bottom: 18px;
+            }
+
+            .article-hero {
+                margin: 0 0 20px;
+                height: 220px;
+                border-radius: 18px;
+                overflow: hidden;
+            }
+
+            .article-kv {
+                min-height: 100%;
+                box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+            }
+
+            .article-content {
+                font-size: 0.98rem;
+                line-height: 1.8;
+            }
+
+            .article-content p {
+                margin-bottom: 18px;
+            }
+
+            .article-content h2 {
+                margin: 28px 0 12px;
+            }
+
+            .article-content h3 {
+                margin: 20px 0 8px;
+            }
+        }
 
         @media (min-width: 768px) {
             .search-wrapper {
@@ -742,90 +788,16 @@
                 width: 280px !important;
             }
         }
-        /* ================================
-   スマホ用：タイトル・リード・本文の余白最適化
-================================ */
-@media (max-width: 767px) {
 
-    /* 横の余白を少しだけタイトに */
-    .container {
-        padding: 0 16px;
-    }
-
-    /* ヘッダーから本編への入り方 */
-    main {
-        padding-top: 96px;
-    }
-
-    /* メタ情報（カテゴリ・日付）まわり */
-    .article-header-block {
-        margin-top: 8px;
-        margin-bottom: 8px;   /* メタ → ヒーローまでの大枠 */
-    }
-
-    .article-meta-row {
-        margin-bottom: 4px;
-        font-size: 0.8rem;
-    }
-
-    /* タイトル */
-    .article-title {
-        font-size: 1.7rem;    /* ちょい小さめで読みやすく */
-        line-height: 1.35;
-        margin-bottom: 6px;   /* タイトル → リードの距離 */
-    }
-
-    /* 説明文（リード文） */
-    .article-lead {
-        font-size: 0.98rem;
-        line-height: 1.7;
-        color: #4b4b4b;
-        margin-top: 0;
-        margin-bottom: 18px;  /* リード → 画像の距離（重要） */
-    }
-
-    /* ヒーロー画像の上下の余白＆比率 */
-    .article-hero {
-        margin: 0 0 20px;     /* リードのすぐ下に来て、本文とも詰まりすぎない */
-        height: 220px;
-        border-radius: 18px;
-        overflow: hidden;
-    }
-
-    .article-kv {
-        min-height: 100%;
-        box-shadow: 0 12px 26px rgba(0,0,0,0.12);
-    }
-
-    /* 本文の行間・段落間 */
-    .article-content {
-        font-size: 0.98rem;
-        line-height: 1.8;
-    }
-
-    .article-content p {
-        margin-bottom: 18px;  /* 段落ごとにちゃんと区切り感 */
-    }
-
-    .article-content h2 {
-        margin: 28px 0 12px;
-    }
-
-    .article-content h3 {
-        margin: 20px 0 8px;
-    }
-}
-
-@media (max-width: 767px) {
-    .author-avatar {
-        width: 38px;
-        height: 38px;
-    }
-    .author-name {
-        font-size: 0.9rem;
-    }
-}
-
+        @media (max-width: 767px) {
+            .author-avatar {
+                width: 38px;
+                height: 38px;
+            }
+            .author-name {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -862,32 +834,30 @@
         </div>
     </div>
 
-<div class="nav-overlay" id="nav-overlay">
-    <ul class="nav-list">
-        <li>
-            <a href="index.html" class="nav-link" onclick="toggleMenu();">
-                トップ
-            </a>
-        </li>
-        <li>
-            <a href="all.html" class="nav-link" onclick="toggleMenu();">
-                すべての記事
-            </a>
-        </li>
-        <li>
-            <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
-                ランキング
-            </a>
-        </li>
-        <!-- ★ ここを追加 ★ -->
-        <li>
-            <a href="sns.html" class="nav-link" onclick="toggleMenu();">
-                SNS
-            </a>
-        </li>
-    </ul>
-</div>
-
+    <div class="nav-overlay" id="nav-overlay">
+        <ul class="nav-list">
+            <li>
+                <a href="index.html" class="nav-link" onclick="toggleMenu();">
+                    トップ
+                </a>
+            </li>
+            <li>
+                <a href="all.html" class="nav-link" onclick="toggleMenu();">
+                    すべての記事
+                </a>
+            </li>
+            <li>
+                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
+                    ランキング
+                </a>
+            </li>
+            <li>
+                <a href="sns.html" class="nav-link" onclick="toggleMenu();">
+                    SNS
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <!-- 検索結果 -->
     <div class="search-results-container">
@@ -901,30 +871,30 @@
             <!-- パンくず -->
             <div class="breadcrumb" id="breadcrumb"></div>
 
-<!-- タイトル＋メタ＋リード（先に表示） -->
-<section class="article-header-block">
-    <div class="article-meta-row">
-        <span class="article-meta-pill" id="meta-service"></span>
-        <span class="article-meta-pill" id="meta-category"></span>
-        <span class="article-date" id="meta-date"></span>
-    </div>
+            <!-- タイトル＋メタ＋リード -->
+            <section class="article-header-block">
+                <div class="article-meta-row">
+                    <span class="article-meta-pill" id="meta-service"></span>
+                    <span class="article-meta-pill" id="meta-category"></span>
+                    <span class="article-date" id="meta-date"></span>
+                </div>
 
-    <!-- 著者部分 -->
-    <div class="article-author">
-        <a href="#" class="author-link" id="author-link">
-            <img id="author-avatar" class="author-avatar" alt="著者アイコン">
-            <span id="author-name" class="author-name"></span>
-        </a>
-    </div>
+                <!-- 著者部分 -->
+                <div class="article-author">
+                    <a href="#" class="author-link" id="author-link">
+                        <img id="author-avatar" class="author-avatar" alt="著者アイコン">
+                        <span id="author-name" class="author-name"></span>
+                    </a>
+                </div>
 
-    <h1 class="article-title" id="article-title"></h1>
-    <p class="article-lead" id="article-lead"></p>
-</section>
+                <h1 class="article-title" id="article-title"></h1>
+                <p class="article-lead" id="article-lead"></p>
+            </section>
 
-<!-- ヒーロー写真 -->
-<section class="article-hero">
-    <div class="article-kv" id="article-kv"></div>
-</section>
+            <!-- ヒーロー写真 -->
+            <section class="article-hero">
+                <div class="article-kv" id="article-kv"></div>
+            </section>
 
             <!-- 本文 -->
             <article class="article-content" id="article-content">
@@ -995,7 +965,7 @@
             }
         });
 
-        // × ボタン表示切り替え
+        // × ボタン表示切り替え（PC用）
         if (clearBtn) {
             function updateClearBtn() {
                 if (searchInput.value.trim() === "") {
@@ -1048,7 +1018,7 @@
         const relatedGrid    = document.getElementById("related-grid");
         const relatedSection = document.getElementById("related-section");
 
-        // ★ 著者（名前＋顔）
+        // 著者（名前＋顔）
         const authorNameEl   = document.getElementById("author-name");
         const authorAvatarEl = document.getElementById("author-avatar");
         const authorLinkEl   = document.getElementById("author-link");
@@ -1063,95 +1033,90 @@
             return;
         }
 
-// ===== カテゴリー（日本語ラベル） =====
-const categoryLabel =
-    article.categoryName ||   // index.js でつけた表示用
-    article.category    ||    // 直接文字列で入れている場合
-    "その他";
+        // カテゴリー（日本語ラベル）
+        const categoryLabel =
+            article.categoryName ||   // index.js でつけた表示用
+            article.category    ||    // 直接文字列で入れている場合
+            "その他";
 
-// パンくず
-breadcrumbEl.innerHTML = `
-    <a href="index.html">トップ</a> /
-    <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">
-        ${categoryLabel}
-    </a> /
-    <span>${article.title}</span>
-`;
+        // パンくず
+        breadcrumbEl.innerHTML = `
+            <a href="index.html">トップ</a> /
+            <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">
+                ${categoryLabel}
+            </a> /
+            <span>${article.title}</span>
+        `;
 
-// メタ
-serviceEl.textContent  = article.service || "SUBSCOPE";
-categoryEl.textContent = categoryLabel;
-dateEl.textContent     = (article.date || "").replace(/-/g, ".");
+        // メタ
+        serviceEl.textContent  = article.service || "SUBSCOPE";
+        categoryEl.textContent = categoryLabel;
+        dateEl.textContent     = (article.date || "").replace(/-/g, ".");
 
-// ヒーロー画像
-if (kv) {
-    const img = article.image || "images/sample1.jpg";
-    kv.style.backgroundImage = `url('${img}')`;
-}
+        // ヒーロー画像
+        if (kv) {
+            const img = article.image || "images/sample1.jpg";
+            kv.style.backgroundImage = `url('${img}')`;
+        }
 
-// メタ情報
-const serviceName = article.service || article.serviceName || "";
-if (serviceEl) {
-    if (serviceName) {
-        serviceEl.textContent = serviceName;
-        serviceEl.style.display = "inline-block";
-    } else {
-        serviceEl.style.display = "none";
-    }
-}
-/* ==========================
-   著者（名前＋顔＋プロフィールリンク）
-   microCMS想定：
-   article.author.name / article.author.avatar.url / article.author.id
-   ＋ 互換用に authorName / authorImage も見ておく
-========================== */
-if (authorNameEl && authorAvatarEl && authorLinkEl) {
-    const authorObj   = article.author || null;
-    const authorName  = (authorObj && authorObj.name) || article.authorName || "";
-    const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
-    const authorId    = authorObj && authorObj.id;  // microCMS の参照は id が入る
+        // メタ情報（サービス名の表示制御）
+        const serviceName = article.service || article.serviceName || "";
+        if (serviceEl) {
+            if (serviceName) {
+                serviceEl.textContent = serviceName;
+                serviceEl.style.display = "inline-block";
+            } else {
+                serviceEl.style.display = "none";
+            }
+        }
 
-    if (authorName) {
-        authorNameEl.textContent = authorName;
-    } else {
-        // 著者名がなければブロックごと非表示
-        const authorBlock = authorNameEl.closest(".article-author");
-        if (authorBlock) authorBlock.style.display = "none";
-    }
+        /* 著者（名前＋顔＋プロフィールリンク）
+           microCMS想定：
+           article.author.name / article.author.avatar.url / article.author.id
+           ＋ 互換用に authorName / authorImage も見る
+        */
+        if (authorNameEl && authorAvatarEl && authorLinkEl) {
+            const authorObj   = article.author || null;
+            const authorName  = (authorObj && authorObj.name) || article.authorName || "";
+            const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
+            const authorId    = authorObj && authorObj.id;  // microCMS 参照用 ID（今は未使用）
 
-    if (authorImage) {
-        authorAvatarEl.src = authorImage;
-    } else {
-        authorAvatarEl.style.display = "none";
-    }
+            if (authorName) {
+                authorNameEl.textContent = authorName;
+            } else {
+                const authorBlock = authorNameEl.closest(".article-author");
+                if (authorBlock) authorBlock.style.display = "none";
+            }
 
-// 今は著者ページ無し → クリック無効化
-authorLinkEl.href = "javascript:void(0)";
-authorLinkEl.style.cursor = "default";
-authorLinkEl.style.pointerEvents = "none";  // 完全にクリック不可
+            if (authorImage) {
+                authorAvatarEl.src = authorImage;
+            } else {
+                authorAvatarEl.style.display = "none";
+            }
 
-}
+            // 今は著者ページなし → クリック無効化
+            authorLinkEl.href = "javascript:void(0)";
+            authorLinkEl.style.cursor = "default";
+            authorLinkEl.style.pointerEvents = "none";
+        }
 
-// タイトル & リード
-if (titleEl) titleEl.textContent = article.title || "";
+        // タイトル & リード
+        if (titleEl) titleEl.textContent = article.title || "";
 
-if (leadEl) {
-    // microCMS の「説明文・リード文（description）」を優先して使う
-    const leadFromCms = (article.description || "").trim();
+        if (leadEl) {
+            // microCMS の「説明文・リード文（description）」を優先
+            const leadFromCms = (article.description || "").trim();
 
-    if (leadFromCms) {
-        leadEl.textContent = leadFromCms;
-    } else {
-        // もし description が空なら、今まで通り本文の最初の <p> をリードにする
-        const tmp = document.createElement("div");
-        tmp.innerHTML = article.contentHtml || article.content || "";
-        const firstP = tmp.querySelector("p");
-        leadEl.textContent = firstP ? firstP.textContent : "";
-    }
-}
-
-
-
+            if (leadFromCms) {
+                leadEl.textContent = leadFromCms;
+            } else {
+                // description が空なら本文の最初の <p> をリードに
+                const tmp = document.createElement("div");
+                tmp.innerHTML = article.contentHtml || article.content || "";
+                const firstP = tmp.querySelector("p");
+                leadEl.textContent = firstP ? firstP.textContent : "";
+            }
+        }
 
         // 本文
         if (contentEl) {
@@ -1160,15 +1125,15 @@ if (leadEl) {
         }
 
         // 関連記事（同じカテゴリ or 同じサービス）
-       const related = list
-    .filter(a =>
-        a.id !== article.id &&
-        (
-            (a.categoryName || a.category) === categoryLabel ||
-            a.service === article.service
-        )
-    )
-    .slice(0, 3);
+        const related = list
+            .filter(a =>
+                a.id !== article.id &&
+                (
+                    (a.categoryName || a.category) === categoryLabel ||
+                    a.service === article.service
+                )
+            )
+            .slice(0, 3);
 
         if (!related.length) {
             if (relatedSection) relatedSection.style.display = "none";
@@ -1202,6 +1167,5 @@ if (leadEl) {
         window.location.href = "article.html?id=" + encodeURIComponent(id);
     }
     </script>
-article.html
 </body>
 </html>
