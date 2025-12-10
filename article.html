@@ -807,6 +807,34 @@
         margin: 20px 0 8px;
     }
 }
+.article-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 28px;
+}
+
+.author-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.author-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1D1D1F;
+}
+@media (max-width: 767px) {
+    .author-avatar {
+        width: 38px;
+        height: 38px;
+    }
+    .author-name {
+        font-size: 0.9rem;
+    }
+}
 
     </style>
 </head>
@@ -906,6 +934,14 @@
 
 <!-- ヒーロー写真（後に表示） -->
 <section class="article-hero">
+    <!-- 著者情報 -->
+<div class="article-author" id="article-author">
+    <img class="author-avatar" id="author-avatar">
+    <div class="author-info">
+        <span class="author-name" id="author-name"></span>
+    </div>
+</div>
+
     <div class="article-kv" id="article-kv"></div>
 </section>
 
@@ -1083,6 +1119,19 @@ if (serviceEl) {
         serviceEl.style.display = "none";
     }
 }
+        // 著者表示
+const authorBox   = document.getElementById("article-author");
+const authorImg   = document.getElementById("author-avatar");
+const authorName  = document.getElementById("author-name");
+
+if (article.author) {
+    authorImg.src = article.authorImage || "images/default-author.png";
+    authorName.textContent = article.authorName || "";
+    authorBox.style.display = "flex";
+} else {
+    authorBox.style.display = "none";
+}
+
 
 /* ==========================
    著者（名前＋顔＋プロフィールリンク）
