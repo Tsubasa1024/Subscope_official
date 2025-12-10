@@ -603,7 +603,14 @@
                 height: 22px;
                 color: #a7a7aa;
             }
-
+    .search-item p {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;       /* 表示する行数（2行） */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
             .clear-btn {
                 display: none;
             }
