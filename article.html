@@ -498,6 +498,48 @@
             font-size: 13px;
             color: #86868B;
         }
+                /* ================================
+           著者（名前＋顔）
+        ================================ */
+        .article-author {
+            margin: 8px 0 24px;
+        }
+
+        .author-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .author-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .author-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-text-main);
+        }
+
+        @media (max-width: 767px) {
+            .article-author {
+                margin: 6px 0 18px;
+            }
+
+            .author-avatar {
+                width: 28px;
+                height: 28px;
+            }
+
+            .author-name {
+                font-size: 0.85rem;
+            }
+        }
+
 
         /* =========================================
            Responsive
@@ -842,11 +884,20 @@
             <div class="breadcrumb" id="breadcrumb"></div>
 
 <!-- タイトル＋メタ＋リード（先に表示） -->
+<!-- タイトル＋メタ＋リード（先に表示） -->
 <section class="article-header-block">
     <div class="article-meta-row">
         <span class="article-meta-pill" id="meta-service"></span>
         <span class="article-meta-pill" id="meta-category"></span>
         <span class="article-date" id="meta-date"></span>
+    </div>
+
+    <!-- ★ ここが新しく増える「著者部分」 -->
+    <div class="article-author">
+        <a href="#" class="author-link" id="author-link">
+            <img id="author-avatar" class="author-avatar" alt="著者アイコン">
+            <span id="author-name" class="author-name"></span>
+        </a>
     </div>
 
     <h1 class="article-title" id="article-title"></h1>
@@ -981,6 +1032,11 @@
         const relatedGrid    = document.getElementById("related-grid");
         const relatedSection = document.getElementById("related-section");
 
+        // ★ 著者（名前＋顔）
+        const authorNameEl   = document.getElementById("author-name");
+        const authorAvatarEl = document.getElementById("author-avatar");
+        const authorLinkEl   = document.getElementById("author-link");
+
         if (!article) {
             if (contentEl) {
                 contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
@@ -1010,12 +1066,12 @@ breadcrumbEl.innerHTML = `
 serviceEl.textContent  = article.service || "SUBSCOPE";
 categoryEl.textContent = categoryLabel;
 dateEl.textContent     = (article.date || "").replace(/-/g, ".");
-        
-        // ヒーロー画像
-        if (kv) {
-            const img = article.image || "images/sample1.jpg";
-            kv.style.backgroundImage = `url('${img}')`;
-        }
+
+// ヒーロー画像
+if (kv) {
+    const img = article.image || "images/sample1.jpg";
+    kv.style.backgroundImage = `url('${img}')`;
+}
 
 // メタ情報
 const serviceName = article.service || article.serviceName || "";
@@ -1025,6 +1081,41 @@ if (serviceEl) {
         serviceEl.style.display = "inline-block";
     } else {
         serviceEl.style.display = "none";
+    }
+}
+
+/* ==========================
+   著者（名前＋顔＋プロフィールリンク）
+   microCMS想定：
+   article.author.name / article.author.avatar.url / article.author.id
+   ＋ 互換用に authorName / authorImage も見ておく
+========================== */
+if (authorNameEl && authorAvatarEl && authorLinkEl) {
+    const authorObj   = article.author || null;
+    const authorName  = (authorObj && authorObj.name) || article.authorName || "";
+    const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
+    const authorId    = authorObj && authorObj.id;  // microCMS の参照は id が入る
+
+    if (authorName) {
+        authorNameEl.textContent = authorName;
+    } else {
+        // 著者名がなければブロックごと非表示
+        const authorBlock = authorNameEl.closest(".article-author");
+        if (authorBlock) authorBlock.style.display = "none";
+    }
+
+    if (authorImage) {
+        authorAvatarEl.src = authorImage;
+    } else {
+        authorAvatarEl.style.display = "none";
+    }
+
+    // プロフィールページへのリンク（author.html?id=xxx）
+    if (authorId) {
+        authorLinkEl.href = `author.html?id=${encodeURIComponent(authorId)}`;
+    } else {
+        authorLinkEl.href = "javascript:void(0)";
+        authorLinkEl.style.cursor = "default";
     }
 }
 
