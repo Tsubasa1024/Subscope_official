@@ -791,6 +791,18 @@
         white-space: nowrap;  /* 「検索」が折れないように */
     }
 }
+/* 🔥 スマホ版だけ × ボタンを押しやすくする */
+.all-clear-btn {
+    right: 6px;               /* 位置をちょい内側へ */
+    width: 36px;              /* タップ判定を広くする */
+    height: 36px;
+    font-size: 22px;          /* × を少し大きく */
+    display: flex !important; /* 表示時は flex で中央寄せ */
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;       /* 押しやすい丸 */
+    cursor: pointer;
+}
 
         }
     </style>
