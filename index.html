@@ -457,7 +457,15 @@
     width: auto;
   }
 }
-
+/* iPad（縦・横）だけ：左右の余白をそろえる */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .featured-content {
+    max-width: none;
+    width: auto;
+    left: 40px;
+    right: 40px;
+  }
+}
 
 /* ▼▼ グラデーションを強めて下側を読みやすくする ▼▼ */
 .featured-card::before {
