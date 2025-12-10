@@ -8,22 +8,36 @@ const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
 
 // HTML → プレーンテキスト（description 用）
-function stripHtml(html) {
-    const tmp = document.createElement("div");
-    tmp.innerHTML = html || "";
-    return tmp.textContent || tmp.innerText || "";
-}
-
-// microCMS の1件を SUBSCOPE 形式に変換
 function mapCmsArticle(item) {
     const rawCat = item.category;
     let category = "";
 
-    if (typeof rawCat === "string") {
+    // ★ ① 配列パターン（カテゴリー複数選択など）
+    if (Array.isArray(rawCat)) {
+        if (rawCat.length > 0 && rawCat[0]) {
+            const first = rawCat[0];
+            // first がオブジェクト { name, id } の想定
+            category = (
+                first.name ||
+                first.id ||
+                first
+            ).toString().trim();
+        }
+
+    // ★ ② 文字列パターン
+    } else if (typeof rawCat === "string") {
         category = rawCat.trim();
+
+    // ★ ③ オブジェクトパターン（単一選択）
     } else if (rawCat && typeof rawCat === "object") {
-        category = (rawCat.name || rawCat.id || "").trim();
+        category = (
+            rawCat.name ||
+            rawCat.id ||
+            ""
+        ).toString().trim();
     }
+
+    // 何も取れなかった場合だけデフォルト
     if (!category) category = "音楽";
 
     console.log("[mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
@@ -31,17 +45,13 @@ function mapCmsArticle(item) {
     return {
         id: item.id,
         title: item.title || "",
-
-        // ★ microCMS の「説明文・リード文（description）」を最優先で使う
         description: item.description
             ? item.description
             : item.content
                 ? stripHtml(item.content).slice(0, 80) + "…"
                 : "",
-
         category: category,
         categoryName: category,
-
         service: item.service || "",
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
@@ -49,6 +59,7 @@ function mapCmsArticle(item) {
         contentHtml: item.content || ""
     };
 }
+
 // 一覧取得
 async function loadArticles() {
     if (window.articles && window.articles.length > 0) {
@@ -443,6 +454,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initSearch();
     initScrollReveal();
 });
+
 
 
 
