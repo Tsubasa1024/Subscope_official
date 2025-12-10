@@ -518,18 +518,24 @@
             background: #fff;
         }
 
-        .all-clear-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            line-height: 1;
-            color: #999;
-            cursor: pointer;
-            user-select: none;
-            display: none; /* 入力時にだけ表示 */
-        }
+/* 🔥 スマホ版だけ × ボタンを押しやすく＆JSで表示制御 */
+.all-clear-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+    line-height: 1;
+    color: #999;
+    border-radius: 50%;
+    display: none;              /* ← これが超重要（JSで表示制御） */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
 
         .all-search-button {
             padding: 9px 20px;
