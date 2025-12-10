@@ -1117,13 +1117,11 @@ if (authorNameEl && authorAvatarEl && authorLinkEl) {
         authorAvatarEl.style.display = "none";
     }
 
-    // プロフィールページへのリンク（author.html?id=xxx）
-    if (authorId) {
-        authorLinkEl.href = `author.html?id=${encodeURIComponent(authorId)}`;
-    } else {
-        authorLinkEl.href = "javascript:void(0)";
-        authorLinkEl.style.cursor = "default";
-    }
+// 今は著者ページ無し → クリック無効化
+authorLinkEl.href = "javascript:void(0)";
+authorLinkEl.style.cursor = "default";
+authorLinkEl.style.pointerEvents = "none";  // 完全にクリック不可
+
 }
 
 // タイトル & リード
