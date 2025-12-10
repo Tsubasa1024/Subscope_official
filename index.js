@@ -59,8 +59,6 @@ function mapCmsArticle(item) {
     };
 }   // ← ← ← ★ この閉じカッコが必要！！
 
-
-
 // 一覧取得
 async function loadArticles() {
     if (window.articles && window.articles.length > 0) {
@@ -96,11 +94,17 @@ function getArticles() {
 // =====================================
 // 2. DOM 変数
 // =====================================
-let searchInput;
+let searchInput;      // ヘッダー左上の検索
 let clearBtn;
-let searchResultsEl;
+let searchResultsEl;  // ヘッダーの候補表示用
 let heroContainer;
 let latestGrid;
+
+// 「すべての記事」ページ用
+let allSearchForm;
+let allSearchInput;
+let allSearchInfo;
+let allArticlesList;
 
 // =====================================
 // 3. テキスト正規化
@@ -281,93 +285,97 @@ function initCarousel3D() {
 }
 
 // =====================================
-// 7. 検索ロジック
+// 7. 検索ロジック（共通配列を返す）
 // =====================================
-function calcArticleScore(article, tokens) {
-    const title = normalizeText(article.title);
-    const desc = normalizeText(article.description);
-    const service = normalizeText(article.service);
-    const tags = normalizeText((article.tags || []).join(" "));
 
-    let totalScore = 0;
+/**
+ * キーワードで記事を検索して、
+ * ・タイトル / 説明 / サービス名 / カテゴリ / tags を対象に
+ * ・AND 検索（すべてのトークンを含む）
+ * ・日付の新しい順に並べて返す
+ */
+function searchArticlesList(query) {
+    const q = (query || "").trim();
+    if (!q) return [];
 
-    for (const t of tokens) {
-        const token = normalizeText(t);
-        if (!token) continue;
+    const tokens = q
+        .split(/\s+/)
+        .map(normalizeText)
+        .filter(Boolean);
 
-        let matched = false;
+    const list = getArticles();
+    if (!list.length || !tokens.length) return [];
 
-        if (title.includes(token)) {
-            totalScore += 50;
-            matched = true;
-        }
-        if (desc.includes(token)) {
-            totalScore += 25;
-            matched = true;
-        }
-        if (service.includes(token)) {
-            totalScore += 15;
-            matched = true;
-        }
-        if (tags.includes(token)) {
-            totalScore += 15;
-            matched = true;
-        }
+    const result = list.filter((article) => {
+        const joined = [
+            article.title || "",
+            article.description || "",
+            article.service || "",
+            article.categoryName || article.category || "",
+            (article.tags || []).join(" ")
+        ].join(" ");
 
-        if (!matched) return 0;
-    }
+        const haystack = normalizeText(joined);
+        return tokens.every((token) => haystack.includes(token));
+    });
 
-    totalScore += (article.views || 0) * 0.05;
-    return totalScore;
+    // ★ 新しい順（英語って入ってる「最新記事」から3つ、に対応）
+    result.sort((a, b) => {
+        const da = a.date ? new Date(a.date) : 0;
+        const db = b.date ? new Date(b.date) : 0;
+        return db - da;
+    });
+
+    return result;
 }
 
-function searchArticles(query) {
+// =====================================
+// 8. ヘッダー検索（候補3件＋Enterで all.html に飛ぶ）
+// =====================================
+
+function renderHeaderSearchResults(query) {
     if (!searchResultsEl) return;
 
-    const q = query.trim();
+    const q = (query || "").trim();
+
     if (!q) {
         searchResultsEl.innerHTML = "";
+        searchResultsEl.style.display = "none";
         return;
     }
 
-    const tokens = q.split(/\s+/);
-    const list = getArticles();
+    const results = searchArticlesList(q).slice(0, 3); // ★最新3件まで
 
-    const scored = list
-        .map((article) => {
-            const score = calcArticleScore(article, tokens);
-            return { article, score };
-        })
-        .filter((item) => item.score > 0)
-        .sort((a, b) => b.score - a.score);
-
-    if (!scored.length) {
+    if (!results.length) {
         searchResultsEl.innerHTML =
             `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
+        searchResultsEl.style.display = "block";
         return;
     }
 
-    searchResultsEl.innerHTML = scored
-        .map(({ article }) => `
-            <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(
-                article.id
-            )}'">
-                <img src="${article.image}" alt="">
-                <div>
-                    <h3>${article.title}</h3>
-                    <p>${article.description}</p>
-                </div>
+    searchResultsEl.innerHTML = results
+        .map(
+            (article) => `
+        <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(
+            article.id
+        )}'">
+            <img src="${article.image}" alt="">
+            <div>
+                <h3>${article.title}</h3>
+                <p>${article.description}</p>
             </div>
-        `)
+        </div>
+    `
+        )
         .join("");
+
+    searchResultsEl.style.display = "block";
 }
 
-// =====================================
-// 8. 検索イベント紐付け
-// =====================================
 function initSearch() {
     if (!searchInput) return;
 
+    // searchResultsEl がなかったら body の最後に作る
     if (!searchResultsEl) {
         const container = document.createElement("div");
         container.className = "search-results-container";
@@ -376,28 +384,125 @@ function initSearch() {
         searchResultsEl = container.querySelector("#searchResults");
     }
 
+    // 入力中：最新3件だけ候補表示
     searchInput.addEventListener("input", (e) => {
-        searchArticles(e.target.value);
+        renderHeaderSearchResults(e.target.value);
     });
 
+    // Enter：すべての記事ページに遷移し、検索済み状態で開く
     searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
-            searchArticles(searchInput.value);
+            const keyword = searchInput.value.trim();
+            if (!keyword) {
+                renderHeaderSearchResults("");
+                return;
+            }
+            const url = `all.html?search=${encodeURIComponent(keyword)}`;
+            window.location.href = url;
         }
     });
 
     if (clearBtn) {
         clearBtn.addEventListener("click", () => {
             searchInput.value = "";
-            searchResultsEl.innerHTML = "";
+            if (searchResultsEl) {
+                searchResultsEl.innerHTML = "";
+                searchResultsEl.style.display = "none";
+            }
             searchInput.focus();
         });
     }
 }
 
 // =====================================
-// 9. Menu / スクロールリビール
+// 9. 「すべての記事」ページ専用 検索
+//    （本命の検索ボックスをここで制御）
+// =====================================
+
+function renderAllPageArticles(articles, keyword) {
+    if (!allArticlesList) return;
+
+    if (!articles || articles.length === 0) {
+        allArticlesList.innerHTML = `
+            <p class="all-empty">
+                「${keyword || ""}」に該当する記事はありませんでした。<br>
+                キーワードを変えるか、ジャンルから探してみてください。
+            </p>
+        `;
+        return;
+    }
+
+    allArticlesList.innerHTML = articles
+        .map(
+            (a) => `
+        <article class="all-article-card">
+            <a href="article.html?id=${encodeURIComponent(a.id)}">
+                <div class="all-article-thumb">
+                    <img src="${a.image}" alt="${a.title}">
+                </div>
+                <div class="all-article-body">
+                    <div class="all-article-meta">
+                        <span class="all-article-service">${a.service || "SUBSCOPE"}</span>
+                        <span class="all-article-category">${a.categoryName || a.category || ""}</span>
+                    </div>
+                    <h2 class="all-article-title">${a.title}</h2>
+                    <p class="all-article-desc">${a.description || ""}</p>
+                    <p class="all-article-date">${(a.date || "").replace(/-/g, ".")}</p>
+                </div>
+            </a>
+        </article>
+    `
+        )
+        .join("");
+}
+
+function initAllPageSearch() {
+    allSearchForm   = document.getElementById("allSearchForm");
+    allSearchInput  = document.getElementById("allSearchInput");
+    allSearchInfo   = document.getElementById("allSearchInfo");
+    allArticlesList = document.getElementById("allArticlesList");
+
+    // 「すべての記事」ページ以外では何もしない
+    if (!allSearchForm || !allSearchInput || !allArticlesList) return;
+
+    function runSearch(keyword) {
+        const q = (keyword || "").trim();
+        if (!q) {
+            // キーワード無し → ここでは何もしない（デフォ表示は別ロジックでOK）
+            if (allSearchInfo) allSearchInfo.textContent = "";
+            return;
+        }
+
+        const results = searchArticlesList(q);
+        renderAllPageArticles(results, q);
+
+        if (allSearchInfo) {
+            allSearchInfo.textContent = `「${q}」の検索結果：${results.length}件`;
+        }
+
+        // URL を /all.html?search=〇〇 に揃えておく
+        const newUrl = `${location.pathname}?search=${encodeURIComponent(q)}`;
+        window.history.replaceState(null, "", newUrl);
+    }
+
+    // URL パラメータに search があればそれで初期検索
+    const params = new URLSearchParams(window.location.search);
+    const initialKeyword = params.get("search") || "";
+    if (initialKeyword) {
+        allSearchInput.value = initialKeyword;
+        runSearch(initialKeyword);
+    }
+
+    // 検索フォーム送信時
+    allSearchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        runSearch(allSearchInput.value);
+    });
+}
+
+// =====================================
+// 10. Menu / スクロールリビール
 // =====================================
 function toggleMenu() {
     const overlay = document.getElementById("nav-overlay");
@@ -438,12 +543,15 @@ function initScrollReveal() {
 }
 
 // =====================================
-// 10. 初期化（トップページ / 共通）
+// 11. 初期化（トップページ / 共通）
 // =====================================
 document.addEventListener("DOMContentLoaded", async () => {
+    // ヘッダー検索まわり
     searchInput     = document.getElementById("searchInput");
     clearBtn        = document.getElementById("clear-btn");
     searchResultsEl = document.getElementById("searchResults");
+
+    // トップページ用
     heroContainer   = document.getElementById("most-viewed-content");
     latestGrid      = document.getElementById("latest-grid");
 
@@ -452,19 +560,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderHero();
     renderLatest();
     initCarousel3D();
-    initSearch();
+    initSearch();          // ★ どのページからでもヘッダー検索
+    initAllPageSearch();   // ★ all.html にいるときだけ本命検索を有効にする
     initScrollReveal();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
