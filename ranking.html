@@ -810,7 +810,14 @@
                 color: #a7a7aa;
                 transition: transform 0.25s ease;
             }
-
+    .search-item p {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;       /* 表示する行数（2行） */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
             .clear-btn {
                 display: none;
             }
