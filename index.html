@@ -1163,9 +1163,15 @@
     line-height: 1.3 !important;
   }
 
-  /* 説明文はスマホでは消す（高さを抑えるため） */
+  /* 説明文：2行で…に省略（スマホ） */
   .featured-desc {
-    display: none !important;
+    font-size: 0.9rem !important;
+    line-height: 1.45 !important;
+    margin-bottom: 8px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;          /* ★ ここで2行に制限 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* ボタンも少し小さめに */
