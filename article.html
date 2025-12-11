@@ -1084,83 +1084,73 @@
             const params = new URLSearchParams(location.search);
             const id = params.get("id");
 
+            // 記事一覧がなければロード
             if (!window.articles || window.articles.length === 0) {
                 if (typeof loadArticles === "function") {
                     await loadArticles();
                 }
             }
 
-            const list = window.articles || [];
-            const article =
-                list.find((a) => a.id === id) || list[0];
+            const list    = window.articles || [];
+            const article = list.find((a) => a.id === id) || list[0];
 
-            const kv = document.getElementById("article-kv");
-            const titleEl = document.getElementById("article-title");
-            const leadEl = document.getElementById("article-lead");
-            const serviceEl = document.getElementById("meta-service");
-            const categoryEl = document.getElementById("meta-category");
-            const dateEl = document.getElementById("meta-date");
-            const contentEl = document.getElementById("article-content");
+            const kv           = document.getElementById("article-kv");
+            const titleEl      = document.getElementById("article-title");
+            const leadEl       = document.getElementById("article-lead");
+            const serviceEl    = document.getElementById("meta-service");
+            const categoryEl   = document.getElementById("meta-category");
+            const dateEl       = document.getElementById("meta-date");
+            const contentEl    = document.getElementById("article-content");
             const breadcrumbEl = document.getElementById("breadcrumb");
-            const relatedGrid =
-                document.getElementById("related-grid");
-            const relatedSection =
-                document.getElementById("related-section");
+            const relatedGrid  = document.getElementById("related-grid");
+            const relatedSection = document.getElementById("related-section");
 
-            const authorNameEl =
-                document.getElementById("author-name");
-            const authorAvatarEl =
-                document.getElementById("author-avatar");
-            const authorLinkEl =
-                document.getElementById("author-link");
+            const authorNameEl   = document.getElementById("author-name");
+            const authorAvatarEl = document.getElementById("author-avatar");
+            const authorLinkEl   = document.getElementById("author-link");
 
-            const priceSection = document.getElementById(
-                "price-summary-section"
-            );
-            const priceBox =
-                document.getElementById("price-summary-box");
+            const priceSection = document.getElementById("price-summary-section");
+            const priceBox     = document.getElementById("price-summary-box");
 
+            // ★ 公式サイト用
+            const officialSection = document.getElementById("official-site-section");
+            const officialButtons = document.getElementById("official-site-buttons");
+
+            // 記事がなかったとき
             if (!article) {
                 if (contentEl) {
-                    contentEl.innerHTML =
-                        "<p>記事が見つかりませんでした。</p>";
+                    contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
                 }
-                if (relatedSection) {
-                    relatedSection.style.display = "none";
-                }
-                if (priceSection) {
-                    priceSection.style.display = "none";
-                }
+                if (relatedSection) relatedSection.style.display = "none";
+                if (priceSection)   priceSection.style.display   = "none";
+                if (officialSection) officialSection.style.display = "none";
                 return;
-                // 公式サイトリンクボタン生成
-const officialSection = document.getElementById("official-site-section");
-const officialButtons = document.getElementById("official-site-buttons");
+            }
 
-if (officialSection && officialButtons) {
-    const links = Array.isArray(article.officialLinks)
-        ? article.officialLinks
-        : [];
+            // ★ 公式サイトリンクボタン生成
+            if (officialSection && officialButtons) {
+                const links = Array.isArray(article.officialLinks)
+                    ? article.officialLinks
+                    : [];
 
-    if (links.length === 0) {
-        officialSection.style.display = "none";
-    } else {
-        links.forEach((link) => {
-            if (!link.url) return;
+                if (links.length === 0) {
+                    officialSection.style.display = "none";
+                } else {
+                    links.forEach((link) => {
+                        if (!link.url) return;
 
-            const a = document.createElement("a");
-            a.href = link.url;
-            a.target = "_blank";
-            a.rel = "noopener";
-            a.className = "official-site-button";
-            a.textContent = link.label
-                ? `${link.label} の公式サイト`
-                : "公式サイトへ";
+                        const a = document.createElement("a");
+                        a.href = link.url;
+                        a.target = "_blank";
+                        a.rel = "noopener";
+                        a.className = "official-site-button";
+                        a.textContent = link.label
+                            ? `${link.label} の公式サイト`
+                            : "公式サイトへ";
 
-            officialButtons.appendChild(a);
-        });
-    }
-}
-
+                        officialButtons.appendChild(a);
+                    });
+                }
             }
 
             const categoryLabel =
@@ -1168,32 +1158,18 @@ if (officialSection && officialButtons) {
                 article.category ||
                 "その他";
 
-            breadcrumbEl.innerHTML = `
-                <a href="index.html">トップ</a> /
-                <a href="all.html?tab=${encodeURIComponent(
-                    categoryLabel
-                )}">
-                    ${categoryLabel}
-                </a> /
-                <span>${article.title}</span>
-            `;
-
-            serviceEl.textContent = article.service || "SUBSCOPE";
-            categoryEl.textContent = categoryLabel;
-            dateEl.textContent = (article.date || "").replace(
-                /-/g,
-                "."
-            );
-
-            if (kv) {
-                const img =
-                    article.image || "images/sample1.jpg";
-                kv.style.backgroundImage = `url('${img}')`;
+            if (breadcrumbEl) {
+                breadcrumbEl.innerHTML = `
+                    <a href="index.html">トップ</a> /
+                    <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">
+                        ${categoryLabel}
+                    </a> /
+                    <span>${article.title}</span>
+                `;
             }
 
-            const serviceName =
-                article.service || article.serviceName || "";
             if (serviceEl) {
+                const serviceName = article.service || article.serviceName || "";
                 if (serviceName) {
                     serviceEl.textContent = serviceName;
                     serviceEl.style.display = "inline-block";
@@ -1202,30 +1178,31 @@ if (officialSection && officialButtons) {
                 }
             }
 
-            if (
-                authorNameEl &&
-                authorAvatarEl &&
-                authorLinkEl
-            ) {
-                const authorObj = article.author || null;
+            if (categoryEl) categoryEl.textContent = categoryLabel;
+            if (dateEl) {
+                dateEl.textContent = (article.date || "").replace(/-/g, ".");
+            }
+
+            if (kv) {
+                const img = article.image || "images/sample1.jpg";
+                kv.style.backgroundImage = `url('${img}')`;
+            }
+
+            // 著者
+            if (authorNameEl && authorAvatarEl && authorLinkEl) {
+                const authorObj  = article.author || null;
                 const authorName =
-                    (authorObj && authorObj.name) ||
-                    article.authorName ||
-                    "";
+                    (authorObj && authorObj.name) || article.authorName || "";
                 const authorImage =
-                    (authorObj &&
-                        authorObj.avatar &&
-                        authorObj.avatar.url) ||
+                    (authorObj && authorObj.avatar && authorObj.avatar.url) ||
                     article.authorImage ||
                     "";
 
                 if (authorName) {
                     authorNameEl.textContent = authorName;
                 } else {
-                    const authorBlock =
-                        authorNameEl.closest(".article-author");
-                    if (authorBlock)
-                        authorBlock.style.display = "none";
+                    const block = authorNameEl.closest(".article-author");
+                    if (block) block.style.display = "none";
                 }
 
                 if (authorImage) {
@@ -1242,36 +1219,27 @@ if (officialSection && officialButtons) {
             if (titleEl) titleEl.textContent = article.title || "";
 
             if (leadEl) {
-                const leadFromCms =
-                    (article.description || "").trim();
-
+                const leadFromCms = (article.description || "").trim();
                 if (leadFromCms) {
                     leadEl.textContent = leadFromCms;
                 } else {
                     const tmp = document.createElement("div");
-                    tmp.innerHTML =
-                        article.contentHtml || article.content || "";
+                    tmp.innerHTML = article.contentHtml || article.content || "";
                     const firstP = tmp.querySelector("p");
-                    leadEl.textContent = firstP
-                        ? firstP.textContent
-                        : "";
+                    leadEl.textContent = firstP ? firstP.textContent : "";
                 }
             }
 
             if (contentEl) {
-                const bodyHtml =
-                    article.contentHtml || article.content || "";
+                const bodyHtml = article.contentHtml || article.content || "";
                 contentEl.innerHTML =
                     bodyHtml ||
                     `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
             }
 
-            // ★ 料金プラン（priceSummary）を本文の下に表示
+            // ★ 料金プラン
             if (priceSection && priceBox) {
-                if (
-                    article.priceSummary &&
-                    article.priceSummary.trim() !== ""
-                ) {
+                if (article.priceSummary && article.priceSummary.trim() !== "") {
                     priceBox.innerHTML = article.priceSummary;
                     priceSection.style.display = "block";
                 } else {
@@ -1279,46 +1247,42 @@ if (officialSection && officialButtons) {
                 }
             }
 
+            // 関連記事
             const related = list
                 .filter(
                     (a) =>
                         a.id !== article.id &&
-                        ((a.categoryName || a.category) ===
-                            categoryLabel ||
+                        ((a.categoryName || a.category) === categoryLabel ||
                             a.service === article.service)
                 )
                 .slice(0, 6);
 
             if (!related.length) {
-                if (relatedSection)
-                    relatedSection.style.display = "none";
+                if (relatedSection) relatedSection.style.display = "none";
             } else if (relatedGrid) {
                 relatedGrid.innerHTML = related
                     .map(
                         (a) => `
-                    <div class="related-card" onclick="openArticle('${a.id}')">
-                        <div class="related-thumb" style="background-image:url('${
-                            a.image || "images/sample1.jpg"
-                        }');"></div>
-                        <div class="related-body">
-                            <div class="related-service">${
-                                a.service || ""
-                            }</div>
-                            <div class="related-title-text">${
-                                a.title || ""
-                            }</div>
-                            <div class="related-date">${(
-                                a.date || ""
-                            ).replace(/-/g, ".")}</div>
+                        <div class="related-card" onclick="openArticle('${a.id}')">
+                            <div class="related-thumb" style="background-image:url('${
+                                a.image || "images/sample1.jpg"
+                            }');"></div>
+                            <div class="related-body">
+                                <div class="related-service">${a.service || ""}</div>
+                                <div class="related-title-text">${a.title || ""}</div>
+                                <div class="related-date">${(a.date || "").replace(
+                                    /-/g,
+                                    "."
+                                )}</div>
+                            </div>
                         </div>
-                    </div>
-                `
+                    `
                     )
                     .join("");
             }
 
-            const reveals =
-                document.querySelectorAll(".reveal");
+            // スクロールリビール
+            const reveals = document.querySelectorAll(".reveal");
             const io = new IntersectionObserver(
                 (entries) => {
                     entries.forEach((e) => {
