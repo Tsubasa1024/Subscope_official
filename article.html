@@ -378,6 +378,66 @@
             font-size: 1.15rem;
             margin: 20px 0 8px;
         }
+        /* 公式サイトリンクセクション */
+        .official-site-section {
+            margin-top: 40px;
+            margin-bottom: 24px;
+        }
+
+        .official-site-inner {
+            background: #f5f5f7;
+            border-radius: 24px;
+            padding: 20px 24px;
+            text-align: center;
+            border: 1px solid #e5e5ea;
+        }
+
+        .official-site-label {
+            font-size: 0.85rem;
+            color: #86868b;
+            margin-bottom: 12px;
+        }
+
+        .official-site-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .official-site-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 20px;
+            border-radius: 999px;
+            border: 1px solid #000;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #ffffff;
+            background: #000000;
+            white-space: nowrap;
+            transition: transform 0.25s var(--transition-hover),
+                        box-shadow 0.25s var(--transition-hover),
+                        background 0.25s var(--transition-hover);
+        }
+
+        .official-site-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+            background: #111111;
+        }
+
+        @media (max-width: 767px) {
+            .official-site-inner {
+                padding: 16px 16px;
+            }
+            .official-site-button {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+        }
 
         .article-content p {
             margin-bottom: 14px;
@@ -908,7 +968,15 @@
             <article class="article-content" id="article-content">
                 <!-- JS で注入 -->
             </article>
-
+<!-- 公式サイトリンク -->
+<section class="official-site-section reveal" id="official-site-section">
+    <div class="official-site-inner">
+        <p class="official-site-label">気になったらまずは公式サイトをチェック</p>
+        <div class="official-site-buttons" id="official-site-buttons">
+            <!-- JSでボタンが増える -->
+        </div>
+    </div>
+</section>
             <!-- 料金プラン -->
             <section
                 class="price-summary-section reveal"
@@ -1064,6 +1132,35 @@
                     priceSection.style.display = "none";
                 }
                 return;
+                // 公式サイトリンクボタン生成
+const officialSection = document.getElementById("official-site-section");
+const officialButtons = document.getElementById("official-site-buttons");
+
+if (officialSection && officialButtons) {
+    const links = Array.isArray(article.officialLinks)
+        ? article.officialLinks
+        : [];
+
+    if (links.length === 0) {
+        officialSection.style.display = "none";
+    } else {
+        links.forEach((link) => {
+            if (!link.url) return;
+
+            const a = document.createElement("a");
+            a.href = link.url;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.className = "official-site-button";
+            a.textContent = link.label
+                ? `${link.label} の公式サイト`
+                : "公式サイトへ";
+
+            officialButtons.appendChild(a);
+        });
+    }
+}
+
             }
 
             const categoryLabel =
