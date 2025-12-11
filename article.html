@@ -1175,7 +1175,7 @@
                     article.priceSummary &&
                     article.priceSummary.trim() !== ""
                 ) {
-                    priceBox.textContent = article.priceSummary;
+                    priceBox.innerHTML = article.priceSummary;
                     priceSection.style.display = "block";
                 } else {
                     priceSection.style.display = "none";
