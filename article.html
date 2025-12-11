@@ -378,6 +378,58 @@
             font-size: 1.15rem;
             margin: 20px 0 8px;
         }
+
+        /* 共有ボタン */
+        .share-section {
+            margin: 24px 0 16px;
+        }
+
+        .share-label {
+            font-size: 0.85rem;
+            color: var(--color-text-gray);
+            margin-bottom: 10px;
+        }
+
+        .share-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .share-btn {
+            border-radius: 999px;
+            border: 1px solid #d2d2d7;
+            background: #ffffff;
+            padding: 7px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        }
+
+        .share-btn:hover {
+            background: #f5f5f7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transform: translateY(-1px);
+        }
+
+        .share-btn-main {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .share-btn-main:hover {
+            background: #111;
+        }
+
+        .share-btn small {
+            font-size: 0.75rem;
+            color: #a1a1a6;
+        }
+
         /* 公式サイトリンクセクション */
         .official-site-section {
             margin-top: 40px;
@@ -436,6 +488,14 @@
             .official-site-button {
                 font-size: 0.85rem;
                 padding: 8px 16px;
+            }
+
+            .share-section {
+                margin: 18px 0 10px;
+            }
+            .share-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
             }
         }
 
@@ -958,6 +1018,30 @@
 
                 <h1 class="article-title" id="article-title"></h1>
                 <p class="article-lead" id="article-lead"></p>
+
+                <!-- 共有ボタン -->
+                <section class="share-section">
+                    <p class="share-label">この記事をシェアする</p>
+                    <div class="share-buttons">
+                        <!-- ネイティブ共有（スマホ向け） -->
+                        <button class="share-btn share-btn-main" data-share="native">
+                            シェアする
+                            <small>スマホの共有メニュー</small>
+                        </button>
+                        <!-- X -->
+                        <button class="share-btn" data-share="x">
+                            Xでシェア
+                        </button>
+                        <!-- LINE -->
+                        <button class="share-btn" data-share="line">
+                            LINEで送る
+                        </button>
+                        <!-- コピー -->
+                        <button class="share-btn" data-share="copy">
+                            リンクをコピー
+                        </button>
+                    </div>
+                </section>
             </section>
 
             <section class="article-hero">
@@ -1070,7 +1154,7 @@
         }
     </script>
 
-    <!-- 記事データ読み込み -->
+    <!-- 記事データ読み込み & 共有ボタン -->
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const params = new URLSearchParams(location.search);
@@ -1197,6 +1281,82 @@
                     bodyHtml ||
                     `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
             }
+
+            // ★ 共有ボタン設定
+            const shareUrl  = window.location.href.split("#")[0];
+            const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
+            const shareButtons = document.querySelectorAll(".share-btn");
+
+            shareButtons.forEach((btn) => {
+                btn.addEventListener("click", async () => {
+                    const type = btn.dataset.share;
+
+                    // ネイティブ共有（スマホなど対応ブラウザ）
+                    if (type === "native") {
+                        if (navigator.share) {
+                            try {
+                                await navigator.share({
+                                    title: shareText,
+                                    text: shareText,
+                                    url: shareUrl,
+                                });
+                            } catch (e) {
+                                // キャンセルなどは無視
+                            }
+                        } else {
+                            // 対応していない場合は X にフォールバック
+                            const xUrl =
+                                "https://x.com/intent/tweet?text=" +
+                                encodeURIComponent(shareText) +
+                                "&url=" +
+                                encodeURIComponent(shareUrl);
+                            window.open(xUrl, "_blank", "noopener");
+                        }
+                        return;
+                    }
+
+                    // Xでシェア
+                    if (type === "x") {
+                        const xUrl =
+                            "https://x.com/intent/tweet?text=" +
+                            encodeURIComponent(shareText) +
+                            "&url=" +
+                            encodeURIComponent(shareUrl);
+                        window.open(xUrl, "_blank", "noopener");
+                        return;
+                    }
+
+                    // LINEでシェア
+                    if (type === "line") {
+                        const lineUrl =
+                            "https://social-plugins.line.me/lineit/share?url=" +
+                            encodeURIComponent(shareUrl);
+                        window.open(lineUrl, "_blank", "noopener");
+                        return;
+                    }
+
+                    // リンクコピー
+                    if (type === "copy") {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            try {
+                                await navigator.clipboard.writeText(shareUrl);
+                                alert("記事のURLをコピーしました");
+                            } catch (e) {
+                                alert("コピーに失敗しました…");
+                            }
+                        } else {
+                            // 古いブラウザ向け
+                            const tmp = document.createElement("input");
+                            tmp.value = shareUrl;
+                            document.body.appendChild(tmp);
+                            tmp.select();
+                            document.execCommand("copy");
+                            document.body.removeChild(tmp);
+                            alert("記事のURLをコピーしました");
+                        }
+                    }
+                });
+            });
 
             // ★ 料金プラン
             if (priceSection && priceBox) {
