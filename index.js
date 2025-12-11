@@ -50,7 +50,7 @@ function mapCmsArticle(item) {
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
         views: 0,
         contentHtml: item.content || "",
-
+        priceSummary: item.priceSummary || "",
         // ★ 著者データ（安全に）
         author: item.author || null,
         authorName: item.author?.name || "",
@@ -564,3 +564,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();   // ★ all.html にいるときだけ本命検索を有効にする
     initScrollReveal();
 });
+
