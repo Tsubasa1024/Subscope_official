@@ -1104,10 +1104,6 @@
             const priceSection = document.getElementById("price-summary-section");
             const priceBox     = document.getElementById("price-summary-box");
 
-            // ★ 公式サイト用
-            const officialSection = document.getElementById("official-site-section");
-            const officialButtons = document.getElementById("official-site-buttons");
-
             // 記事がなかったとき
             if (!article) {
                 if (contentEl) {
@@ -1115,34 +1111,7 @@
                 }
                 if (relatedSection) relatedSection.style.display = "none";
                 if (priceSection)   priceSection.style.display   = "none";
-                if (officialSection) officialSection.style.display = "none";
                 return;
-            }
-
-            // ★ 公式サイトリンクボタン生成
-            if (officialSection && officialButtons) {
-                const links = Array.isArray(article.officialLinks)
-                    ? article.officialLinks
-                    : [];
-
-                if (links.length === 0) {
-                    officialSection.style.display = "none";
-                } else {
-                    links.forEach((link) => {
-                        if (!link.url) return;
-
-                        const a = document.createElement("a");
-                        a.href = link.url;
-                        a.target = "_blank";
-                        a.rel = "noopener";
-                        a.className = "official-site-button";
-                        a.textContent = link.label
-                            ? `${link.label} の公式サイト`
-                            : "公式サイトへ";
-
-                        officialButtons.appendChild(a);
-                    });
-                }
             }
 
             const categoryLabel =
