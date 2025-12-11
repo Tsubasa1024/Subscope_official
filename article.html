@@ -366,6 +366,12 @@
             margin-bottom: 30px;
         }
 
+        /* CMSの改行をそのまま反映（PC・スマホ共通） */
+        .article-title,
+        .article-lead {
+            white-space: pre-line;
+        }
+
         .article-content {
             font-size: 0.98rem;
             color: #1d1d1f;
@@ -834,11 +840,7 @@
                 margin-bottom: 18px;
             }
 
-            .article-hero {    .article-title,
-    .article-lead {
-        white-space: pre-line; /* ← CMSの改行をそのまま反映 */
-    }
-
+            .article-hero {
                 margin: 0 0 20px;
                 height: 220px;
                 border-radius: 18px;
