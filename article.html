@@ -381,35 +381,37 @@
             margin: 20px 0 8px;
         }
 
-        /* 丸い黒のシェアボタン（記事右上） */
-        .share-circle-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: #000;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-        }
+/* 丸い白のシェアボタン（記事右上） */
+.share-circle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    background: #ffffff;       /* ← 白ボタン */
+    color: #000000;            /* ← 黒アイコン */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    transition: transform 0.18s ease,
+                box-shadow 0.18s ease,
+                background 0.18s ease;
+}
 
-        .share-circle-btn:hover {
-            background: #111;
-            transform: translateY(-1px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
-        }
+.share-circle-btn:hover {
+    background: #f5f5f7;       /* ほんのりグレーに */
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+    transform: translateY(-1px);
+}
 
-        .share-circle-btn span {
-            font-size: 0.9rem;
-            line-height: 1;
-        }
+.share-circle-btn span {
+    font-size: 0.9rem;
+    line-height: 1;
+}
 
         /* 公式サイトリンクセクション（そのまま） */
         .official-site-section {
