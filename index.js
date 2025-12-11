@@ -50,7 +50,10 @@ function mapCmsArticle(item) {
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
         views: 0,
         contentHtml: item.content || "",
+
+        // ★ 料金プラン（microCMS のフィールドID: priceSummary）
         priceSummary: item.priceSummary || "",
+
         // ★ 著者データ（安全に）
         author: item.author || null,
         authorName: item.author?.name || "",
@@ -319,7 +322,7 @@ function searchArticlesList(query) {
         return tokens.every((token) => haystack.includes(token));
     });
 
-    // ★ 新しい順（英語って入ってる「最新記事」から3つ、に対応）
+    // ★ 新しい順
     result.sort((a, b) => {
         const da = a.date ? new Date(a.date) : 0;
         const db = b.date ? new Date(b.date) : 0;
@@ -417,7 +420,6 @@ function initSearch() {
 
 // =====================================
 // 9. 「すべての記事」ページ専用 検索
-//    （本命の検索ボックスをここで制御）
 // =====================================
 
 function renderAllPageArticles(articles, keyword) {
@@ -469,7 +471,6 @@ function initAllPageSearch() {
     function runSearch(keyword) {
         const q = (keyword || "").trim();
         if (!q) {
-            // キーワード無し → ここでは何もしない（デフォ表示は別ロジックでOK）
             if (allSearchInfo) allSearchInfo.textContent = "";
             return;
         }
@@ -481,7 +482,6 @@ function initAllPageSearch() {
             allSearchInfo.textContent = `「${q}」の検索結果：${results.length}件`;
         }
 
-        // URL を /all.html?search=〇〇 に揃えておく
         const newUrl = `${location.pathname}?search=${encodeURIComponent(q)}`;
         window.history.replaceState(null, "", newUrl);
     }
@@ -560,8 +560,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderHero();
     renderLatest();
     initCarousel3D();
-    initSearch();          // ★ どのページからでもヘッダー検索
-    initAllPageSearch();   // ★ all.html にいるときだけ本命検索を有効にする
+    initSearch();
+    initAllPageSearch();
     initScrollReveal();
 });
-
