@@ -352,29 +352,21 @@
             font-size: 0.85rem;
         }
 
-.article-title {
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    margin-bottom: 10px;
-    white-space: pre-line;   /* ← CMS改行反映 */
-    text-align: right;       /* ← 右端に揃えて折り返す */
-}
+        /* ここがタイトル＆リード文（左右に少し余白を入れて自然に折り返し） */
+        .article-title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+            padding: 0 8px;      /* ← 左右に同じだけ空白を作る */
+        }
 
-.article-lead {
-    font-size: 1rem;
-    color: #4b4b4b;
-    margin-top: 4px;
-    margin-bottom: 30px;
-    white-space: pre-line;   /* ← CMS改行反映 */
-    text-align: right;       /* ← 右端に揃えて折り返す */
-}
-
-
-        /* 改行は普通にブラウザ任せ（手動改行は使わない） */
-        .article-title,
         .article-lead {
-            white-space: normal;
+            font-size: 1rem;
+            color: #4b4b4b;
+            margin-top: 4px;
+            margin-bottom: 30px;
+            padding: 0 8px;      /* ← タイトルと同じだけ左右に余白 */
         }
 
         .article-content {
@@ -426,7 +418,7 @@
             line-height: 1;
         }
 
-        /* 公式サイトリンクセクション（そのまま） */
+        /* 公式サイトリンクセクション */
         .official-site-section {
             margin-top: 40px;
             margin-bottom: 24px;
@@ -797,38 +789,6 @@
 
             main {
                 padding-top: 96px;
-            }
-
-            .article-title {
-                font-size: 2rem;
-            }
-
-            .footer-links {
-                gap: 24px;
-                flex-wrap: wrap;
-            }
-
-            .related-grid {
-                flex-direction: column;
-            }
-
-            .related-card {
-                flex: 1 1 auto;
-                max-width: 100%;
-            }
-
-            .container {
-                padding: 0 16px;
-            }
-
-            .article-header-block {
-                margin-top: 8px;
-                margin-bottom: 8px;
-            }
-
-            .article-meta-row {
-                margin-bottom: 4px;
-                font-size: 0.8rem;
             }
 
             .article-title {
