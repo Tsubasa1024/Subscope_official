@@ -59,8 +59,28 @@ function mapCmsArticle(item) {
         authorName: item.author?.name || "",
         authorImage: item.author?.avatar?.url || "",
         authorId: item.author?.id || "",
+
+        // ★ 公式サイトリンク（最大4つ）
+        officialLinks: [
+            {
+                label: (item.officialLabel1 || "").trim(),
+                url:   (item.officialUrl1   || "").trim(),
+            },
+            {
+                label: (item.officialLabel2 || "").trim(),
+                url:   (item.officialUrl2   || "").trim(),
+            },
+            {
+                label: (item.officialLabel3 || "").trim(),
+                url:   (item.officialUrl3   || "").trim(),
+            },
+            {
+                label: (item.officialLabel4 || "").trim(),
+                url:   (item.officialUrl4   || "").trim(),
+            },
+        ].filter(link => link.url),
     };
-}   // ← ← ← ★ この閉じカッコが必要！！
+}   // ← このままでOK
 
 // 一覧取得
 async function loadArticles() {
@@ -564,3 +584,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();
     initScrollReveal();
 });
+
