@@ -357,6 +357,8 @@
             font-weight: 700;
             letter-spacing: -0.04em;
             margin-bottom: 10px;
+            /* 左右に少し余白を作って、左端と右端の“空白”をそろえる */
+            padding: 0 8px;
         }
 
         .article-lead {
@@ -364,12 +366,13 @@
             color: #4b4b4b;
             margin-top: 4px;
             margin-bottom: 30px;
+            padding: 0 8px; /* タイトルと同じ余白 */
         }
 
-        /* CMSの改行をそのまま反映（PC・スマホ共通） */
+        /* 改行は普通にブラウザ任せ（手動改行は使わない） */
         .article-title,
         .article-lead {
-            white-space: pre-line;
+            white-space: normal;
         }
 
         .article-content {
