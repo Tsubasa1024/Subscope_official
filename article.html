@@ -369,7 +369,7 @@
         .article-content {
             font-size: 0.98rem;
             color: #1d1d1f;
-            white-space: pre-line;   /* ← これを追加 */
+            line-height: 1.9; /* 行間を少し広めに */
         }
 
         .article-content h2 {
@@ -382,39 +382,38 @@
             margin: 20px 0 8px;
         }
 
-/* 白丸 × 黒アイコン × フチなしの自然なシェアボタン */
-.share-circle-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;                     /* ← フチ完全なし */
-    background: #ffffffee;            /* ← ほんのり透明で自然に馴染む */
-    backdrop-filter: blur(6px);       /* ← ちょっとだけガラス感 */
-    color: #000000;                   /* ← 黒アイコン */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.10); /* ← Appleライクな自然な影 */
-    transition: transform .18s ease,
-                box-shadow .18s ease,
-                background .18s ease;
-}
+        /* 白丸 × 黒アイコン × フチなしの自然なシェアボタン */
+        .share-circle-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #ffffffee;
+            backdrop-filter: blur(6px);
+            color: #000000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+            transition: transform .18s ease,
+                        box-shadow .18s ease,
+                        background .18s ease;
+        }
 
-.share-circle-btn:hover {
-    background: #ffffff;              /* ホバーで少しだけ白く */
-    box-shadow: 0 10px 26px rgba(0,0,0,0.16);
-    transform: translateY(-1px);
-}
+        .share-circle-btn:hover {
+            background: #ffffff;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+            transform: translateY(-1px);
+        }
 
-
-.share-circle-btn span {
-    font-size: 0.9rem;
-    line-height: 1;
-}
+        .share-circle-btn span {
+            font-size: 0.9rem;
+            line-height: 1;
+        }
 
         /* 公式サイトリンクセクション（そのまま） */
         .official-site-section {
@@ -490,6 +489,12 @@
             margin-bottom: 24px;
         }
 
+        /* 空の段落を大きな空白として扱う */
+        .article-content p.empty-space {
+            height: 32px;   /* 空白の大きさ */
+            margin: 0;
+        }
+
         .article-content ul {
             margin: 8px 0 16px 18px;
         }
@@ -510,7 +515,7 @@
             font-size: 0.95rem;
             line-height: 1.8;
             color: #1d1d1f;
-            white-space: pre-line; /* ← microCMS の改行をそのまま表示 */
+            white-space: pre-line;
         }
 
         .related-section {
@@ -1252,6 +1257,23 @@
                 contentEl.innerHTML =
                     bodyHtml ||
                     `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+
+                // ★ 空の段落（空白行用）を検知してクラス付与
+                const ps = contentEl.querySelectorAll("p");
+                ps.forEach((p) => {
+                    const inner = p.innerHTML
+                        .replace(/&nbsp;/g, "")
+                        .trim()
+                        .toLowerCase();
+                    if (
+                        inner === "" ||
+                        inner === "<br>" ||
+                        inner === "<br/>" ||
+                        inner === "<br />"
+                    ) {
+                        p.classList.add("empty-space");
+                    }
+                });
             }
 
             // ★ 黒い丸シェアボタンの動作
