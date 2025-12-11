@@ -7,6 +7,9 @@ const SERVICE_ID = "subscope";
 const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
 
+/**
+ * microCMS の1件分を、フロント用の形にマッピング
+ */
 function mapCmsArticle(item) {
     const rawCat = item.category;
     let category = "";
@@ -37,7 +40,26 @@ function mapCmsArticle(item) {
 
     if (!category) category = "音楽";
 
-    console.log("[article.js mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
+    console.log("[index.js mapCmsArticle]", item.id, "category =", rawCat, "=>", category);
+
+    // ★ 本文HTML
+    const rawContentHtml = item.content || "";
+
+    // ★ 本文プレーンテキスト（検索用）
+    let bodyText = "";
+    if (rawContentHtml) {
+        const tmp = document.createElement("div");
+        tmp.innerHTML = rawContentHtml;
+        bodyText = (tmp.textContent || tmp.innerText || "").trim();
+    }
+
+    // ★ タグ（あれば検索用に拾っておく）
+    let tags = [];
+    if (Array.isArray(item.tags)) {
+        tags = item.tags
+            .map(t => (t && (t.name || t.id || t)).toString().trim())
+            .filter(Boolean);
+    }
 
     return {
         id: item.id,
@@ -49,7 +71,15 @@ function mapCmsArticle(item) {
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
         image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
         views: 0,
-        contentHtml: item.content || "",
+
+        // 本文HTML（記事ページ用）
+        contentHtml: rawContentHtml,
+
+        // ★ 追加：検索用の本文テキスト
+        bodyText,
+
+        // ★ タグ
+        tags,
 
         // ★ 料金プラン（microCMS のフィールドID: priceSummary）
         priceSummary: item.priceSummary || "",
@@ -80,7 +110,7 @@ function mapCmsArticle(item) {
             },
         ].filter(link => link.url),
     };
-}   // ← このままでOK
+}
 
 // 一覧取得
 async function loadArticles() {
@@ -203,7 +233,7 @@ function initCarousel3D() {
     const carousel = document.querySelector(".carousel3d");
     if (!carousel) return;
 
-    const items = carousel.querySelectorAll(".carousel3d-item");
+    const items  = carousel.querySelectorAll(".carousel3d-item");
     const prevBtn = carousel.querySelector(".carousel3d-nav-prev");
     const nextBtn = carousel.querySelector(".carousel3d-nav-next");
     if (!items.length || !prevBtn || !nextBtn) return;
@@ -313,7 +343,7 @@ function initCarousel3D() {
 
 /**
  * キーワードで記事を検索して、
- * ・タイトル / 説明 / サービス名 / カテゴリ / tags を対象に
+ * ・タイトル / 説明 / サービス名 / カテゴリ / tags / 本文 を対象に
  * ・AND 検索（すべてのトークンを含む）
  * ・日付の新しい順に並べて返す
  */
@@ -335,7 +365,8 @@ function searchArticlesList(query) {
             article.description || "",
             article.service || "",
             article.categoryName || article.category || "",
-            (article.tags || []).join(" ")
+            (article.tags || []).join(" "),
+            article.bodyText || ""          // ★ 本文も検索対象に追加
         ].join(" ");
 
         const haystack = normalizeText(joined);
@@ -584,4 +615,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();
     initScrollReveal();
 });
-
