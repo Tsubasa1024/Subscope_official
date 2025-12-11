@@ -386,6 +386,20 @@
             font-size: 1.4rem;
             margin: 28px 0 12px;
         }
+        /* 料金プランボックス */
+.price-summary-section {
+    margin-top: 40px;
+}
+
+.price-summary-box {
+    background: #f5f5f7;
+    border-radius: 24px;
+    padding: 24px 28px;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #1d1d1f;
+    white-space: pre-line;   /* ★ここが改行を生かすポイント */
+}
 
         .article-content h3 {
             font-size: 1.15rem;
@@ -944,8 +958,10 @@
                 <!-- JS で注入 -->
             </article>
 
-            <!-- 料金プラン（microCMS の priceSummary をそのまま表示） -->
-            <section class="price-section" id="price-section"></section>
+<!-- 料金プラン -->
+<section class="price-summary-section reveal" id="price-summary-section" style="display:none;">
+    <div class="price-summary-box" id="price-summary-box"></div>
+</section>
 
             <!-- 関連記事 -->
             <section class="related-section reveal" id="related-section">
