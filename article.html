@@ -869,6 +869,25 @@
                 font-size: 0.9rem;
             }
         }
+        @media (max-width: 767px) {
+
+    /* 関連記事を縦1列にする */
+    .related-grid {
+        display: flex;
+        flex-direction: column;  /* ← 縦並び */
+        gap: 16px;
+    }
+
+    .related-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .related-thumb {
+        height: 180px; /* 必要なら調整OK */
+    }
+}
+
     </style>
 </head>
 <body>
