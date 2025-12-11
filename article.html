@@ -412,7 +412,6 @@
             background: #F5F5F7;
         }
 
-        /* 料金表の中で使いたい場合のサブクラス（任意） */
         .price-table {
             width: 100%;
             border-collapse: collapse;
@@ -1121,12 +1120,12 @@
             }
         }
 
-        /* 著者（名前＋顔＋プロフィールリンク） */
+        // 著者（名前＋顔＋プロフィールリンク）
         if (authorNameEl && authorAvatarEl && authorLinkEl) {
             const authorObj   = article.author || null;
             const authorName  = (authorObj && authorObj.name) || article.authorName || "";
             const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
-            const authorId    = authorObj && authorObj.id;  // 今は未使用
+            const authorId    = authorObj && authorObj.id;
 
             if (authorName) {
                 authorNameEl.textContent = authorName;
@@ -1141,7 +1140,6 @@
                 authorAvatarEl.style.display = "none";
             }
 
-            // 今は著者ページなし → クリック無効化
             authorLinkEl.href = "javascript:void(0)";
             authorLinkEl.style.cursor = "default";
             authorLinkEl.style.pointerEvents = "none";
@@ -1151,13 +1149,11 @@
         if (titleEl) titleEl.textContent = article.title || "";
 
         if (leadEl) {
-            // microCMS の「説明文・リード文（description）」を優先
             const leadFromCms = (article.description || "").trim();
 
             if (leadFromCms) {
                 leadEl.textContent = leadFromCms;
             } else {
-                // description が空なら本文の最初の <p> をリードに
                 const tmp = document.createElement("div");
                 tmp.innerHTML = article.contentHtml || article.content || "";
                 const firstP = tmp.querySelector("p");
