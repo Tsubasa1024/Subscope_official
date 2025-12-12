@@ -1,5 +1,5 @@
 // =====================================
-// 1. microCMS から記事を読む設定
+// microCMS 設定（記事のみ）
 // =====================================
 window.articles = window.articles || [];
 
@@ -7,154 +7,79 @@ const SERVICE_ID = "subscope";
 const API_KEY = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 const ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
 
+// 画像がない時の保険（軽いURLに）
+const FALLBACK_IMAGE = "https://placehold.co/800x500?text=SUBSCOPE";
+
 // =====================================
-// A. microCMS から広告を読む設定（ads）
+// Utility
 // =====================================
-window.__ADS__ = window.__ADS__ || {};
-const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
+const qs = (sel, root = document) => root.querySelector(sel);
+const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-/**
- * position（= 表示位置）で1件引く
- * enabled（= 表示する）が true のものだけ（※フィールドIDが enabled 前提）
- */
-async function fetchTopAd(position) {
-  // いったん全部取って、JS側で絞る（microCMSセレクト対策）
-  const url = `${ADS_ENDPOINT}?limit=50&orders=-priority&ts=${Date.now()}`;
-
-  const res = await fetch(url, {
-    headers: { "X-MICROCMS-API-KEY": API_KEY },
-  });
-
-  if (!res.ok) {
-    console.error("[fetchTopAd] HTTP error", res.status);
-    return null;
-  }
-
-  const data = await res.json();
-
-  if (!data || !data.contents) return null;
-
-return (
-  data.contents.find((ad) => {
-    const pos =
-      typeof ad.position === "string"
-        ? ad.position
-        : (ad.position?.id || ad.position?.name || "");
-
-    return ad.enabled === true && pos === position;
-  }) || null
-);
+function normalizeText(str) {
+  if (!str) return "";
+  return str.toString().toLowerCase().replace(/\s+/g, "");
 }
 
-/**
- * 広告を <a> に反映する（サイド/ヒーロー下/グリッド 共通）
- * - 画像があればバナー化
- * - 画像がなければタイトル/説明を該当ノードに差し替え
- */
-function applyBannerAdToAnchor(anchorEl, ad) {
-  if (!anchorEl || !ad) return;
-
-  // URL反映
-  if (ad.url) anchorEl.href = ad.url;
-  anchorEl.target = "_blank";
-  anchorEl.rel = "noopener";
-
-  // 画像があるなら、枠内を画像で置換（崩れにくい）
-  if (ad.image && ad.image.url) {
-    anchorEl.innerHTML = `
-      <img src="${ad.image.url}" alt="${ad.title || "ad"}"
-           style="width:100%;height:auto;display:block;border-radius:16px;">
-    `;
-    return;
-  }
-
-  // 画像なし：テキスト差し替え（サイドは .ad-title/.ad-desc、ヒーロー下は .between-ad-text 等）
-  const titleNode =
-    anchorEl.querySelector(".ad-title") ||
-    anchorEl.querySelector(".between-ad-tag") ||
-    anchorEl.querySelector(".ad-tag");
-
-  const descNode =
-    anchorEl.querySelector(".ad-desc") ||
-    anchorEl.querySelector(".between-ad-text");
-
-  if (titleNode && ad.title) titleNode.textContent = ad.title;
-  if (descNode && ad.description) descNode.textContent = ad.description;
-
-  // descriptionが無い場合の保険
-  if (descNode && !ad.description && ad.title) descNode.textContent = ad.title;
-}  // ← これは if じゃなくて applyBannerAdToAnchor の終わり
-
-// ✅ ここから次の処理に入る
-/**
- * ads を読み込んで、各スロットに反映
- */
-async function loadAds() {
-
-  const heroBottom = document.querySelector('[data-slot-id="HERO_BOTTOM_1"]');
-  const leftAnchor = document.querySelector('[data-slot-id="SIDE_LEFT_1"]');
-  const rightAnchor = document.querySelector('[data-slot-id="SIDE_RIGHT_1"]');
-
-  // ヒーロー直下
-  const adHero = await fetchTopAd("home_hero_under");
-  if (adHero) {
-    applyBannerAdToAnchor(heroBottom, adHero);
-    window.__ADS__["home_hero_under"] = adHero;
-  }
-
-  // 左右サイド
-  const adLeft = await fetchTopAd("home_side_left");
-  if (adLeft) {
-    applyBannerAdToAnchor(leftAnchor, adLeft);
-    window.__ADS__["home_side_left"] = adLeft;
-  }
-
-  const adRight = await fetchTopAd("home_side_right");
-  if (adRight) {
-    applyBannerAdToAnchor(rightAnchor, adRight);
-    window.__ADS__["home_side_right"] = adRight;
-  }
-
-  // 最新記事グリッド差し込み用
-  const adGrid = await fetchTopAd("home_grid_sponsor");
-  if (adGrid) {
-    window.__ADS__["home_grid_sponsor"] = adGrid;
-  }
+// XSS/崩れ予防（最低限）
+function esc(str) {
+  return (str ?? "")
+    .toString()
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-/**
- * microCMS の1件分を、フロント用の形にマッピング
- */
+function formatDateDot(dateStr) {
+  return (dateStr || "").slice(0, 10).replace(/-/g, ".");
+}
+
+// 本文テキスト化は重いので「検索時だけ」作る（キャッシュあり）
+function getBodyText(article) {
+  if (!article) return "";
+  if (typeof article.bodyText === "string") return article.bodyText;
+
+  const raw = article.contentHtml || "";
+  if (!raw) {
+    article.bodyText = "";
+    return "";
+  }
+  const tmp = document.createElement("div");
+  tmp.innerHTML = raw;
+  article.bodyText = (tmp.textContent || tmp.innerText || "").trim();
+  return article.bodyText;
+}
+
+function articleImage(item) {
+  return (
+    item?.eyecatch?.url ||
+    item?.thumbnail?.url ||
+    item?.image?.url ||
+    item?.heroImage?.url ||
+    (typeof item?.image === "string" ? item.image : "") ||
+    FALLBACK_IMAGE
+  );
+}
+
+// =====================================
+// Article mapping
+// =====================================
 function mapCmsArticle(item) {
   const rawCat = item.category;
   let category = "";
 
-  // 配列パターン
-  if (Array.isArray(rawCat)) {
-    if (rawCat.length > 0 && rawCat[0]) {
-      const first = rawCat[0];
-      category = (first.name || first.id || first).toString().trim();
-    }
+  if (Array.isArray(rawCat) && rawCat[0]) {
+    const first = rawCat[0];
+    category = (first.name || first.id || first).toString().trim();
   } else if (typeof rawCat === "string") {
     category = rawCat.trim();
   } else if (rawCat && typeof rawCat === "object") {
     category = (rawCat.name || rawCat.id || "").toString().trim();
   }
-
   if (!category) category = "音楽";
 
-  // 本文HTML
-  const rawContentHtml = item.content || "";
-
-  // 本文プレーンテキスト（検索用）
-  let bodyText = "";
-  if (rawContentHtml) {
-    const tmp = document.createElement("div");
-    tmp.innerHTML = rawContentHtml;
-    bodyText = (tmp.textContent || tmp.innerText || "").trim();
-  }
-
-  // タグ
   let tags = [];
   if (Array.isArray(item.tags)) {
     tags = item.tags
@@ -162,16 +87,7 @@ function mapCmsArticle(item) {
       .filter(Boolean);
   }
 
-  // 画像URL（フィールド名の揺れに対応）
-const imageUrl =
-  item?.eyecatch?.url ||
-  item?.thumbnail?.url ||
-  item?.image?.url ||
-  item?.heroImage?.url ||
-  (typeof item?.image === "string" ? item.image : "") ||
-  "https://placehold.co/800x500?text=SUBSCOPE";
-
-
+  // ★ bodyText はここでは作らない（軽量化）
   return {
     id: item.id,
     title: item.title || "",
@@ -180,214 +96,205 @@ const imageUrl =
     categoryName: category,
     service: item.service || "",
     date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
-    image: imageUrl,
-    views: 0,
+    image: articleImage(item),
 
-    contentHtml: rawContentHtml,
-    bodyText,
+    contentHtml: item.content || "",
+    // bodyText: undefined（検索時に生成）
     tags,
-
-    priceSummary: item.priceSummary || "",
-
-    author: item.author || null,
-    authorName: item.author?.name || "",
-    authorImage: item.author?.avatar?.url || "",
-    authorId: item.author?.id || "",
-
-    officialLinks: [
-      { label: (item.officialLabel1 || "").trim(), url: (item.officialUrl1 || "").trim() },
-      { label: (item.officialLabel2 || "").trim(), url: (item.officialUrl2 || "").trim() },
-      { label: (item.officialLabel3 || "").trim(), url: (item.officialUrl3 || "").trim() },
-      { label: (item.officialLabel4 || "").trim(), url: (item.officialUrl4 || "").trim() },
-    ].filter((link) => link.url),
   };
 }
 
-// 一覧取得
+// =====================================
+// Fetch + cache
+// =====================================
+// セッション中はキャッシュ（同じページ内の無駄fetch削減）
+let _articlesPromise = null;
+
 async function loadArticles() {
-  if (window.articles && window.articles.length > 0) {
+  if (window.articles && window.articles.length > 0) return window.articles;
+  if (_articlesPromise) return _articlesPromise;
+
+  _articlesPromise = (async () => {
+    try {
+      // 初回表示の重さ対策：depthは必要なければ1にしてOK
+      const url = `${ENDPOINT}?limit=100&depth=2`;
+
+      // タイムアウト（重い時の待ちっぱなし防止）
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 12000);
+
+      const res = await fetch(url, {
+        headers: { "X-MICROCMS-API-KEY": API_KEY },
+        signal: controller.signal,
+        cache: "no-store",
+      });
+
+      clearTimeout(t);
+
+      if (!res.ok) throw new Error("HTTP error " + res.status);
+
+      const data = await res.json();
+      const contents = data.contents || [];
+      window.articles = contents.map(mapCmsArticle);
+    } catch (e) {
+      console.error("microCMS から記事一覧の取得に失敗:", e);
+      window.articles = [];
+    }
     return window.articles;
-  }
+  })();
 
-  try {
-    const res = await fetch(`${ENDPOINT}?limit=100&depth=2`, {
-      headers: { "X-MICROCMS-API-KEY": API_KEY },
-    });
-
-    if (!res.ok) throw new Error("HTTP error " + res.status);
-
-    const data = await res.json();
-    const contents = data.contents || [];
-    window.articles = contents.map(mapCmsArticle);
-  } catch (e) {
-    console.error("microCMS から記事一覧の取得に失敗:", e);
-    window.articles = [];
-  }
-
-  return window.articles;
+  return _articlesPromise;
 }
 
 function getArticles() {
   return window.articles || [];
 }
 
-// =====================================
-// 2. DOM 変数
-// =====================================
-let searchInput;
-let clearBtn;
-let searchResultsEl;
-let heroContainer;
-let latestGrid;
-
-let allSearchForm;
-let allSearchInput;
-let allSearchInfo;
-let allArticlesList;
-
-// =====================================
-// 3. テキスト正規化
-// =====================================
-function normalizeText(str) {
-  if (!str) return "";
-  return str.toString().toLowerCase().replace(/\s+/g, "");
+function sortByDateDesc(list) {
+  return [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
 // =====================================
-// 4. ヒーロー記事（最新日付）
+// Render: Hero
 // =====================================
-function renderHero() {
+function renderHero(mountEl) {
   const list = getArticles();
-  if (!heroContainer || list.length === 0) return;
+  if (!mountEl || !list.length) return;
 
-  const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const featured = sorted[0];
+  const featured = sortByDateDesc(list)[0];
 
-  heroContainer.innerHTML = `
-    <article class="featured-card" style="background-image:url('${featured.image}')"
-             onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
-      <div class="featured-content">
-        <div class="featured-meta">
-          <span class="tag">${featured.service || "SUBSCOPE"}</span>
-          <span>${featured.categoryName || featured.category || ""}</span>
-        </div>
-        <h2 class="featured-title">${featured.title}</h2>
-        <p class="featured-desc">${featured.description}</p>
-        <button class="btn-read">詳しく見る</button>
-      </div>
-    </article>
+  // DOM生成（innerHTML最小）
+  const card = document.createElement("article");
+  card.className = "featured-card";
+  card.dataset.href = `article.html?id=${encodeURIComponent(featured.id)}`;
+
+  const img = document.createElement("img");
+  img.className = "featured-media";
+  img.src = featured.image;
+  img.alt = featured.title || "featured";
+  img.decoding = "async";
+  // ヒーローは eager（最重要）
+  img.loading = "eager";
+
+  const content = document.createElement("div");
+  content.className = "featured-content";
+
+  const meta = document.createElement("div");
+  meta.className = "featured-meta";
+  meta.innerHTML = `
+    <span class="tag">${esc(featured.service || "SUBSCOPE")}</span>
+    <span>${esc(featured.categoryName || featured.category || "")}</span>
   `;
-}
 
-// =====================================
-// 5. 最新記事グリッド（8 + スポンサー1）
-// =====================================
-function renderLatest(limit = 8) {
-  if (!latestGrid) return;
+  const title = document.createElement("h2");
+  title.className = "featured-title";
+  title.textContent = featured.title || "";
 
-  const list = getArticles();
-  const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const target = sorted.slice(0, limit);
+  const desc = document.createElement("p");
+  desc.className = "featured-desc";
+  desc.textContent = featured.description || "";
 
-  const ad = window.__ADS__ && window.__ADS__["home_grid_sponsor"];
+  content.append(meta, title, desc);
+  card.append(img, content);
 
-  const cards = [];
-  target.forEach((a, index) => {
-    cards.push(`
-      <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
-        <div class="card-image" style="background-image:url('${a.image}')"></div>
-        <div class="card-body">
-          <div class="card-service">${a.service || "SUBSCOPE"}</div>
-          <h3 class="card-title">${a.title}</h3>
-          <p class="card-desc">${a.description}</p>
-          <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
-        </div>
-      </article>
-    `);
-
-    // 3枚目のあとにスポンサー
-    if (index === 2) {
-      if (ad) {
-        const adInner =
-          ad.image && ad.image.url
-            ? `
-              <span class="ad-tag">スポンサー</span>
-              <div style="margin-top:10px;">
-                <img src="${ad.image.url}" alt="${ad.title || "ad"}"
-                     style="width:100%;border-radius:16px;display:block;">
-              </div>
-              <div class="ad-title" style="margin-top:12px;">${ad.title || "スポンサー"}</div>
-              <div class="ad-desc">Sponsored</div>
-            `
-            : `
-              <span class="ad-tag">スポンサー</span>
-              <div class="ad-title">${ad.title || "スポンサー"}</div>
-              <div class="ad-desc">Sponsored</div>
-            `;
-
-        cards.push(`
-          <a class="ad-card" href="${ad.url || "index.html"}" target="_blank" rel="noopener" data-slot-id="HOME_SPONSOR_1">
-            ${adInner}
-          </a>
-        `);
-      } else {
-        cards.push(`
-          <a class="ad-card" href="index.html" data-slot-id="HOME_SPONSOR_1">
-            <span class="ad-tag">スポンサー</span>
-            <div class="ad-title">サブスクならサブスコープ</div>
-            <div class="ad-desc">迷ったときは、ここを見ればいい。</div>
-          </a>
-        `);
-      }
-    }
+  // クリック遷移（HTML軽量化）
+  card.addEventListener("click", () => {
+    location.href = card.dataset.href;
   });
 
-  latestGrid.innerHTML = cards.join("");
+  mountEl.innerHTML = "";
+  mountEl.appendChild(card);
 }
 
 // =====================================
-// 6. 3D カルーセル（おすすめ）
+// Render: Latest Grid
 // =====================================
-function initCarousel3D() {
-  const carousel = document.querySelector(".carousel3d");
-  if (!carousel) return;
+function renderLatest(gridEl, limit = 8) {
+  if (!gridEl) return;
 
-  const items = carousel.querySelectorAll(".carousel3d-item");
-  const prevBtn = carousel.querySelector(".carousel3d-nav-prev");
-  const nextBtn = carousel.querySelector(".carousel3d-nav-next");
-  if (!items.length || !prevBtn || !nextBtn) return;
+  const list = getArticles();
+  const sorted = sortByDateDesc(list).slice(0, limit);
+
+  // まとめてDOM生成
+  const frag = document.createDocumentFragment();
+
+  sorted.forEach((a) => {
+    const card = document.createElement("article");
+    card.className = "article-card";
+    card.dataset.href = `article.html?id=${encodeURIComponent(a.id)}`;
+
+    const imgDiv = document.createElement("div");
+    imgDiv.className = "card-image";
+    imgDiv.style.backgroundImage = `url('${a.image}')`;
+
+    const body = document.createElement("div");
+    body.className = "card-body";
+    body.innerHTML = `
+      <div class="card-service">${esc(a.service || "SUBSCOPE")}</div>
+      <h3 class="card-title">${esc(a.title)}</h3>
+      <p class="card-desc">${esc(a.description)}</p>
+      <div class="card-date">${esc(formatDateDot(a.date))}</div>
+    `;
+
+    card.append(imgDiv, body);
+    card.addEventListener("click", () => (location.href = card.dataset.href));
+
+    frag.appendChild(card);
+  });
+
+  gridEl.innerHTML = "";
+  gridEl.appendChild(frag);
+}
+
+// =====================================
+// Carousel 3D（おすすめ）
+// =====================================
+function initCarousel3D(carouselRoot) {
+  if (!carouselRoot) return;
+
+  const items = qsa(".carousel3d-item", carouselRoot);
+  const prevBtn = qs(".carousel3d-nav-prev", carouselRoot);
+  const nextBtn = qs(".carousel3d-nav-next", carouselRoot);
+  const inner = qs(".carousel3d-inner", carouselRoot);
+
+  if (!items.length || !prevBtn || !nextBtn || !inner) return;
 
   const list = getArticles();
   if (!list.length) return;
 
   const total = items.length;
   let currentIndex = 0;
-  const recommend = list.slice(0, total);
+
+  // “おすすめ”は最新から先頭4件
+  const recommend = sortByDateDesc(list).slice(0, total);
 
   items.forEach((item, i) => {
     const a = recommend[i % recommend.length];
 
-    item.innerHTML = `
-      <div class="carousel3d-card">
-        <img src="${a.image}" alt="">
-        <p>${a.title}</p>
-      </div>
-    `;
+    const card = document.createElement("div");
+    card.className = "carousel3d-card";
+    card.dataset.href = `article.html?id=${encodeURIComponent(a.id)}`;
 
-    const card = item.querySelector(".carousel3d-card");
-    if (card) {
-      card.style.cursor = "pointer";
-      card.addEventListener("click", () => {
-        location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-      });
-    }
+    const img = document.createElement("img");
+    img.src = a.image;
+    img.alt = a.title || "";
+    img.loading = "lazy";
+    img.decoding = "async";
+
+    const p = document.createElement("p");
+    p.textContent = a.title || "";
+
+    card.append(img, p);
+    card.addEventListener("click", () => (location.href = card.dataset.href));
+
+    item.innerHTML = "";
+    item.appendChild(card);
   });
 
   function updatePositions() {
     items.forEach((item, i) => {
       item.className = "carousel3d-item";
       const offset = (i - currentIndex + total) % total;
-
       if (offset === 0) item.classList.add("is-center");
       else if (offset === 1) item.classList.add("is-right");
       else if (offset === total - 1) item.classList.add("is-left");
@@ -399,77 +306,75 @@ function initCarousel3D() {
     currentIndex = (currentIndex + 1) % total;
     updatePositions();
   }
-
   function goPrev() {
     currentIndex = (currentIndex - 1 + total) % total;
     updatePositions();
   }
 
+  // 自動再生（表示中だけ回す）
   let autoTimer = null;
-  function startAutoScroll() {
+  const AUTO_MS = 4500;
+
+  function stopAuto() {
     if (autoTimer) clearInterval(autoTimer);
-    autoTimer = setInterval(goNext, 4000);
+    autoTimer = null;
+  }
+  function startAuto() {
+    stopAuto();
+    autoTimer = setInterval(goNext, AUTO_MS);
   }
 
-  startAutoScroll();
-  nextBtn.addEventListener("click", () => {
-    goNext();
-    startAutoScroll();
-  });
-  prevBtn.addEventListener("click", () => {
-    goPrev();
-    startAutoScroll();
+  // 可視性で停止
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopAuto();
+    else startAuto();
   });
 
-  // スワイプ対応
+  // 画面外なら止める（さらに軽い）
+  const io = new IntersectionObserver(
+    (entries) => {
+      const isOn = entries.some((e) => e.isIntersecting);
+      if (isOn) startAuto();
+      else stopAuto();
+    },
+    { threshold: 0.2 }
+  );
+  io.observe(carouselRoot);
+
+  nextBtn.addEventListener("click", () => { goNext(); startAuto(); });
+  prevBtn.addEventListener("click", () => { goPrev(); startAuto(); });
+
+  // スワイプ（passive）
   let touchStartX = 0;
   let touchEndX = 0;
-  const SWIPE_THRESHOLD = 40;
-  const carouselInner = carousel.querySelector(".carousel3d-inner");
+  const SWIPE = 40;
 
-  if (carouselInner) {
-    carouselInner.addEventListener(
-      "touchstart",
-      (e) => {
-        touchStartX = e.touches[0].clientX;
-      },
-      { passive: true }
-    );
+  inner.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
 
-    carouselInner.addEventListener(
-      "touchend",
-      (e) => {
-        touchEndX = e.changedTouches[0].clientX;
-        const diff = touchEndX - touchStartX;
-        if (diff > SWIPE_THRESHOLD) {
-          goPrev();
-          startAutoScroll();
-        } else if (diff < -SWIPE_THRESHOLD) {
-          goNext();
-          startAutoScroll();
-        }
-      },
-      { passive: true }
-    );
-  }
+  inner.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+    if (diff > SWIPE) { goPrev(); startAuto(); }
+    else if (diff < -SWIPE) { goNext(); startAuto(); }
+  }, { passive: true });
 
   updatePositions();
 }
 
 // =====================================
-// 7. 検索ロジック（AND検索・新しい順）
+// Search
 // =====================================
 function searchArticlesList(query) {
   const q = (query || "").trim();
   if (!q) return [];
 
-  const tokens = q
-    .split(/\s+/)
-    .map(normalizeText)
-    .filter(Boolean);
+  const tokens = q.split(/\s+/).map(normalizeText).filter(Boolean);
+  if (!tokens.length) return [];
 
   const list = getArticles();
-  if (!list.length || !tokens.length) return [];
+  if (!list.length) return [];
 
   const result = list.filter((article) => {
     const joined = [
@@ -478,242 +383,211 @@ function searchArticlesList(query) {
       article.service || "",
       article.categoryName || article.category || "",
       (article.tags || []).join(" "),
-      article.bodyText || "",
+      getBodyText(article), // ★ここで初めて生成
     ].join(" ");
 
-    const haystack = normalizeText(joined);
-    return tokens.every((token) => haystack.includes(token));
+    const hay = normalizeText(joined);
+    return tokens.every((t) => hay.includes(t));
   });
 
-  result.sort((a, b) => {
-    const da = a.date ? new Date(a.date) : 0;
-    const db = b.date ? new Date(b.date) : 0;
-    return db - da;
-  });
-
+  result.sort((a, b) => new Date(b.date) - new Date(a.date));
   return result;
 }
 
-// =====================================
-// 8. ヘッダー検索（候補3件 + Enterで all.html）
-// =====================================
-function renderHeaderSearchResults(query) {
-  if (!searchResultsEl) return;
-
+function renderHeaderSearchResults(resultsEl, query) {
   const q = (query || "").trim();
-
   if (!q) {
-    searchResultsEl.innerHTML = "";
-    searchResultsEl.style.display = "none";
+    resultsEl.innerHTML = "";
+    resultsEl.style.display = "none";
     return;
   }
 
   const results = searchArticlesList(q).slice(0, 3);
 
   if (!results.length) {
-    searchResultsEl.innerHTML =
+    resultsEl.innerHTML =
       `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
-    searchResultsEl.style.display = "block";
+    resultsEl.style.display = "block";
     return;
   }
 
-  searchResultsEl.innerHTML = results
-    .map(
-      (article) => `
-      <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(article.id)}'">
-        <img src="${article.image}" alt="">
-        <div>
-          <h3>${article.title}</h3>
-          <p>${article.description}</p>
-        </div>
+  resultsEl.innerHTML = results.map((a) => `
+    <div class="search-item" data-href="article.html?id=${encodeURIComponent(a.id)}">
+      <img src="${esc(a.image)}" alt="" loading="lazy" decoding="async">
+      <div>
+        <h3>${esc(a.title)}</h3>
+        <p>${esc(a.description)}</p>
       </div>
-    `
-    )
-    .join("");
+    </div>
+  `).join("");
 
-  searchResultsEl.style.display = "block";
+  resultsEl.style.display = "block";
 }
 
-function initSearch() {
-  if (!searchInput) return;
+function initHeaderSearch() {
+  const fixedHeader = qs("#fixedHeader");
+  const searchWrapper = qs("#searchWrapper");
+  const searchInput = qs("#searchInput");
+  const clearBtn = qs("#clearBtn");
+  const resultsEl = qs("#searchResults");
 
-  // searchResultsEl がなかったら body の最後に作る
-  if (!searchResultsEl) {
-    const container = document.createElement("div");
-    container.className = "search-results-container";
-    container.innerHTML = `<div id="searchResults"></div>`;
-    document.body.appendChild(container);
-    searchResultsEl = container.querySelector("#searchResults");
-  }
+  if (!fixedHeader || !searchWrapper || !searchInput || !resultsEl) return;
 
-  searchInput.addEventListener("input", (e) => {
-    renderHeaderSearchResults(e.target.value);
+  const isMobile = () => window.innerWidth <= 767;
+  let isOpen = false;
+
+  // スマホ：タップで展開
+  searchWrapper.addEventListener("click", (e) => {
+    if (!isMobile()) {
+      if (e.target !== searchInput) searchInput.focus();
+      return;
+    }
+
+    if (!isOpen) {
+      fixedHeader.classList.add("search-open");
+      isOpen = true;
+      setTimeout(() => searchInput.focus(), 60);
+    } else {
+      // 入力中をタップした時は閉じない
+      if (e.target === searchInput) return;
+      fixedHeader.classList.remove("search-open");
+      isOpen = false;
+      searchInput.blur();
+    }
   });
 
+  // リサイズ時：スマホ→PCなどで整合
+  window.addEventListener("resize", () => {
+    if (!isMobile() && isOpen) {
+      fixedHeader.classList.remove("search-open");
+      isOpen = false;
+    }
+  }, { passive: true });
+
+  // 入力
+  let rafId = 0;
+  searchInput.addEventListener("input", () => {
+    // 連打で重くならないように1フレームにまとめる
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      renderHeaderSearchResults(resultsEl, searchInput.value);
+      if (clearBtn) clearBtn.style.display = searchInput.value.trim() ? "block" : "none";
+    });
+  });
+
+  // Enter → all.html へ
   searchInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const keyword = searchInput.value.trim();
-      if (!keyword) {
-        renderHeaderSearchResults("");
-        return;
-      }
-      window.location.href = `all.html?search=${encodeURIComponent(keyword)}`;
+      if (!keyword) return;
+      location.href = `all.html?search=${encodeURIComponent(keyword)}`;
     }
   });
 
+  // クリア
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
+    clearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       searchInput.value = "";
-      if (searchResultsEl) {
-        searchResultsEl.innerHTML = "";
-        searchResultsEl.style.display = "none";
-      }
+      clearBtn.style.display = "none";
+      renderHeaderSearchResults(resultsEl, "");
       searchInput.focus();
     });
   }
-}
 
-// =====================================
-// 9. 「すべての記事」ページ専用 検索
-// =====================================
-function renderAllPageArticles(articles, keyword) {
-  if (!allArticlesList) return;
-
-  if (!articles || articles.length === 0) {
-    allArticlesList.innerHTML = `
-      <p class="all-empty">
-        「${keyword || ""}」に該当する記事はありませんでした。<br>
-        キーワードを変えるか、ジャンルから探してみてください。
-      </p>
-    `;
-    return;
-  }
-
-  allArticlesList.innerHTML = articles
-    .map(
-      (a) => `
-      <article class="all-article-card">
-        <a href="article.html?id=${encodeURIComponent(a.id)}">
-          <div class="all-article-thumb">
-            <img src="${a.image}" alt="${a.title}">
-          </div>
-          <div class="all-article-body">
-            <div class="all-article-meta">
-              <span class="all-article-service">${a.service || "SUBSCOPE"}</span>
-              <span class="all-article-category">${a.categoryName || a.category || ""}</span>
-            </div>
-            <h2 class="all-article-title">${a.title}</h2>
-            <p class="all-article-desc">${a.description || ""}</p>
-            <p class="all-article-date">${(a.date || "").replace(/-/g, ".")}</p>
-          </div>
-        </a>
-      </article>
-    `
-    )
-    .join("");
-}
-
-function initAllPageSearch() {
-  allSearchForm = document.getElementById("allSearchForm");
-  allSearchInput = document.getElementById("allSearchInput");
-  allSearchInfo = document.getElementById("allSearchInfo");
-  allArticlesList = document.getElementById("allArticlesList");
-
-  if (!allSearchForm || !allSearchInput || !allArticlesList) return;
-
-  function runSearch(keyword) {
-    const q = (keyword || "").trim();
-    if (!q) {
-      if (allSearchInfo) allSearchInfo.textContent = "";
-      return;
-    }
-
-    const results = searchArticlesList(q);
-    renderAllPageArticles(results, q);
-
-    if (allSearchInfo) {
-      allSearchInfo.textContent = `「${q}」の検索結果：${results.length}件`;
-    }
-
-    const newUrl = `${location.pathname}?search=${encodeURIComponent(q)}`;
-    window.history.replaceState(null, "", newUrl);
-  }
-
-  const params = new URLSearchParams(window.location.search);
-  const initialKeyword = params.get("search") || "";
-  if (initialKeyword) {
-    allSearchInput.value = initialKeyword;
-    runSearch(initialKeyword);
-  }
-
-  allSearchForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    runSearch(allSearchInput.value);
+  // 検索候補クリック（イベント委譲）
+  resultsEl.addEventListener("click", (e) => {
+    const item = e.target.closest(".search-item");
+    if (!item) return;
+    const href = item.dataset.href;
+    if (href) location.href = href;
   });
 }
 
 // =====================================
-// 10. Menu / スクロールリビール
+// Menu + Smooth scroll
 // =====================================
-function toggleMenu() {
-  const overlay = document.getElementById("nav-overlay");
-  if (!overlay) return;
-  overlay.classList.toggle("open");
-}
-window.toggleMenu = toggleMenu;
+function initMenu() {
+  const menuBtn = qs("#menuBtn");
+  const overlay = qs("#nav-overlay");
+  if (!menuBtn || !overlay) return;
 
-function smoothScroll(targetSelector) {
-  const el = document.querySelector(targetSelector);
+  menuBtn.addEventListener("click", () => overlay.classList.toggle("open"));
+
+  // overlay内の scroll link
+  overlay.addEventListener("click", (e) => {
+    const link = e.target.closest(".nav-link");
+    if (!link) return;
+
+    const target = link.getAttribute("data-scroll");
+    if (target) {
+      e.preventDefault();
+      overlay.classList.remove("open");
+      smoothScroll(target);
+    } else {
+      overlay.classList.remove("open");
+    }
+  });
+
+  // 画面タップで閉じる（外側）
+  document.addEventListener("click", (e) => {
+    if (!overlay.classList.contains("open")) return;
+    if (e.target.closest("#nav-overlay") || e.target.closest("#menuBtn")) return;
+    overlay.classList.remove("open");
+  });
+}
+
+function smoothScroll(selector) {
+  const el = qs(selector);
   if (!el) return;
-  const rectTop = el.getBoundingClientRect().top + window.scrollY;
+  const y = el.getBoundingClientRect().top + window.scrollY;
   const offset = 80;
-  window.scrollTo({ top: rectTop - offset, behavior: "smooth" });
+  window.scrollTo({ top: y - offset, behavior: "smooth" });
 }
-window.smoothScroll = smoothScroll;
 
+// =====================================
+// Scroll Reveal
+// =====================================
 function initScrollReveal() {
-  const targets = document.querySelectorAll(".reveal");
+  const targets = qsa(".reveal");
   if (!targets.length) return;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("active");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.15 }
-  );
+  // reduced motionなら全部表示
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    targets.forEach((el) => el.classList.add("active"));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("active");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
 
   targets.forEach((el) => observer.observe(el));
 }
 
 // =====================================
-// 11. 起動
+// Boot
 // =====================================
 document.addEventListener("DOMContentLoaded", async () => {
-  searchInput = document.getElementById("searchInput");
-  clearBtn = document.getElementById("clear-btn");
-  searchResultsEl = document.getElementById("searchResults");
-
-  heroContainer = document.getElementById("most-viewed-content");
-  latestGrid = document.getElementById("latest-grid");
+  // 先にUIだけ（体感速く）
+  initMenu();
+  initHeaderSearch();
+  initScrollReveal();
 
   await loadArticles();
-  await loadAds();
 
-  renderHero();
-  renderLatest(8);
-  initCarousel3D();
-  initSearch();
-  initAllPageSearch();
-  initScrollReveal();
+  // Home pageだけ描画（要素がある時だけ）
+  const heroMount = qs("#heroMount");
+  const latestGrid = qs("#latest-grid");
+  const carousel = qs("#carousel3d");
+
+  if (heroMount) renderHero(heroMount);
+  if (latestGrid) renderLatest(latestGrid, 8);
+  if (carousel) initCarousel3D(carousel);
 });
-
-
-
-
-
