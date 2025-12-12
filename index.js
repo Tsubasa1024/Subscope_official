@@ -163,13 +163,14 @@ function mapCmsArticle(item) {
   }
 
   // 画像URL（フィールド名の揺れに対応）
-  const imageUrl =
-    item?.eyecatch?.url ||
-    item?.thumbnail?.url ||
-    item?.image?.url ||
-    item?.heroImage?.url ||
-    item?.image || // 文字列で来るケース
-    "images/sample1.jpg";
+const imageUrl =
+  item?.eyecatch?.url ||
+  item?.thumbnail?.url ||
+  item?.image?.url ||
+  item?.heroImage?.url ||
+  (typeof item?.image === "string" ? item.image : "") ||
+  "https://placehold.co/800x500?text=SUBSCOPE";
+
 
   return {
     id: item.id,
@@ -711,6 +712,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAllPageSearch();
   initScrollReveal();
 });
+
 
 
 
