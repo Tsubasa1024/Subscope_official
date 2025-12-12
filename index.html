@@ -1324,6 +1324,59 @@
         font-size: 0.85rem;
       }
     }
+    /* ============================
+   PCのみ：サイド広告を固定＆記事に被らせない
+   ============================ */
+@media (min-width: 1200px) {
+  :root{
+    --side-w: 180px;        /* 通常幅（今の値に合わせた） */
+    --side-expanded: 320px; /* 拡大時の幅 */
+    --side-gap: 24px;       /* ヒーローとの距離 */
+    --side-top: 120px;      /* 上からの固定位置（今top:120pxだから合わせた） */
+  }
+
+  /* 既存の absolute を上書き */
+  .side-sponsor{
+    position: fixed !important;
+    top: var(--side-top) !important;
+    width: var(--side-w) !important;
+    z-index: 60;
+    pointer-events: none;
+  }
+
+  /* 中央1080pxの“外側”に固定配置 */
+  .side-sponsor-left{
+    left: calc(50% - (var(--container-width) / 2) - var(--side-w) - var(--side-gap)) !important;
+    right: auto !important;
+  }
+  .side-sponsor-right{
+    left: calc(50% + (var(--container-width) / 2) + var(--side-gap)) !important;
+    right: auto !important;
+  }
+
+  .side-sponsor .side-sponsor-inner{
+    pointer-events: auto;
+    width: 100%;
+    transition: width .25s ease, transform .25s ease;
+    will-change: width, transform;
+  }
+
+  /* 拡大しても記事側に伸びない（外側にだけ伸ばす） */
+  .side-sponsor-left .side-sponsor-inner:hover{
+    width: var(--side-expanded);
+    transform: translateX(calc(var(--side-w) - var(--side-expanded)));
+  }
+  .side-sponsor-right .side-sponsor-inner:hover{
+    width: var(--side-expanded);
+    transform: translateX(0);
+  }
+}
+
+/* タッチ端末は非表示（あなたのままでOKだけど念のため強化） */
+@media (hover: none), (pointer: coarse){
+  .side-sponsor{ display:none !important; }
+}
+
   </style>
 </head>
 
