@@ -1,593 +1,875 @@
-// =====================================
-// microCMS 設定（記事のみ）
-// =====================================
-window.articles = window.articles || [];
+/* =========================================
+   SUBSCOPE | index.js（共通ロジック集約版）
+   - microCMS: articles / ads
+   - 共通UI: menu, header search, reveal
+   - ページ別: home / all / ranking
+   ========================================= */
 
-const SERVICE_ID = "subscope";
-const API_KEY = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
-const ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
+(() => {
+  // ============
+  // 0. Config
+  // ============
+  const SERVICE_ID = "subscope";
+  const API_KEY = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 
-// 画像がない時の保険（軽いURLに）
-const FALLBACK_IMAGE = "https://placehold.co/800x500?text=SUBSCOPE";
+  const ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
+  const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
 
-// =====================================
-// Utility
-// =====================================
-const qs = (sel, root = document) => root.querySelector(sel);
-const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  // ✅ ここで広告ON/OFF
+  const ADS_ENABLED = false;
 
-function normalizeText(str) {
-  if (!str) return "";
-  return str.toString().toLowerCase().replace(/\s+/g, "");
-}
+  window.articles = window.articles || [];
+  window.__ADS__ = window.__ADS__ || {};
 
-// XSS/崩れ予防（最低限）
-function esc(str) {
-  return (str ?? "")
-    .toString()
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+  // ============
+  // 1. Utils
+  // ============
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-function formatDateDot(dateStr) {
-  return (dateStr || "").slice(0, 10).replace(/-/g, ".");
-}
-
-// 本文テキスト化は重いので「検索時だけ」作る（キャッシュあり）
-function getBodyText(article) {
-  if (!article) return "";
-  if (typeof article.bodyText === "string") return article.bodyText;
-
-  const raw = article.contentHtml || "";
-  if (!raw) {
-    article.bodyText = "";
-    return "";
-  }
-  const tmp = document.createElement("div");
-  tmp.innerHTML = raw;
-  article.bodyText = (tmp.textContent || tmp.innerText || "").trim();
-  return article.bodyText;
-}
-
-function articleImage(item) {
-  return (
-    item?.eyecatch?.url ||
-    item?.thumbnail?.url ||
-    item?.image?.url ||
-    item?.heroImage?.url ||
-    (typeof item?.image === "string" ? item.image : "") ||
-    FALLBACK_IMAGE
-  );
-}
-
-// =====================================
-// Article mapping
-// =====================================
-function mapCmsArticle(item) {
-  const rawCat = item.category;
-  let category = "";
-
-  if (Array.isArray(rawCat) && rawCat[0]) {
-    const first = rawCat[0];
-    category = (first.name || first.id || first).toString().trim();
-  } else if (typeof rawCat === "string") {
-    category = rawCat.trim();
-  } else if (rawCat && typeof rawCat === "object") {
-    category = (rawCat.name || rawCat.id || "").toString().trim();
-  }
-  if (!category) category = "音楽";
-
-  let tags = [];
-  if (Array.isArray(item.tags)) {
-    tags = item.tags
-      .map((t) => (t && (t.name || t.id || t)).toString().trim())
-      .filter(Boolean);
+  function normalizeText(str) {
+    if (!str) return "";
+    return str.toString().toLowerCase().replace(/\s+/g, "");
   }
 
-  // ★ bodyText はここでは作らない（軽量化）
-  return {
-    id: item.id,
-    title: item.title || "",
-    description: item.description || "",
-    category,
-    categoryName: category,
-    service: item.service || "",
-    date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
-    image: articleImage(item),
+  async function fetchJson(url) {
+    const res = await fetch(url, { headers: { "X-MICROCMS-API-KEY": API_KEY } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
 
-    contentHtml: item.content || "",
-    // bodyText: undefined（検索時に生成）
-    tags,
-  };
-}
+  // ============
+  // 2. Ads
+  // ============
+  async function fetchTopAd(position) {
+    if (!ADS_ENABLED) return null;
 
-// =====================================
-// Fetch + cache
-// =====================================
-// セッション中はキャッシュ（同じページ内の無駄fetch削減）
-let _articlesPromise = null;
-
-async function loadArticles() {
-  if (window.articles && window.articles.length > 0) return window.articles;
-  if (_articlesPromise) return _articlesPromise;
-
-  _articlesPromise = (async () => {
+    const url = `${ADS_ENDPOINT}?limit=50&orders=-priority&ts=${Date.now()}`;
     try {
-      // 初回表示の重さ対策：depthは必要なければ1にしてOK
-      const url = `${ENDPOINT}?limit=100&depth=2`;
+      const data = await fetchJson(url);
+      const list = data?.contents || [];
+      return (
+        list.find((ad) => {
+          const pos =
+            typeof ad.position === "string"
+              ? ad.position
+              : (ad.position?.id || ad.position?.name || "");
+          return ad.enabled === true && pos === position;
+        }) || null
+      );
+    } catch (e) {
+      console.error("[fetchTopAd] failed:", e);
+      return null;
+    }
+  }
 
-      // タイムアウト（重い時の待ちっぱなし防止）
-      const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 12000);
+  function applyBannerAdToAnchor(anchorEl, ad) {
+    if (!anchorEl || !ad) return;
 
-      const res = await fetch(url, {
-        headers: { "X-MICROCMS-API-KEY": API_KEY },
-        signal: controller.signal,
-        cache: "no-store",
-      });
+    if (ad.url) anchorEl.href = ad.url;
+    anchorEl.target = "_blank";
+    anchorEl.rel = "noopener";
 
-      clearTimeout(t);
+    if (ad.image && ad.image.url) {
+      anchorEl.innerHTML = `
+        <img src="${ad.image.url}" alt="${ad.title || "ad"}"
+          style="width:100%;height:auto;display:block;border-radius:16px;">
+      `;
+      return;
+    }
 
-      if (!res.ok) throw new Error("HTTP error " + res.status);
+    const titleNode =
+      anchorEl.querySelector(".ad-title") ||
+      anchorEl.querySelector(".between-ad-tag") ||
+      anchorEl.querySelector(".ad-tag");
 
-      const data = await res.json();
-      const contents = data.contents || [];
+    const descNode =
+      anchorEl.querySelector(".ad-desc") ||
+      anchorEl.querySelector(".between-ad-text");
+
+    if (titleNode && ad.title) titleNode.textContent = ad.title;
+    if (descNode && ad.description) descNode.textContent = ad.description;
+    if (descNode && !ad.description && ad.title) descNode.textContent = ad.title;
+  }
+
+  async function loadAds() {
+    if (!ADS_ENABLED) return;
+
+    const heroBottom = $('[data-slot-id="HERO_BOTTOM_1"]');
+    const leftAnchor = $('[data-slot-id="SIDE_LEFT_1"]');
+    const rightAnchor = $('[data-slot-id="SIDE_RIGHT_1"]');
+
+    const adHero = await fetchTopAd("home_hero_under");
+    if (adHero) {
+      applyBannerAdToAnchor(heroBottom, adHero);
+      window.__ADS__["home_hero_under"] = adHero;
+    }
+
+    const adLeft = await fetchTopAd("home_side_left");
+    if (adLeft) {
+      applyBannerAdToAnchor(leftAnchor, adLeft);
+      window.__ADS__["home_side_left"] = adLeft;
+    }
+
+    const adRight = await fetchTopAd("home_side_right");
+    if (adRight) {
+      applyBannerAdToAnchor(rightAnchor, adRight);
+      window.__ADS__["home_side_right"] = adRight;
+    }
+
+    const adGrid = await fetchTopAd("home_grid_sponsor");
+    if (adGrid) window.__ADS__["home_grid_sponsor"] = adGrid;
+  }
+
+  // ============
+  // 3. Articles
+  // ============
+  function mapCmsArticle(item) {
+    const rawCat = item.category;
+    let category = "";
+
+    if (Array.isArray(rawCat)) {
+      if (rawCat[0]) {
+        const first = rawCat[0];
+        category = (first.name || first.id || first).toString().trim();
+      }
+    } else if (typeof rawCat === "string") {
+      category = rawCat.trim();
+    } else if (rawCat && typeof rawCat === "object") {
+      category = (rawCat.name || rawCat.id || "").toString().trim();
+    }
+    if (!category) category = "音楽";
+
+    const rawContentHtml = item.content || "";
+    let bodyText = "";
+    if (rawContentHtml) {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = rawContentHtml;
+      bodyText = (tmp.textContent || tmp.innerText || "").trim();
+    }
+
+    let tags = [];
+    if (Array.isArray(item.tags)) {
+      tags = item.tags
+        .map((t) => (t && (t.name || t.id || t)).toString().trim())
+        .filter(Boolean);
+    }
+
+    const imageUrl =
+      item?.eyecatch?.url ||
+      item?.thumbnail?.url ||
+      item?.image?.url ||
+      item?.heroImage?.url ||
+      (typeof item?.image === "string" ? item.image : "") ||
+      "https://placehold.co/800x500?text=SUBSCOPE";
+
+    return {
+      id: item.id,
+      title: item.title || "",
+      description: item.description || "",
+      category,
+      categoryName: category,
+      service: item.service || "",
+      date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
+      image: imageUrl,
+
+      // ranking用：なければ 0
+      views: item.views ?? 0,
+      views_day: item.views_day ?? undefined,
+      views_week: item.views_week ?? undefined,
+      views_month: item.views_month ?? undefined,
+
+      contentHtml: rawContentHtml,
+      bodyText,
+      tags,
+
+      priceSummary: item.priceSummary || "",
+      author: item.author || null,
+      authorName: item.author?.name || "",
+      authorImage: item.author?.avatar?.url || "",
+      authorId: item.author?.id || "",
+
+      officialLinks: [
+        { label: (item.officialLabel1 || "").trim(), url: (item.officialUrl1 || "").trim() },
+        { label: (item.officialLabel2 || "").trim(), url: (item.officialUrl2 || "").trim() },
+        { label: (item.officialLabel3 || "").trim(), url: (item.officialUrl3 || "").trim() },
+        { label: (item.officialLabel4 || "").trim(), url: (item.officialUrl4 || "").trim() },
+      ].filter((link) => link.url),
+    };
+  }
+
+  async function loadArticles() {
+    if (window.articles && window.articles.length > 0) return window.articles;
+
+    try {
+      const data = await fetchJson(`${ENDPOINT}?limit=100&depth=2&ts=${Date.now()}`);
+      const contents = data?.contents || [];
       window.articles = contents.map(mapCmsArticle);
     } catch (e) {
       console.error("microCMS から記事一覧の取得に失敗:", e);
       window.articles = [];
     }
     return window.articles;
-  })();
+  }
 
-  return _articlesPromise;
-}
+  function getArticles() {
+    return window.articles || [];
+  }
 
-function getArticles() {
-  return window.articles || [];
-}
+  // ============
+  // 4. Search（共通）
+  // ============
+  function searchArticlesList(query) {
+    const q = (query || "").trim();
+    if (!q) return [];
 
-function sortByDateDesc(list) {
-  return [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-}
+    const tokens = q.split(/\s+/).map(normalizeText).filter(Boolean);
+    const list = getArticles();
+    if (!list.length || !tokens.length) return [];
 
-// =====================================
-// Render: Hero
-// =====================================
-function renderHero(mountEl) {
-  const list = getArticles();
-  if (!mountEl || !list.length) return;
-
-  const featured = sortByDateDesc(list)[0];
-
-  // DOM生成（innerHTML最小）
-  const card = document.createElement("article");
-  card.className = "featured-card";
-  card.dataset.href = `article.html?id=${encodeURIComponent(featured.id)}`;
-
-  const img = document.createElement("img");
-  img.className = "featured-media";
-  img.src = featured.image;
-  img.alt = featured.title || "featured";
-  img.decoding = "async";
-  // ヒーローは eager（最重要）
-  img.loading = "eager";
-
-  const content = document.createElement("div");
-  content.className = "featured-content";
-
-  const meta = document.createElement("div");
-  meta.className = "featured-meta";
-  meta.innerHTML = `
-    <span class="tag">${esc(featured.service || "SUBSCOPE")}</span>
-    <span>${esc(featured.categoryName || featured.category || "")}</span>
-  `;
-
-  const title = document.createElement("h2");
-  title.className = "featured-title";
-  title.textContent = featured.title || "";
-
-  const desc = document.createElement("p");
-  desc.className = "featured-desc";
-  desc.textContent = featured.description || "";
-
-  content.append(meta, title, desc);
-  card.append(img, content);
-
-  // クリック遷移（HTML軽量化）
-  card.addEventListener("click", () => {
-    location.href = card.dataset.href;
-  });
-
-  mountEl.innerHTML = "";
-  mountEl.appendChild(card);
-}
-
-// =====================================
-// Render: Latest Grid
-// =====================================
-function renderLatest(gridEl, limit = 8) {
-  if (!gridEl) return;
-
-  const list = getArticles();
-  const sorted = sortByDateDesc(list).slice(0, limit);
-
-  // まとめてDOM生成
-  const frag = document.createDocumentFragment();
-
-  sorted.forEach((a) => {
-    const card = document.createElement("article");
-    card.className = "article-card";
-    card.dataset.href = `article.html?id=${encodeURIComponent(a.id)}`;
-
-    const imgDiv = document.createElement("div");
-    imgDiv.className = "card-image";
-    imgDiv.style.backgroundImage = `url('${a.image}')`;
-
-    const body = document.createElement("div");
-    body.className = "card-body";
-    body.innerHTML = `
-      <div class="card-service">${esc(a.service || "SUBSCOPE")}</div>
-      <h3 class="card-title">${esc(a.title)}</h3>
-      <p class="card-desc">${esc(a.description)}</p>
-      <div class="card-date">${esc(formatDateDot(a.date))}</div>
-    `;
-
-    card.append(imgDiv, body);
-    card.addEventListener("click", () => (location.href = card.dataset.href));
-
-    frag.appendChild(card);
-  });
-
-  gridEl.innerHTML = "";
-  gridEl.appendChild(frag);
-}
-
-// =====================================
-// Carousel 3D（おすすめ）
-// =====================================
-function initCarousel3D(carouselRoot) {
-  if (!carouselRoot) return;
-
-  const items = qsa(".carousel3d-item", carouselRoot);
-  const prevBtn = qs(".carousel3d-nav-prev", carouselRoot);
-  const nextBtn = qs(".carousel3d-nav-next", carouselRoot);
-  const inner = qs(".carousel3d-inner", carouselRoot);
-
-  if (!items.length || !prevBtn || !nextBtn || !inner) return;
-
-  const list = getArticles();
-  if (!list.length) return;
-
-  const total = items.length;
-  let currentIndex = 0;
-
-  // “おすすめ”は最新から先頭4件
-  const recommend = sortByDateDesc(list).slice(0, total);
-
-  items.forEach((item, i) => {
-    const a = recommend[i % recommend.length];
-
-    const card = document.createElement("div");
-    card.className = "carousel3d-card";
-    card.dataset.href = `article.html?id=${encodeURIComponent(a.id)}`;
-
-    const img = document.createElement("img");
-    img.src = a.image;
-    img.alt = a.title || "";
-    img.loading = "lazy";
-    img.decoding = "async";
-
-    const p = document.createElement("p");
-    p.textContent = a.title || "";
-
-    card.append(img, p);
-    card.addEventListener("click", () => (location.href = card.dataset.href));
-
-    item.innerHTML = "";
-    item.appendChild(card);
-  });
-
-  function updatePositions() {
-    items.forEach((item, i) => {
-      item.className = "carousel3d-item";
-      const offset = (i - currentIndex + total) % total;
-      if (offset === 0) item.classList.add("is-center");
-      else if (offset === 1) item.classList.add("is-right");
-      else if (offset === total - 1) item.classList.add("is-left");
-      else item.classList.add("is-back");
+    const result = list.filter((a) => {
+      const joined = [
+        a.title || "",
+        a.description || "",
+        a.service || "",
+        a.categoryName || a.category || "",
+        (a.tags || []).join(" "),
+        a.bodyText || "",
+      ].join(" ");
+      const haystack = normalizeText(joined);
+      return tokens.every((t) => haystack.includes(t));
     });
+
+    result.sort((a, b) => (b.date ? new Date(b.date) : 0) - (a.date ? new Date(a.date) : 0));
+    return result;
   }
 
-  function goNext() {
-    currentIndex = (currentIndex + 1) % total;
-    updatePositions();
-  }
-  function goPrev() {
-    currentIndex = (currentIndex - 1 + total) % total;
-    updatePositions();
-  }
+  function renderHeaderSearchResults(query) {
+    const resultsEl = $("#searchResults");
+    if (!resultsEl) return;
 
-  // 自動再生（表示中だけ回す）
-  let autoTimer = null;
-  const AUTO_MS = 4500;
-
-  function stopAuto() {
-    if (autoTimer) clearInterval(autoTimer);
-    autoTimer = null;
-  }
-  function startAuto() {
-    stopAuto();
-    autoTimer = setInterval(goNext, AUTO_MS);
-  }
-
-  // 可視性で停止
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopAuto();
-    else startAuto();
-  });
-
-  // 画面外なら止める（さらに軽い）
-  const io = new IntersectionObserver(
-    (entries) => {
-      const isOn = entries.some((e) => e.isIntersecting);
-      if (isOn) startAuto();
-      else stopAuto();
-    },
-    { threshold: 0.2 }
-  );
-  io.observe(carouselRoot);
-
-  nextBtn.addEventListener("click", () => { goNext(); startAuto(); });
-  prevBtn.addEventListener("click", () => { goPrev(); startAuto(); });
-
-  // スワイプ（passive）
-  let touchStartX = 0;
-  let touchEndX = 0;
-  const SWIPE = 40;
-
-  inner.addEventListener("touchstart", (e) => {
-    touchStartX = e.touches[0].clientX;
-  }, { passive: true });
-
-  inner.addEventListener("touchend", (e) => {
-    touchEndX = e.changedTouches[0].clientX;
-    const diff = touchEndX - touchStartX;
-    if (diff > SWIPE) { goPrev(); startAuto(); }
-    else if (diff < -SWIPE) { goNext(); startAuto(); }
-  }, { passive: true });
-
-  updatePositions();
-}
-
-// =====================================
-// Search
-// =====================================
-function searchArticlesList(query) {
-  const q = (query || "").trim();
-  if (!q) return [];
-
-  const tokens = q.split(/\s+/).map(normalizeText).filter(Boolean);
-  if (!tokens.length) return [];
-
-  const list = getArticles();
-  if (!list.length) return [];
-
-  const result = list.filter((article) => {
-    const joined = [
-      article.title || "",
-      article.description || "",
-      article.service || "",
-      article.categoryName || article.category || "",
-      (article.tags || []).join(" "),
-      getBodyText(article), // ★ここで初めて生成
-    ].join(" ");
-
-    const hay = normalizeText(joined);
-    return tokens.every((t) => hay.includes(t));
-  });
-
-  result.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return result;
-}
-
-function renderHeaderSearchResults(resultsEl, query) {
-  const q = (query || "").trim();
-  if (!q) {
-    resultsEl.innerHTML = "";
-    resultsEl.style.display = "none";
-    return;
-  }
-
-  const results = searchArticlesList(q).slice(0, 3);
-
-  if (!results.length) {
-    resultsEl.innerHTML =
-      `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
-    resultsEl.style.display = "block";
-    return;
-  }
-
-  resultsEl.innerHTML = results.map((a) => `
-    <div class="search-item" data-href="article.html?id=${encodeURIComponent(a.id)}">
-      <img src="${esc(a.image)}" alt="" loading="lazy" decoding="async">
-      <div>
-        <h3>${esc(a.title)}</h3>
-        <p>${esc(a.description)}</p>
-      </div>
-    </div>
-  `).join("");
-
-  resultsEl.style.display = "block";
-}
-
-function initHeaderSearch() {
-  const fixedHeader = qs("#fixedHeader");
-  const searchWrapper = qs("#searchWrapper");
-  const searchInput = qs("#searchInput");
-  const clearBtn = qs("#clearBtn");
-  const resultsEl = qs("#searchResults");
-
-  if (!fixedHeader || !searchWrapper || !searchInput || !resultsEl) return;
-
-  const isMobile = () => window.innerWidth <= 767;
-  let isOpen = false;
-
-  // スマホ：タップで展開
-  searchWrapper.addEventListener("click", (e) => {
-    if (!isMobile()) {
-      if (e.target !== searchInput) searchInput.focus();
+    const q = (query || "").trim();
+    if (!q) {
+      resultsEl.innerHTML = "";
+      resultsEl.style.display = "none";
       return;
     }
 
-    if (!isOpen) {
-      fixedHeader.classList.add("search-open");
-      isOpen = true;
-      setTimeout(() => searchInput.focus(), 60);
-    } else {
-      // 入力中をタップした時は閉じない
-      if (e.target === searchInput) return;
-      fixedHeader.classList.remove("search-open");
-      isOpen = false;
-      searchInput.blur();
-    }
-  });
+    const results = searchArticlesList(q).slice(0, 3);
 
-  // リサイズ時：スマホ→PCなどで整合
-  window.addEventListener("resize", () => {
-    if (!isMobile() && isOpen) {
-      fixedHeader.classList.remove("search-open");
-      isOpen = false;
+    if (!results.length) {
+      resultsEl.innerHTML =
+        `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
+      resultsEl.style.display = "block";
+      return;
     }
-  }, { passive: true });
 
-  // 入力
-  let rafId = 0;
-  searchInput.addEventListener("input", () => {
-    // 連打で重くならないように1フレームにまとめる
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => {
-      renderHeaderSearchResults(resultsEl, searchInput.value);
-      if (clearBtn) clearBtn.style.display = searchInput.value.trim() ? "block" : "none";
+    resultsEl.innerHTML = results
+      .map(
+        (a) => `
+        <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
+          <img src="${a.image}" alt="">
+          <div>
+            <h3>${a.title}</h3>
+            <p>${a.description}</p>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+
+    resultsEl.style.display = "block";
+  }
+
+  function initHeaderSearch() {
+    const searchInput = $("#searchInput");
+    const clearBtn = $("#clear-btn");
+    const fixedHeader = $(".fixed-header");
+    const searchWrapper = $(".search-wrapper");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => renderHeaderSearchResults(e.target.value));
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const keyword = searchInput.value.trim();
+          if (!keyword) return renderHeaderSearchResults("");
+          location.href = `all.html?search=${encodeURIComponent(keyword)}`;
+        }
+      });
+    }
+
+    // ×
+    if (searchInput && clearBtn) {
+      const update = () => {
+        clearBtn.style.display = searchInput.value.trim() ? "block" : "none";
+      };
+      searchInput.addEventListener("input", update);
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        renderHeaderSearchResults("");
+        update();
+        searchInput.focus();
+      });
+      update();
+    }
+
+    // スマホ：検索ボタンの開閉
+    if (fixedHeader && searchWrapper && searchInput) {
+      let isOpen = false;
+      const isMobile = () => window.innerWidth <= 767;
+
+      searchWrapper.addEventListener("click", (e) => {
+        if (!isMobile()) {
+          if (e.target !== searchInput) searchInput.focus();
+          return;
+        }
+
+        if (isOpen && e.target === searchInput) return;
+
+        if (!isOpen) {
+          fixedHeader.classList.add("search-open");
+          isOpen = true;
+          setTimeout(() => searchInput.focus(), 80);
+        } else {
+          fixedHeader.classList.remove("search-open");
+          isOpen = false;
+          searchInput.blur();
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (!isMobile() && isOpen) {
+          fixedHeader.classList.remove("search-open");
+          isOpen = false;
+          searchInput.blur();
+        }
+      });
+    }
+  }
+
+  // ============
+  // 5. Menu / Reveal
+  // ============
+  function toggleMenu(force) {
+    const overlay = $("#nav-overlay");
+    if (!overlay) return;
+    if (typeof force === "boolean") overlay.classList.toggle("open", force);
+    else overlay.classList.toggle("open");
+  }
+  window.toggleMenu = toggleMenu;
+
+  function initMenuCloseBehaviors() {
+    const overlay = $("#nav-overlay");
+    if (!overlay) return;
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest?.(".menu-btn");
+      const inside = e.target.closest?.("#nav-overlay");
+      if (btn || inside) return;
+      if (overlay.classList.contains("open")) toggleMenu(false);
     });
-  });
 
-  // Enter → all.html へ
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const keyword = searchInput.value.trim();
-      if (!keyword) return;
-      location.href = `all.html?search=${encodeURIComponent(keyword)}`;
-    }
-  });
-
-  // クリア
-  if (clearBtn) {
-    clearBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      searchInput.value = "";
-      clearBtn.style.display = "none";
-      renderHeaderSearchResults(resultsEl, "");
-      searchInput.focus();
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && overlay.classList.contains("open")) toggleMenu(false);
     });
   }
 
-  // 検索候補クリック（イベント委譲）
-  resultsEl.addEventListener("click", (e) => {
-    const item = e.target.closest(".search-item");
-    if (!item) return;
-    const href = item.dataset.href;
-    if (href) location.href = href;
-  });
-}
+  function initScrollReveal() {
+    const targets = $$(".reveal");
+    if (!targets.length) return;
 
-// =====================================
-// Menu + Smooth scroll
-// =====================================
-function initMenu() {
-  const menuBtn = qs("#menuBtn");
-  const overlay = qs("#nav-overlay");
-  if (!menuBtn || !overlay) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add("active");
+            observer.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
 
-  menuBtn.addEventListener("click", () => overlay.classList.toggle("open"));
-
-  // overlay内の scroll link
-  overlay.addEventListener("click", (e) => {
-    const link = e.target.closest(".nav-link");
-    if (!link) return;
-
-    const target = link.getAttribute("data-scroll");
-    if (target) {
-      e.preventDefault();
-      overlay.classList.remove("open");
-      smoothScroll(target);
-    } else {
-      overlay.classList.remove("open");
-    }
-  });
-
-  // 画面タップで閉じる（外側）
-  document.addEventListener("click", (e) => {
-    if (!overlay.classList.contains("open")) return;
-    if (e.target.closest("#nav-overlay") || e.target.closest("#menuBtn")) return;
-    overlay.classList.remove("open");
-  });
-}
-
-function smoothScroll(selector) {
-  const el = qs(selector);
-  if (!el) return;
-  const y = el.getBoundingClientRect().top + window.scrollY;
-  const offset = 80;
-  window.scrollTo({ top: y - offset, behavior: "smooth" });
-}
-
-// =====================================
-// Scroll Reveal
-// =====================================
-function initScrollReveal() {
-  const targets = qsa(".reveal");
-  if (!targets.length) return;
-
-  // reduced motionなら全部表示
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    targets.forEach((el) => el.classList.add("active"));
-    return;
+    targets.forEach((el) => observer.observe(el));
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("active");
-        observer.unobserve(entry.target);
+  // ============
+  // 6. Home（index.html）
+  // ============
+  function renderHero() {
+    const heroContainer = $("#most-viewed-content");
+    const list = getArticles();
+    if (!heroContainer || !list.length) return;
+
+    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const featured = sorted[0];
+
+    heroContainer.innerHTML = `
+      <article class="featured-card" style="background-image:url('${featured.image}')"
+        onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
+        <div class="featured-content">
+          <div class="featured-meta">
+            <span class="tag">${featured.service || "SUBSCOPE"}</span>
+            <span>${featured.categoryName || featured.category || ""}</span>
+          </div>
+          <h2 class="featured-title">${featured.title}</h2>
+          <p class="featured-desc">${featured.description}</p>
+          <button class="btn-read">詳しく見る</button>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderLatest(limit = 8) {
+    const latestGrid = $("#latest-grid");
+    if (!latestGrid) return;
+
+    const list = getArticles();
+    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const target = sorted.slice(0, limit);
+
+    const ad = window.__ADS__ && window.__ADS__["home_grid_sponsor"];
+
+    const cards = [];
+    target.forEach((a, index) => {
+      cards.push(`
+        <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
+          <div class="card-image" style="background-image:url('${a.image}')"></div>
+          <div class="card-body">
+            <div class="card-service">${a.service || "SUBSCOPE"}</div>
+            <h3 class="card-title">${a.title}</h3>
+            <p class="card-desc">${a.description}</p>
+            <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
+          </div>
+        </article>
+      `);
+
+      // 3枚目のあとにスポンサー（広告ON時のみ）
+      if (index === 2 && ADS_ENABLED) {
+        if (ad) {
+          const adInner =
+            ad.image?.url
+              ? `
+                <span class="ad-tag">スポンサー</span>
+                <div style="margin-top:10px;">
+                  <img src="${ad.image.url}" alt="${ad.title || "ad"}"
+                    style="width:100%;border-radius:16px;display:block;">
+                </div>
+                <div class="ad-title" style="margin-top:12px;">${ad.title || "スポンサー"}</div>
+                <div class="ad-desc">Sponsored</div>
+              `
+              : `
+                <span class="ad-tag">スポンサー</span>
+                <div class="ad-title">${ad.title || "スポンサー"}</div>
+                <div class="ad-desc">Sponsored</div>
+              `;
+
+          cards.push(`
+            <a class="ad-card" href="${ad.url || "index.html"}" target="_blank" rel="noopener" data-slot-id="HOME_SPONSOR_1">
+              ${adInner}
+            </a>
+          `);
+        }
       }
     });
-  }, { threshold: 0.15 });
 
-  targets.forEach((el) => observer.observe(el));
-}
+    latestGrid.innerHTML = cards.join("");
+  }
 
-// =====================================
-// Boot
-// =====================================
-document.addEventListener("DOMContentLoaded", async () => {
-  // 先にUIだけ（体感速く）
-  initMenu();
-  initHeaderSearch();
-  initScrollReveal();
+  function initCarousel3D() {
+    const carousel = $(".carousel3d");
+    if (!carousel) return;
 
-  await loadArticles();
+    const items = $$(".carousel3d-item", carousel);
+    const prevBtn = $(".carousel3d-nav-prev", carousel);
+    const nextBtn = $(".carousel3d-nav-next", carousel);
+    if (!items.length || !prevBtn || !nextBtn) return;
 
-  // Home pageだけ描画（要素がある時だけ）
-  const heroMount = qs("#heroMount");
-  const latestGrid = qs("#latest-grid");
-  const carousel = qs("#carousel3d");
+    const list = getArticles();
+    if (!list.length) return;
 
-  if (heroMount) renderHero(heroMount);
-  if (latestGrid) renderLatest(latestGrid, 8);
-  if (carousel) initCarousel3D(carousel);
-});
+    const total = items.length;
+    let currentIndex = 0;
+    const recommend = list.slice(0, total);
+
+    items.forEach((item, i) => {
+      const a = recommend[i % recommend.length];
+      item.innerHTML = `
+        <div class="carousel3d-card">
+          <img src="${a.image}" alt="">
+          <p>${a.title}</p>
+        </div>
+      `;
+      const card = $(".carousel3d-card", item);
+      if (card) {
+        card.style.cursor = "pointer";
+        card.addEventListener("click", () => {
+          location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+        });
+      }
+    });
+
+    function updatePositions() {
+      items.forEach((item, i) => {
+        item.className = "carousel3d-item";
+        const offset = (i - currentIndex + total) % total;
+
+        if (offset === 0) item.classList.add("is-center");
+        else if (offset === 1) item.classList.add("is-right");
+        else if (offset === total - 1) item.classList.add("is-left");
+        else item.classList.add("is-back");
+      });
+    }
+
+    function goNext() {
+      currentIndex = (currentIndex + 1) % total;
+      updatePositions();
+    }
+    function goPrev() {
+      currentIndex = (currentIndex - 1 + total) % total;
+      updatePositions();
+    }
+
+    let autoTimer = null;
+    function startAutoScroll() {
+      if (autoTimer) clearInterval(autoTimer);
+      autoTimer = setInterval(goNext, 4000);
+    }
+
+    startAutoScroll();
+    nextBtn.addEventListener("click", () => { goNext(); startAutoScroll(); });
+    prevBtn.addEventListener("click", () => { goPrev(); startAutoScroll(); });
+
+    // swipe
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const SWIPE_THRESHOLD = 40;
+    const inner = $(".carousel3d-inner", carousel);
+
+    if (inner) {
+      inner.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+      inner.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].clientX;
+        const diff = touchEndX - touchStartX;
+        if (diff > SWIPE_THRESHOLD) { goPrev(); startAutoScroll(); }
+        else if (diff < -SWIPE_THRESHOLD) { goNext(); startAutoScroll(); }
+      }, { passive: true });
+    }
+
+    updatePositions();
+  }
+
+  // ============
+  // 7. all.html（すべての記事）
+  // ============
+  function initAllPage() {
+    const tabsEl = $("#tabs");
+    const gridEl = $("#all-grid");
+    if (!tabsEl || !gridEl) return;
+
+    const all = getArticles();
+
+    const allSearchForm = $("#allSearchForm");
+    const allSearchInput = $("#allSearchInput");
+    const allSearchInfo = $("#allSearchInfo");
+    const allClearBtn = $("#allClearBtn");
+
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab") || "すべて";
+    const searchParam = params.get("search") || "";
+
+    const categories = [
+      "すべて",
+      "音楽",
+      "映画・ドラマ",
+      "学習・資格",
+      "健康・フィットネス",
+      "ゲーム・エンタメ",
+      "生活・ライフスタイル",
+      "AI・ツール",
+      "その他",
+    ];
+
+    function renderList(list) {
+      if (!list.length) {
+        gridEl.innerHTML = `<div class="empty-message">該当する記事はありません。</div>`;
+        return;
+      }
+
+      gridEl.innerHTML = list
+        .map(
+          (a) => `
+          <div class="article-card" onclick="openArticle('${a.id}')">
+            <div class="card-image" style="background-image:url('${a.image}');"></div>
+            <div class="card-body">
+              <div class="card-service">${a.service || "SUBSCOPE"}</div>
+              <h3 class="card-title">${a.title || ""}</h3>
+              <p class="card-desc">${a.description || ""}</p>
+              <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    function filterByCategory(cat) {
+      if (cat === "すべて") return all;
+      return all.filter((a) => (a.categoryName || a.category) === cat);
+    }
+
+    function updateAllClearBtn() {
+      if (!allClearBtn || !allSearchInput) return;
+      allClearBtn.style.display = allSearchInput.value.trim() ? "flex" : "none";
+    }
+
+    tabsEl.innerHTML = categories
+      .map(
+        (c) => `
+        <button class="tab ${c === tabParam && !searchParam ? "active" : ""}" data-category-tab="${c}">
+          ${c}
+        </button>
+      `
+      )
+      .join("");
+
+    const tabButtons = $$(".tab", tabsEl);
+
+    // 初期表示
+    if (searchParam) {
+      if (allSearchInput) allSearchInput.value = searchParam;
+      const results = searchArticlesList(searchParam);
+      renderList(results);
+      if (allSearchInfo) allSearchInfo.textContent = `「${searchParam}」の検索結果：${results.length}件`;
+    } else {
+      renderList(filterByCategory(tabParam));
+      if (allSearchInfo) allSearchInfo.textContent = "";
+    }
+
+    updateAllClearBtn();
+
+    // タブ切替（search解除）
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const cat = btn.getAttribute("data-category-tab");
+
+        const newParams = new URLSearchParams(location.search);
+        newParams.set("tab", cat);
+        newParams.delete("search");
+        history.replaceState(null, "", "all.html?" + newParams.toString());
+
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        if (allSearchInput) allSearchInput.value = "";
+        if (allSearchInfo) allSearchInfo.textContent = "";
+
+        renderList(filterByCategory(cat));
+        updateAllClearBtn();
+      });
+    });
+
+    if (allSearchInput) {
+      allSearchInput.addEventListener("input", updateAllClearBtn);
+    }
+
+    if (allSearchForm && allSearchInput) {
+      allSearchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const keyword = allSearchInput.value.trim();
+
+        const newParams = new URLSearchParams(location.search);
+        if (keyword) {
+          newParams.set("search", keyword);
+          newParams.set("tab", "すべて");
+        } else {
+          newParams.delete("search");
+          newParams.set("tab", "すべて");
+        }
+        history.replaceState(null, "", "all.html?" + newParams.toString());
+
+        tabButtons.forEach((b) =>
+          b.classList.toggle("active", b.getAttribute("data-category-tab") === "すべて")
+        );
+
+        const results = keyword ? searchArticlesList(keyword) : filterByCategory("すべて");
+        renderList(results);
+
+        if (allSearchInfo) {
+          allSearchInfo.textContent = keyword ? `「${keyword}」の検索結果：${results.length}件` : "";
+        }
+
+        updateAllClearBtn();
+      });
+    }
+
+    if (allClearBtn && allSearchInput) {
+      allClearBtn.addEventListener("click", () => {
+        allSearchInput.value = "";
+        updateAllClearBtn();
+
+        const newParams = new URLSearchParams(location.search);
+        newParams.delete("search");
+        newParams.set("tab", "すべて");
+        history.replaceState(null, "", "all.html?" + newParams.toString());
+
+        tabButtons.forEach((b) =>
+          b.classList.toggle("active", b.getAttribute("data-category-tab") === "すべて")
+        );
+
+        renderList(filterByCategory("すべて"));
+        if (allSearchInfo) allSearchInfo.textContent = "";
+      });
+    }
+  }
+
+  // ============
+  // 8. ranking.html
+  // ============
+  function initRankingPage() {
+    const top3El = $("#ranking-top3");
+    const restEl = $("#ranking-rest");
+    const periodBtns = $$(".period-btn");
+    if (!top3El || !restEl || !periodBtns.length) return;
+
+    const articles = getArticles();
+    if (!articles.length) return;
+
+    let currentPeriod = "all";
+
+    function getViews(a, period) {
+      const p = (period || "all").toLowerCase();
+      switch (p) {
+        case "day": return a.views_day ?? a.views ?? 0;
+        case "week": return a.views_week ?? a.views ?? 0;
+        case "month": return a.views_month ?? a.views ?? 0;
+        case "all":
+        default: return a.views ?? 0;
+      }
+    }
+
+    function getCategoryLabel(a) {
+      return (a && (a.categoryName || a.category || "")) || "";
+    }
+
+    function getSortedArticles() {
+      return [...articles].sort((a, b) => getViews(b, currentPeriod) - getViews(a, currentPeriod));
+    }
+
+    function renderRanking() {
+      const sorted = getSortedArticles();
+
+      const hero = sorted[0];
+      const mids = sorted.slice(1, 3);
+      const rest = sorted.slice(3, 20);
+
+      top3El.innerHTML = "";
+      restEl.innerHTML = "";
+
+      if (hero) {
+        top3El.innerHTML += `
+          <div class="rank-hero" onclick="location.href='article.html?id=${encodeURIComponent(hero.id)}'">
+            <div class="rank-badge rank-1 rank-badge-large">1</div>
+            <div class="rank-hero-thumb" style="background-image:url('${hero.image}');"></div>
+            <div class="rank-hero-content">
+              <div class="ranking-service">${(hero.service || "SUBSCOPE").toUpperCase()}</div>
+              <div class="rank-hero-title">${hero.title || ""}</div>
+              <div class="rank-hero-desc">${hero.description || ""}</div>
+              <div class="rank-hero-meta"><span>${getCategoryLabel(hero)}</span></div>
+            </div>
+          </div>
+        `;
+      }
+
+      mids.forEach((a, idx) => {
+        const rank = idx + 2;
+        top3El.innerHTML += `
+          <div class="rank-mid" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
+            <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
+            <div class="rank-mid-thumb" style="background-image:url('${a.image}');"></div>
+            <div class="ranking-content">
+              <div class="ranking-service">${(a.service || "SUBSCOPE").toUpperCase()}</div>
+              <div class="rank-mid-title">${a.title || ""}</div>
+              <div class="rank-mid-desc">${a.description || ""}</div>
+              <div class="rank-mid-meta"><span>${getCategoryLabel(a)}</span></div>
+            </div>
+          </div>
+        `;
+      });
+
+      rest.forEach((a, idx) => {
+        const rank = idx + 4;
+        const row = document.createElement("div");
+        row.className = "ranking-row";
+        row.innerHTML = `
+          <div class="ranking-row-rank">${rank}</div>
+          <div class="ranking-row-thumb" style="background-image:url('${a.image}');"></div>
+          <div class="ranking-row-main">
+            <div class="ranking-row-title">${a.title || ""}</div>
+            <div class="ranking-row-meta">
+              <span class="ranking-row-service">${(a.service || "SUBSCOPE").toUpperCase()}</span>
+              <span>${getCategoryLabel(a)}</span>
+            </div>
+          </div>
+        `;
+        row.addEventListener("click", () => {
+          location.href = `article.html?id=${encodeURIComponent(a.id)}`;
+        });
+        restEl.appendChild(row);
+      });
+
+      [top3El, restEl].forEach((el) => {
+        el.classList.remove("ranking-animate");
+        void el.offsetWidth;
+        el.classList.add("ranking-animate");
+      });
+    }
+
+    periodBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        periodBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentPeriod = btn.dataset.period || "all";
+        renderRanking();
+      });
+    });
+
+    renderRanking();
+  }
+
+  // ============
+  // 9. Global helpers
+  // ============
+  window.loadArticles = loadArticles;
+  window.getArticles = getArticles;
+  window.searchArticlesList = searchArticlesList;
+
+  window.openArticle = (id) => {
+    location.href = "article.html?id=" + encodeURIComponent(id);
+  };
+
+  // ============
+  // 10. Boot
+  // ============
+  document.addEventListener("DOMContentLoaded", async () => {
+    initMenuCloseBehaviors();
+    initHeaderSearch();
+
+    await loadArticles();
+    await loadAds();
+
+    // page detect
+    const page = document.body?.dataset?.page || "";
+
+    if (page === "home") {
+      renderHero();
+      renderLatest(8);
+      initCarousel3D();
+    }
+    if (page === "all") initAllPage();
+    if (page === "ranking") initRankingPage();
+
+    initScrollReveal();
+  });
+})();
