@@ -450,6 +450,11 @@
             background-color: #f5f5f7;
             transform: translateY(-2px);
         }
+        /* ヒーローの「詳しく見る」を消す */
+.featured-content .btn-read {
+    display: none;
+}
+
 
         /* =========================================
            3D Carousel (おすすめ記事)
@@ -1115,28 +1120,32 @@
 @media (min-width: 1025px) {
 
   .featured-card {
-    position: relative;
-    min-height: 70vh; /* 写真の縦の大きさ */
-    padding: 0;
-    overflow: hidden;
+      position: relative;
+      min-height: 70vh;
+      padding: 0;
+      overflow: hidden;
   }
 
-  /* テキストを下半分のエリアに収める */
   .featured-content {
-    position: absolute;
-    left: 40px;
-    right: 40px;
+      position: absolute;
+      left: 40px;
+      right: 40px;
 
-    /* ★ 下半分に限定して表示する魔法 */
-    bottom: 40px;
-    top: 50%; /* ← 上端をちょうど中央に設定 */
+      /* ★ さらに下に寄せる調整値 */
+      top: 60%;      /* 50% → 60% に変更 */
+      bottom: 24px;  /* 40px → 24px に変更 */
 
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-
-    z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      z-index: 2;
   }
+
+  /* 念のためボタン非表示 */
+  .featured-content .btn-read {
+      display: none;
+  }
+}
 
   .featured-title {
     font-size: 2rem;
