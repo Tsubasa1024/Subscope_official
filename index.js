@@ -69,7 +69,7 @@ function mapCmsArticle(item) {
         categoryName: category,
         service: item.service || "",
         date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
-        image: item.eyecatch ? item.eyecatch.url : "images/sample1.jpg",
+        image: imageUrl,   // ★ここ
         views: 0,
 
         // 本文HTML（記事ページ用）
@@ -615,3 +615,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();
     initScrollReveal();
 });
+
