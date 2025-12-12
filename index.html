@@ -1325,51 +1325,53 @@
       }
     }
 /* ============================
-   PCのみ：追跡なし（absoluteのまま）で
-   ヒーロー横の外側に固定＆拡大しても被らない
+   PCのみ：拡大しても記事に被らない（逃がさない版）
+   ・追跡なし（absoluteのまま）
+   ・拡大時も位置固定（transformなし）
    ============================ */
 @media (min-width: 1200px) {
   :root{
     --side-w: 180px;         /* 通常幅 */
     --side-expanded: 320px;  /* 拡大幅 */
-    --side-gap: 24px;        /* ヒーローとの距離 */
+    --side-gap: 24px;        /* 余白 */
   }
 
-  /* 追跡なし：absoluteのまま（あなたの現状維持） */
+  /* ★本文側に「拡大分の余白」を先に確保（これが核心） */
+  body{
+    padding-left:  calc(var(--side-expanded) + var(--side-gap));
+    padding-right: calc(var(--side-expanded) + var(--side-gap));
+  }
+
+  /* 追跡なし：absoluteのまま */
   .side-sponsor{
     position: absolute !important;
     top: 120px !important;
-    width: var(--side-w) !important;
+    width: var(--side-w);
     z-index: 60;
+    pointer-events: none;
   }
 
-  /* 中央(1080px)の外側に置く：左 */
-  .side-sponsor-left{
-    left: calc(50% - (var(--container-width) / 2) - var(--side-w) - var(--side-gap)) !important;
-    right: auto !important;
-  }
-
-  /* 中央(1080px)の外側に置く：右 */
-  .side-sponsor-right{
-    left: calc(50% + (var(--container-width) / 2) + var(--side-gap)) !important;
-    right: auto !important;
-  }
-
-  /* 拡大しても記事側に伸びない（外側へ逃がす） */
-  .side-sponsor-inner{
+  .side-sponsor .side-sponsor-inner{
+    pointer-events: auto;
     width: 100%;
-    transition: width .25s ease, transform .25s ease;
-    will-change: width, transform;
+    transition: width .25s ease;
+    will-change: width;
+    transform: none !important; /* ←逃がしを完全禁止 */
   }
 
-  .side-sponsor-left .side-sponsor-inner:hover{
-    width: var(--side-expanded);
-    transform: translateX(calc(var(--side-w) - var(--side-expanded))); /* 左外へ */
+  /* 左右は「画面端からの固定位置」 */
+  .side-sponsor-left{
+    left: var(--side-gap) !important;
+    right: auto !important;
+  }
+  .side-sponsor-right{
+    right: var(--side-gap) !important;
+    left: auto !important;
   }
 
-  .side-sponsor-right .side-sponsor-inner:hover{
+  /* 拡大しても位置はそのまま（外側にも逃がさない） */
+  .side-sponsor:hover{
     width: var(--side-expanded);
-    transform: translateX(0); /* 右外へ */
   }
 }
 
