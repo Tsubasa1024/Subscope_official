@@ -34,11 +34,16 @@ async function fetchTopAd(position) {
 
   if (!data || !data.contents) return null;
 
-  return (
-    data.contents.find(
-      (ad) => ad.enabled === true && ad.position === position
-    ) || null
-  );
+return (
+  data.contents.find((ad) => {
+    const pos =
+      typeof ad.position === "string"
+        ? ad.position
+        : (ad.position?.id || ad.position?.name || "");
+
+    return ad.enabled === true && pos === position;
+  }) || null
+);
 }
 
 /**
@@ -705,5 +710,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAllPageSearch();
   initScrollReveal();
 });
+
 
 
