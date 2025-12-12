@@ -83,13 +83,14 @@ function applyBannerAdToAnchor(anchorEl, ad) {
 
   // descriptionが無い場合の保険
   if (descNode && !ad.description && ad.title) descNode.textContent = ad.title;
-}
+}  // ← これは if じゃなくて applyBannerAdToAnchor の終わり
 
+// ✅ ここから次の処理に入る
 /**
  * ads を読み込んで、各スロットに反映
- * ✅ data-slot-id で確実に拾う（これが一番事故らない）
  */
 async function loadAds() {
+
   const heroBottom = document.querySelector('[data-slot-id="HERO_BOTTOM_1"]');
   const leftAnchor = document.querySelector('[data-slot-id="SIDE_LEFT_1"]');
   const rightAnchor = document.querySelector('[data-slot-id="SIDE_RIGHT_1"]');
@@ -710,6 +711,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAllPageSearch();
   initScrollReveal();
 });
+
 
 
 
