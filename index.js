@@ -60,6 +60,13 @@ function mapCmsArticle(item) {
             .map(t => (t && (t.name || t.id || t)).toString().trim())
             .filter(Boolean);
     }
+  // ✅ ここを追加！
+  const imageUrl =
+    item?.eyecatch?.url ||
+    item?.thumbnail?.url ||
+    item?.image?.url ||
+    item?.heroImage?.url ||
+    "images/sample1.jpg";
 
     return {
         id: item.id,
@@ -615,4 +622,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();
     initScrollReveal();
 });
+
 
