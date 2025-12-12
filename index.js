@@ -6,6 +6,78 @@ window.articles = window.articles || [];
 const SERVICE_ID = "subscope";
 const API_KEY    = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 const ENDPOINT   = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
+// =====================================
+// A. microCMS から広告を読む設定（ads）
+// =====================================
+window.__ADS__ = window.__ADS__ || {};
+
+const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
+
+async function fetchTopAd(position) {
+  const filters = `position[equals]${position}[and]enabled[equals]true`;
+  const url = `${ADS_ENDPOINT}?filters=${encodeURIComponent(filters)}&orders=-priority&limit=1`;
+
+  const res = await fetch(url, {
+    headers: { "X-MICROCMS-API-KEY": API_KEY }
+  });
+  const data = await res.json();
+  return data?.contents?.[0] || null;
+}
+
+function applyBannerAdToAnchor(anchorEl, ad) {
+  if (!anchorEl || !ad) return;
+
+  anchorEl.href = ad.url || anchorEl.href;
+  anchorEl.target = "_blank";
+  anchorEl.rel = "noopener";
+
+  // 画像があるなら画像バナー化（最強）
+  if (ad.image && ad.image.url) {
+    anchorEl.innerHTML = `
+      <img src="${ad.image.url}" alt="${ad.title || "ad"}"
+           style="width:100%;height:auto;display:block;">
+    `;
+    return;
+  }
+
+  // 画像なし：テキストだけ差し替え
+  const titleNode = anchorEl.querySelector(".ad-title");
+  const textNode  = anchorEl.querySelector(".between-ad-text");
+  if (titleNode && ad.title) titleNode.textContent = ad.title;
+  if (textNode && ad.title)  textNode.textContent  = ad.title;
+}
+
+async function loadAds() {
+  // ヒーロー直下
+  const heroBottom = document.querySelector(".between-sponsor-inner");
+  const adHero = await fetchTopAd("home_hero_under");
+  if (adHero) {
+    applyBannerAdToAnchor(heroBottom, adHero);
+    window.__ADS__["home_hero_under"] = adHero;
+  }
+
+  // 左右サイド
+  const leftAnchor  = document.querySelector(".side-sponsor-left .side-sponsor-inner");
+  const rightAnchor = document.querySelector(".side-sponsor-right .side-sponsor-inner");
+
+  const adLeft = await fetchTopAd("home_side_left");
+  if (adLeft) {
+    applyBannerAdToAnchor(leftAnchor, adLeft);
+    window.__ADS__["home_side_left"] = adLeft;
+  }
+
+  const adRight = await fetchTopAd("home_side_right");
+  if (adRight) {
+    applyBannerAdToAnchor(rightAnchor, adRight);
+    window.__ADS__["home_side_right"] = adRight;
+  }
+
+  // 最新記事グリッド差し込み用（あとで使う）
+  const adGrid = await fetchTopAd("home_grid_sponsor");
+  if (adGrid) {
+    window.__ADS__["home_grid_sponsor"] = adGrid;
+  }
+}
 
 /**
  * microCMS の1件分を、フロント用の形にマッピング
@@ -622,6 +694,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();
     initScrollReveal();
 });
+
 
 
 
