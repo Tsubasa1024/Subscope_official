@@ -1456,11 +1456,8 @@
         const imgDiv = document.createElement("div");
         imgDiv.className = "card-image";
 
-        const eyecatchUrl =
-          (item.eyecatch && item.eyecatch.url) ||
-          (item.thumbnail && item.thumbnail.url) ||
-          "images/sample1.jpg";
-        imgDiv.style.backgroundImage = "url('" + eyecatchUrl + "')";
+const imgUrl = item.image || "images/sample1.jpg";
+imgDiv.style.backgroundImage = "url('" + imgUrl + "')";
 
         const body = document.createElement("div");
         body.className = "card-body";
@@ -1480,7 +1477,7 @@
 
         const date = document.createElement("div");
         date.className = "card-date";
-        date.textContent = formatDate(item.publishedAt || item.createdAt);
+        date.textContent = (item.date || "").replace(/-/g, ".");
 
         body.appendChild(service);
         body.appendChild(title);
