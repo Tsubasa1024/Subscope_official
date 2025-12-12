@@ -797,22 +797,23 @@
             }
         }
 /* ============================
-   PC/iPad：左右サイドスポンサー（indexと同一）
+   PC/iPad：左右サイドスポンサー
    ============================ */
-.side-sponsor{
-  position: absolute;     /* indexと同じ */
-  top: 120px;             /* indexと同じ */
-  width: 180px;           /* indexと同じ */
+.side-sponsor {
+   position: absolute;   /* ← fixed をやめる */
+  top: 120px;           /* ヘッダー下に固定 */
+  width: 180px;
+  height: auto;
   z-index: 60;
   pointer-events: none;
 }
 
-.side-sponsor .side-sponsor-inner{
+.side-sponsor .side-sponsor-inner {
   pointer-events: auto;
   background: #F5F5F7;
   border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 0;       /* 角丸なし */
-  min-height: 630px;      /* indexと同じ（高さ） */
+  border-radius: 0px;
+    min-height: 630px;
   padding: 18px;
   height: 100%;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -823,7 +824,7 @@
   text-align: center;
 }
 
-.side-sponsor .ad-tag{
+.side-sponsor .ad-tag {
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 700;
@@ -834,31 +835,33 @@
   margin: 0 auto 6px;
 }
 
-.side-sponsor .ad-title{
+.side-sponsor .ad-title {
   font-size: 1.05rem;
   font-weight: 700;
   color: #1D1D1F;
 }
 
-.side-sponsor .ad-desc{
+.side-sponsor .ad-desc {
   font-size: 0.85rem;
   color: #86868B;
   line-height: 1.6;
 }
 
-.side-sponsor-left{ left: 18px; }
-.side-sponsor-right{ right: 18px; }
+.side-sponsor-left  { left: 18px; }
+.side-sponsor-right { right: 18px; }
 
-/* iPad以下は非表示（indexと同じ） */
-@media (max-width: 1024px){
-  .side-sponsor{ display:none; }
+/* 画面が狭いときは左右広告は消す（スマホ含む） */
+@media (max-width: 1024px) {
+  .side-sponsor {
+    display: none;
+  }
 }
 
-/* 超ワイドはちょい広げる（indexと同じ） */
-@media (min-width: 1400px){
-  .side-sponsor{ width: 200px; }
-}
-
+/* 超ワイド画面でもちょい余裕 */
+@media (min-width: 1400px) {
+  .side-sponsor {
+    width: 200px;
+  }
     </style>
 </head>
 <body>
