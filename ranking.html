@@ -1034,12 +1034,13 @@
 .side-sponsor-left  { left: 18px; }
 .side-sponsor-right { right: 18px; }
 
-/* 画面が狭いときは左右広告は消す（スマホ含む） */
-@media (max-width: 1024px) {
+/* ✅ iPad & スマホ（タッチ端末）はサイド広告を消す */
+@media (pointer: coarse) {
   .side-sponsor {
     display: none;
   }
 }
+
 
 /* 超ワイド画面でもちょい余裕 */
 @media (min-width: 1400px) {
