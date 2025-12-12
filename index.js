@@ -19,7 +19,7 @@ const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
  */
 async function fetchTopAd(position) {
   // いったん全部取って、JS側で絞る（microCMSセレクト対策）
-  const url = `${ADS_ENDPOINT}?limit=50&orders=-priority`;
+  const url = `${ADS_ENDPOINT}?limit=50&orders=-priority&ts=${Date.now()}`;
 
   const res = await fetch(url, {
     headers: { "X-MICROCMS-API-KEY": API_KEY },
@@ -705,4 +705,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAllPageSearch();
   initScrollReveal();
 });
+
 
