@@ -414,7 +414,7 @@
   // 6. Home（index.html）
   // ============
   function renderHero() {
-    const heroContainer = $("#most-viewed-content");
+    const heroContainer = $("#heroMount"); /
     const list = getArticles();
     if (!heroContainer || !list.length) return;
 
@@ -889,4 +889,5 @@
     initScrollReveal();
   });
 })();
+
 
