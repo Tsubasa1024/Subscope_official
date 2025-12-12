@@ -887,6 +887,19 @@
         height: 180px; /* 必要なら調整OK */
     }
 }
+/* 本文のリストを横幅に収める（はみ出し防止 & 整列） */
+.article-content ul,
+.article-content ol {
+    padding-left: 1.2em;      /* 左側の余白を調整（標準より短く） */
+    margin-left: 0;           /* 左へのはみ出し防止 */
+    margin-right: 0;          /* 本文幅に収める */
+}
+
+.article-content li {
+    word-wrap: break-word;    /* 長い単語、URLなどがはみ出さない */
+    overflow-wrap: break-word;
+    line-height: 1.7;
+}
 
     </style>
 </head>
