@@ -351,6 +351,22 @@
   // ============
   // 5. Menu / Reveal
   // ============
+   function initMenuOpen() {
+  const btn = $("#menuBtn");
+  const overlay = $("#nav-overlay");
+  if (!btn || !overlay) return;
+
+  const onClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMenu(); // open/close
+  };
+
+  // click + touch どっちも拾う（スマホ/タブ強い）
+  btn.addEventListener("click", onClick);
+  btn.addEventListener("touchstart", onClick, { passive: false });
+}
+
   function toggleMenu(force) {
     const overlay = $("#nav-overlay");
     if (!overlay) return;
@@ -873,3 +889,4 @@
     initScrollReveal();
   });
 })();
+
