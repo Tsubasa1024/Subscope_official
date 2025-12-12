@@ -1138,32 +1138,24 @@
 @media (min-width: 1025px) {
 
   .featured-card {
-      position: relative;
-      min-height: 70vh;
-      padding: 0;
-      overflow: hidden;
+    position: relative;
+    min-height: 70vh;
+    padding: 0;
+    overflow: hidden;
   }
 
   .featured-content {
-      position: absolute;
-      left: 40px;
-      right: 40px;
+    position: absolute;
+    left: 40px;
+    right: 40px;
+    top: 60%;
+    bottom: 24px;
 
-      /* ★ さらに下に寄せる調整値 */
-      top: 60%;      /* 50% → 60% に変更 */
-      bottom: 24px;  /* 40px → 24px に変更 */
-
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    z-index: 2;
   }
-
-  /* 念のためボタン非表示 */
-  .featured-content .btn-read {
-      display: none;
-  }
-}
 
   .featured-title {
     font-size: 2rem;
@@ -1177,10 +1169,12 @@
     margin-bottom: 18px;
   }
 
+  /* ボタンはPCでも非表示でOKなら */
   .btn-read {
-    margin-top: 4px;
+    display: none;
   }
 }
+
 
     </style>
 </head>
