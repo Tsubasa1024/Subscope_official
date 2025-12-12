@@ -1259,12 +1259,30 @@
         /* ============================
    iPad 縦向きのみ：ヒーローを2/3の高さに
    ============================ */
+/* ============================
+   iPad 縦向きのみ：ヒーロー調整
+   ============================ */
 @media (min-width: 768px)
   and (max-width: 1024px)
   and (orientation: portrait) {
 
+  /* ヒーロー高さを2/3に */
   .featured-card {
-    min-height: 48vh; /* 画面の約2/3 */
+    min-height: 48vh;
+  }
+
+  /* タイトルを少し小さく */
+  .featured-title {
+    font-size: 1.7rem;   /* PC:2rem → 少しだけ下げる */
+    line-height: 1.35;
+    margin-bottom: 10px;
+  }
+
+  /* 説明文を少し小さく */
+  .featured-desc {
+    font-size: 0.95rem;  /* PC:1rem → ほんのり */
+    line-height: 1.45;
+    margin-bottom: 12px;
   }
 }
 
