@@ -110,12 +110,10 @@
         .top-header {
             max-width: var(--container-width);
             margin: 0 auto;
-            padding: 12px 24px;
-            padding-bottom: 16px;
+            padding: 12px 24px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position:visible; /* 中央ロゴ用 */
         }
 
         .nav-left,
@@ -393,19 +391,28 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(
+                to top,
+                rgba(0,0,0,0.85) 0%,
+                rgba(0,0,0,0.5) 40%,
+                rgba(0,0,0,0.1) 70%,
+                rgba(0,0,0,0) 100%
+            );
             z-index: 1;
         }
 
         .featured-content {
-            position: relative;
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            right: 40px;
             z-index: 2;
             width: 100%;
             max-width: 800px;
         }
 
         .featured-meta {
-            font-size: 1rem;
+            font-size: 0.85rem;
             color: rgba(255,255,255,0.9);
             margin-bottom: 12px;
             display: flex;
@@ -423,55 +430,9 @@
             border: none;
         }
 
-        /* ▼▼ Hero の文字サイズ調整 ▼▼ */
         .featured-title {
-            font-size: 2.2rem !important;
-        }
-
-        .featured-desc {
-            font-size: 0.95rem !important;
-        }
-
-        .featured-meta {
-            font-size: 0.85rem !important;
-        }
-
-        /* ▼▼ 写真の下半分に文字を寄せる ▼▼ */
-        .featured-content {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            right: 40px;
-            z-index: 2;
-        }
-
-        /* PC版 */
-        @media (min-width: 1025px) {
-          .featured-content {
-            max-width: none;
-            width: auto;
-          }
-        }
-
-        /* iPad */
-        @media (min-width: 768px) and (max-width: 1024px) {
-          .featured-content {
-            max-width: none;
-            width: auto;
-            left: 40px;
-            right: 40px;
-          }
-        }
-
-        /* ▼▼ グラデーションを強める ▼▼ */
-        .featured-card::before {
-            background: linear-gradient(
-                to top,
-                rgba(0,0,0,0.85) 0%,
-                rgba(0,0,0,0.5) 40%,
-                rgba(0,0,0,0.1) 70%,
-                rgba(0,0,0,0) 100%
-            ) !important;
+            font-size: 2.2rem;
+            margin-bottom: 16px;
         }
 
         .featured-desc {
@@ -837,7 +798,6 @@
             font-size: 13px;
         }
 
-        /* 「すべての記事」ボタン */
         .all-articles-btn-wrapper {
             text-align: center;
             margin-top: 40px;
@@ -861,7 +821,9 @@
             box-shadow: 0 10px 26px rgba(0,0,0,0.15);
         }
 
-        /* タブレット・PCでは検索バーを通常サイズで表示 */
+        /* =========================================
+           Responsive（タブレット・PC）
+           ========================================= */
         @media (min-width: 769px) {
             .search-wrapper {
                 width: 280px !important;
@@ -919,14 +881,6 @@
            Responsive（スマホ）
            ========================================= */
         @media (max-width: 767px) {
-
-            .featured-title {
-                margin-bottom: 16px !important;
-            }
-
-            .btn-read {
-                margin-top: 8px !important;
-            }
 
             :root {
                 --spacing-section: 60px;
@@ -1039,6 +993,11 @@
                 right: 18px;
                 top: 50%;
                 transform: translateY(-50%);
+                font-size: 22px;
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                text-align: center;
             }
 
             .search-results-container {
@@ -1051,29 +1010,46 @@
             }
 
             .featured-card {
-                padding: 20px;
+                height: 55vh;
                 min-height: 55vh;
+                padding: 16px 16px 20px;
                 border-radius: 24px;
             }
 
             .featured-content {
-                bottom: 24px;
-                left: 20px;
-                right: 20px;
+                position: absolute;
+                bottom: 20px;
+                left: 16px;
+                right: 16px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .featured-meta {
+                font-size: 0.7rem;
+                margin-bottom: 8px;
             }
 
             .featured-title {
-                font-size: 1.4rem;
+                font-size: 1.2rem;
                 line-height: 1.3;
+                margin-bottom: 8px;
             }
 
             .featured-desc {
                 font-size: 0.9rem;
                 line-height: 1.45;
+                margin-bottom: 8px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
 
-            .featured-meta {
-                font-size: 0.75rem;
+            .btn-read {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+                margin-top: 0;
             }
 
             .carousel3d-section .container {
@@ -1136,78 +1112,11 @@
                 border-radius: 2px;
             }
 
-            .fixed-header.search-open .clear-btn {
-                display: block;
-                right: 18px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 22px;
-                width: 36px;
-                height: 36px;
-                line-height: 36px;
-                text-align: center;
-            }
-
             .footer-links {
                 gap: 24px;
                 flex-wrap: wrap;
             }
         }
-
-        /* スマホ：ヒーロー調整 */
-        @media (max-width: 767px) {
-
-          .featured-card {
-            height: 55vh !important;
-            min-height: 55vh !important;
-            padding: 16px 16px 20px !important;
-            border-radius: 24px !important;
-          }
-
-          .featured-content {
-            position: absolute !important;
-            bottom: 20px !important;
-            left: 16px !important;
-            right: 16px !important;
-          }
-
-          .featured-meta {
-            font-size: 0.7rem !important;
-            margin-bottom: 8px !important;
-          }
-
-          .featured-title {
-            font-size: 1.2rem !important;
-            line-height: 1.3 !important;
-            margin-bottom: 8px !important;
-          }
-
-          .featured-desc {
-            font-size: 0.9rem !important;
-            line-height: 1.45 !important;
-            margin-bottom: 8px !important;
-            display: -webkit-box !important;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-
-          .btn-read {
-            font-size: 0.9rem !important;
-            padding: 10px 20px !important;
-            margin-top: 0 !important;
-          }
-
-          .featured-content {
-            padding-left: 16px !important;
-            padding-right: 16px !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          }
-        }
-
     </style>
 </head>
 <body>
@@ -1330,112 +1239,13 @@
         </div>
     </section>
 
-    <!-- Latest Articles（最新8記事＋スポンサー1で3×3） -->
+    <!-- Latest Articles（最新8記事＋スポンサー1で3×3をJSで生成） -->
     <section class="section" id="latest">
         <div class="container">
             <h2 class="section-title reveal" id="latest-title">最新の記事</h2>
 
-            <div class="grid-layout reveal" id="latest-grid">
-
-                <!-- ① 記事カード 1 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample1.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">MUSIC</div>
-                        <h3 class="card-title">空間オーディオで音楽が“体験”に変わった話</h3>
-                        <p class="card-desc">Apple Music と AirPods Pro 3 で、ライブの臨場感が日常になった。</p>
-                        <div class="card-date">2025.01.12</div>
-                    </div>
-                </div>
-
-                <!-- ② 記事カード 2 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample2.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">MOVIE</div>
-                        <h3 class="card-title">ヒップホッププリンセスが想像以上におもしろかった理由</h3>
-                        <p class="card-desc">ヒップホップに興味がなかった自分が、U-NEXTの番組にドハマりした。</p>
-                        <div class="card-date">2025.01.11</div>
-                    </div>
-                </div>
-
-                <!-- ③ 記事カード 3 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample3.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">ENGLISH</div>
-                        <h3 class="card-title">単語帳が続かなかった俺を救ったのは、AbceedのAIだった</h3>
-                        <p class="card-desc">“覚える”より“管理する”を丸投げしたら、勉強がやっと続いた。</p>
-                        <div class="card-date">2025.01.10</div>
-                    </div>
-                </div>
-
-                <!-- ④ 記事カード 4 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample4.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">GUIDE</div>
-                        <h3 class="card-title">2025年版：今選ぶべきサブスクサービスまとめ</h3>
-                        <p class="card-desc">音楽・動画・学習・本、それぞれのベストを1つずつ選んだ。</p>
-                        <div class="card-date">2025.01.09</div>
-                    </div>
-                </div>
-
-                <!-- ⑤ ★ スポンサー広告カード ★ -->
-                <a href="index.html" class="ad-card">
-                    <span class="ad-tag">スポンサー</span>
-                    <div class="ad-title">サブスクならサブスコープ</div>
-                    <div class="ad-desc">
-                        迷ったときは、ここを見ればいい。  
-                        音楽、映画、勉強、全部まとめて比べられる“サブスクの地図”。
-                    </div>
-                </a>
-
-                <!-- ⑥ 記事カード 5 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample5.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">MUSIC</div>
-                        <h3 class="card-title">Apple Music と Spotify、結局どっちが合う？</h3>
-                        <p class="card-desc">価格・音質・プレイリストを、実際に1ヶ月ずつ使って比べた。</p>
-                        <div class="card-date">2025.01.08</div>
-                    </div>
-                </div>
-
-                <!-- ⑦ 記事カード 6 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample6.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">MOVIE</div>
-                        <h3 class="card-title">NetflixとU-NEXT、映画好きはどっちを選ぶべき？</h3>
-                        <p class="card-desc">作品数だけじゃなく、“観たいジャンル”で比較してみた。</p>
-                        <div class="card-date">2025.01.07</div>
-                    </div>
-                </div>
-
-                <!-- ⑧ 記事カード 7 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample7.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">ENGLISH</div>
-                        <h3 class="card-title">TOEIC800を目指して、サブスクだけで勉強してみる計画</h3>
-                        <p class="card-desc">Abceed と YouTube Premium とKindle Unlimitedをどう組み合わせるか。</p>
-                        <div class="card-date">2025.01.06</div>
-                    </div>
-                </div>
-
-                <!-- ⑨ 記事カード 8 -->
-                <div class="article-card">
-                    <div class="card-image" style="background-image:url('images/sample8.jpg')"></div>
-                    <div class="card-body">
-                        <div class="card-service">LIFE</div>
-                        <h3 class="card-title">サブスクを“減らす”ことで、生活がちょっと軽くなった話</h3>
-                        <p class="card-desc">なんとなく入りっぱなしのサービスを見直して、本当に使うものだけ残した。</p>
-                        <div class="card-date">2025.01.05</div>
-                    </div>
-                </div>
-
-            </div>
+            <!-- ★ここはJSで埋める（最新8 + スポンサー1） -->
+            <div class="grid-layout reveal" id="latest-grid"></div>
 
             <div class="all-articles-btn-wrapper">
                 <a href="all.html" class="all-articles-btn">すべての記事を見る</a>
@@ -1455,6 +1265,7 @@
         </div>
     </footer>
 
+    <!-- もともとのメインJS -->
     <script src="index.js"></script>
 
     <!-- スマホ検索アニメーション制御 -->
@@ -1467,11 +1278,9 @@
         if (!fixedHeader || !searchWrapper || !searchInput) return;
 
         let isOpen = false;
-
         const isMobile = () => window.innerWidth <= 767;
 
         searchWrapper.addEventListener("click", function (e) {
-
             if (!isMobile()) {
                 if (e.target !== searchInput) {
                     searchInput.focus();
@@ -1528,6 +1337,154 @@
 
         updateClearBtn();
     });
+    </script>
+
+    <!-- 最新8記事＋スポンサー1件を表示するスクリプト -->
+    <script>
+    (function () {
+      function renderLatestWithSponsor(allArticlesRaw) {
+        const grid = document.getElementById("latest-grid");
+        if (!grid) return;
+
+        grid.innerHTML = "";
+
+        const allArticles = Array.isArray(allArticlesRaw)
+          ? [...allArticlesRaw]
+          : [];
+
+        allArticles.sort(function (a, b) {
+          const da = new Date(a.publishedAt || a.createdAt || 0);
+          const db = new Date(b.publishedAt || b.createdAt || 0);
+          return db - da; // 新しい順
+        });
+
+        const latest8 = allArticles.slice(0, 8);
+        const nodes = [];
+
+        latest8.forEach(function (article, index) {
+          nodes.push(createArticleCard(article));
+
+          // 3枚目のあとにスポンサー広告を差し込む
+          if (index === 2) {
+            nodes.push(createSponsorCard());
+          }
+        });
+
+        nodes.forEach(function (node) {
+          grid.appendChild(node);
+        });
+      }
+
+      function createArticleCard(item) {
+        const card = document.createElement("a");
+        card.href = "article.html?id=" + item.id;
+        card.className = "article-card";
+
+        const imgDiv = document.createElement("div");
+        imgDiv.className = "card-image";
+
+        const eyecatchUrl =
+          (item.eyecatch && item.eyecatch.url) ||
+          (item.thumbnail && item.thumbnail.url) ||
+          "images/sample1.jpg";
+        imgDiv.style.backgroundImage = "url('" + eyecatchUrl + "')";
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const service = document.createElement("div");
+        service.className = "card-service";
+        service.textContent = getCategoryLabel(item);
+
+        const title = document.createElement("h3");
+        title.className = "card-title";
+        title.textContent = item.title || "タイトル未設定";
+
+        const desc = document.createElement("p");
+        desc.className = "card-desc";
+        desc.textContent =
+          item.lead || item.description || item.summary || "";
+
+        const date = document.createElement("div");
+        date.className = "card-date";
+        date.textContent = formatDate(item.publishedAt || item.createdAt);
+
+        body.appendChild(service);
+        body.appendChild(title);
+        body.appendChild(desc);
+        body.appendChild(date);
+
+        card.appendChild(imgDiv);
+        card.appendChild(body);
+
+        return card;
+      }
+
+      function getCategoryLabel(item) {
+        const raw = item.category || item.categories || item.service;
+
+        if (Array.isArray(raw) && raw.length > 0) {
+          const first = raw[0];
+          const name =
+            (first && (first.name || first.id || first.slug)) || "";
+          return name.toString().toUpperCase();
+        }
+
+        if (typeof raw === "string" && raw.trim() !== "") {
+          return raw.trim().toUpperCase();
+        }
+
+        return "SUBSCOPE";
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return "";
+        var d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "";
+
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, "0");
+        var day = String(d.getDate()).padStart(2, "0");
+        return y + "." + m + "." + day;
+      }
+
+      function createSponsorCard() {
+        const a = document.createElement("a");
+        a.className = "ad-card";
+        a.href = "index.html"; // 将来は Media Guide や案件LPに変更してOK
+        a.setAttribute("data-slot-id", "HOME_SPONSOR_1");
+
+        const tag = document.createElement("span");
+        tag.className = "ad-tag";
+        tag.textContent = "スポンサー";
+
+        const title = document.createElement("div");
+        title.className = "ad-title";
+        title.textContent = "サブスクならサブスコープ";
+
+        const desc = document.createElement("div");
+        desc.className = "ad-desc";
+        desc.innerText =
+          "迷ったときは、ここを見ればいい。\n" +
+          "音楽、映画、勉強、全部まとめて比べられる“サブスクの地図”。";
+
+        a.appendChild(tag);
+        a.appendChild(title);
+        a.appendChild(desc);
+
+        return a;
+      }
+
+      function waitAndRenderLatest() {
+        if (Array.isArray(window.articles) && window.articles.length > 0) {
+          renderLatestWithSponsor(window.articles);
+        } else {
+          setTimeout(waitAndRenderLatest, 300);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", waitAndRenderLatest);
+    })();
     </script>
 </body>
 </html>
