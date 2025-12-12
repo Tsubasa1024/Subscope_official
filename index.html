@@ -1013,35 +1013,53 @@
                 border-radius: 24px;
             }
 
-            .featured-content {
-                position: absolute;
-                bottom: 20px;
-                left: 16px;
-                right: 16px;
-                width: 100%;
-                box-sizing: border-box;
-            }
+.featured-content{
+  position: absolute;
+  left: 16px;
+  right: 16px;
+
+  /* ★ 下半分だけ使う（＝文字を下に） */
+  top: 55%;
+  bottom: 14px;
+
+  width: auto;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
 
             .featured-meta {
                 font-size: 0.7rem;
                 margin-bottom: 8px;
             }
 
-            .featured-title {
-                font-size: 1.2rem;
-                line-height: 1.3;
-                margin-bottom: 8px;
-            }
+.featured-title{
+  font-size: 1.05rem;   /* ★小さく */
+  line-height: 1.35;
+  margin-bottom: 6px;
+  font-weight: 700;
 
-            .featured-desc {
-                font-size: 0.9rem;
-                line-height: 1.45;
-                margin-bottom: 8px;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
+  display: -webkit-box;
+  -webkit-line-clamp: 3;  /* タイトル最大3行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-desc{
+  font-size: 0.82rem;  /* ★小さく */
+  line-height: 1.45;
+  margin-bottom: 0;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;  /* ★2行以降… */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.btn-read{ display:none !important; }
 
             .btn-read {
                 font-size: 0.9rem;
