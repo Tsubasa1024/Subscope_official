@@ -277,33 +277,70 @@ function renderHero() {
 // =====================================
 // 5. 最新記事グリッド
 // =====================================
-function renderLatest(limit = 6) {
-    if (!latestGrid) return;
+function renderLatest(limit = 8) {
+  if (!latestGrid) return;
 
-    const list = getArticles();
-    const sorted = [...list].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-    );
-    const target = sorted.slice(0, limit);
+  const list = getArticles();
+  const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const target = sorted.slice(0, limit);
 
-    latestGrid.innerHTML = target
-        .map(
-            (a) => `
-        <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(
-            a.id
-        )}'">
-            <div class="card-image" style="background-image:url('${a.image}')"></div>
-            <div class="card-body">
-                <div class="card-service">${a.service || "SUBSCOPE"}</div>
-                <h3 class="card-title">${a.title}</h3>
-                <p class="card-desc">${a.description}</p>
-                <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
+  const ad = window.__ADS__ && window.__ADS__["home_grid_sponsor"];
+
+  const cards = [];
+  target.forEach((a, index) => {
+    cards.push(`
+      <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
+        <div class="card-image" style="background-image:url('${a.image}')"></div>
+        <div class="card-body">
+          <div class="card-service">${a.service || "SUBSCOPE"}</div>
+          <h3 class="card-title">${a.title}</h3>
+          <p class="card-desc">${a.description}</p>
+          <div class="card-date">${(a.date || "").replace(/-/g, ".")}</div>
+        </div>
+      </article>
+    `);
+
+    // 3枚目のあとにスポンサー
+    if (index === 2) {
+      if (ad) {
+        // 画像があるならそれを入れる
+        const adInner = (ad.image && ad.image.url)
+          ? `
+            <span class="ad-tag">スポンサー</span>
+            <div style="margin-top:10px;">
+              <img src="${ad.image.url}" alt="${ad.title || "ad"}"
+                   style="width:100%;border-radius:16px;display:block;">
             </div>
-        </article>
-    `
-        )
-        .join("");
+            <div class="ad-title" style="margin-top:12px;">${ad.title || "スポンサー"}</div>
+            <div class="ad-desc">Sponsored</div>
+          `
+          : `
+            <span class="ad-tag">スポンサー</span>
+            <div class="ad-title">${ad.title || "スポンサー"}</div>
+            <div class="ad-desc">Sponsored</div>
+          `;
+
+        cards.push(`
+          <a class="ad-card" href="${ad.url || "index.html"}" target="_blank" rel="noopener" data-slot-id="HOME_SPONSOR_1">
+            ${adInner}
+          </a>
+        `);
+      } else {
+        // 取れない時の保険
+        cards.push(`
+          <a class="ad-card" href="index.html" data-slot-id="HOME_SPONSOR_1">
+            <span class="ad-tag">スポンサー</span>
+            <div class="ad-title">サブスクならサブスコープ</div>
+            <div class="ad-desc">迷ったときは、ここを見ればいい。</div>
+          </a>
+        `);
+      }
+    }
+  });
+
+  latestGrid.innerHTML = cards.join("");
 }
+
 
 // =====================================
 // 6. 3D カルーセル（おすすめ）
@@ -672,28 +709,25 @@ function initScrollReveal() {
     targets.forEach((el) => observer.observe(el));
 }
 
-// =====================================
-// 11. 初期化（トップページ / 共通）
-// =====================================
 document.addEventListener("DOMContentLoaded", async () => {
-    // ヘッダー検索まわり
-    searchInput     = document.getElementById("searchInput");
-    clearBtn        = document.getElementById("clear-btn");
-    searchResultsEl = document.getElementById("searchResults");
+  searchInput     = document.getElementById("searchInput");
+  clearBtn        = document.getElementById("clear-btn");
+  searchResultsEl = document.getElementById("searchResults");
 
-    // トップページ用
-    heroContainer   = document.getElementById("most-viewed-content");
-    latestGrid      = document.getElementById("latest-grid");
+  heroContainer   = document.getElementById("most-viewed-content");
+  latestGrid      = document.getElementById("latest-grid");
 
-    await loadArticles();
+  await loadArticles();
+  await loadAds();          // ← これ追加！
 
-    renderHero();
-    renderLatest();
-    initCarousel3D();
-    initSearch();
-    initAllPageSearch();
-    initScrollReveal();
+  renderHero();
+  renderLatest(8);          // ← 8がおすすめ（+スポンサーで9枚になる）
+  initCarousel3D();
+  initSearch();
+  initAllPageSearch();
+  initScrollReveal();
 });
+
 
 
 
