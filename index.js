@@ -18,24 +18,27 @@ const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
  * enabled（= 表示する）が true のものだけ（※フィールドIDが enabled 前提）
  */
 async function fetchTopAd(position) {
-  const filters = `position[equals]${position}[and]enabled[equals]true`;
-  const url = `${ADS_ENDPOINT}?filters=${encodeURIComponent(filters)}&orders=-priority&limit=1`;
+  // いったん全部取って、JS側で絞る（microCMSセレクト対策）
+  const url = `${ADS_ENDPOINT}?limit=50&orders=-priority`;
 
   const res = await fetch(url, {
     headers: { "X-MICROCMS-API-KEY": API_KEY },
   });
 
   if (!res.ok) {
-    console.error("[fetchTopAd] HTTP error", res.status, position);
+    console.error("[fetchTopAd] HTTP error", res.status);
     return null;
   }
 
   const data = await res.json();
 
-  // ✅ デバッグ（必要なら有効に）
-  // console.log("[fetchTopAd]", position, data?.contents?.[0]);
+  if (!data || !data.contents) return null;
 
-  return data?.contents?.[0] || null;
+  return (
+    data.contents.find(
+      (ad) => ad.enabled === true && ad.position === position
+    ) || null
+  );
 }
 
 /**
@@ -702,3 +705,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAllPageSearch();
   initScrollReveal();
 });
+
