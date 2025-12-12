@@ -352,27 +352,24 @@
             font-size: 0.85rem;
         }
 
-.article-title {
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    margin-bottom: 10px;
-    /* padding 消す */
-}
+        .article-title {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+        }
 
-.article-lead {
-    font-size: 1rem;
-    color: #4b4b4b;
-    margin-top: 4px;
-    margin-bottom: 30px;
-    /* padding 消す */
-}
-
+        .article-lead {
+            font-size: 1rem;
+            color: #4b4b4b;
+            margin-top: 4px;
+            margin-bottom: 30px;
+        }
 
         .article-content {
             font-size: 0.98rem;
             color: #1d1d1f;
-            line-height: 1.9; /* 行間を少し広めに */
+            line-height: 1.9;
         }
 
         .article-content h2 {
@@ -418,7 +415,7 @@
             line-height: 1;
         }
 
-        /* 公式サイトリンクセクション */
+        /* 公式サイトリンクセクション（今は非表示でもOK） */
         .official-site-section {
             margin-top: 40px;
             margin-bottom: 24px;
@@ -494,7 +491,7 @@
 
         /* 空の段落を大きな空白として扱う */
         .article-content p.empty-space {
-            height: 32px;   /* 空白の大きさ */
+            height: 32px;
             margin: 0;
         }
 
@@ -535,7 +532,7 @@
 
         .related-grid {
             display: flex;
-            flex-wrap: wrap;      /* ← これを追加 */
+            flex-wrap: wrap;
             gap: 24px;
         }
 
@@ -869,59 +866,59 @@
                 font-size: 0.9rem;
             }
         }
+
         /* 本文の箇条書きだけ、点・番号を復活させて揃える */
-.article-content ul {
-    list-style: disc;           /* ● を表示 */
-    list-style-position: outside;
-    margin-left: 1.4em;         /* 本文とそろうように微調整 */
-    padding-left: 0;
-}
+        .article-content ul {
+            list-style: disc;
+            list-style-position: outside;
+            margin-left: 1.4em;
+            padding-left: 0;
+        }
 
-.article-content ol {
-    list-style: decimal;        /* 1. 2. 3. を表示 */
-    list-style-position: outside;
-    margin-left: 1.6em;
-    padding-left: 0;
-}
+        .article-content ol {
+            list-style: decimal;
+            list-style-position: outside;
+            margin-left: 1.6em;
+            padding-left: 0;
+        }
 
-.article-content li {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    line-height: 1.7;
-}
+        .article-content li {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.7;
+        }
 
         @media (max-width: 767px) {
+            /* 関連記事を縦1列にする */
+            .related-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
 
-    /* 関連記事を縦1列にする */
-    .related-grid {
-        display: flex;
-        flex-direction: column;  /* ← 縦並び */
-        gap: 16px;
-    }
+            .related-card {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
 
-    .related-card {
-        flex: 1 1 100%;
-        max-width: 100%;
-    }
+            .related-thumb {
+                height: 180px;
+            }
+        }
 
-    .related-thumb {
-        height: 180px; /* 必要なら調整OK */
-    }
-}
-/* 本文のリストを横幅に収める（はみ出し防止 & 整列） */
-.article-content ul,
-.article-content ol {
-    padding-left: 1.2em;      /* 左側の余白を調整（標準より短く） */
-    margin-left: 0;           /* 左へのはみ出し防止 */
-    margin-right: 0;          /* 本文幅に収める */
-}
+        /* 本文のリストを横幅に収める（はみ出し防止 & 整列） */
+        .article-content ul,
+        .article-content ol {
+            padding-left: 1.2em;
+            margin-left: 0;
+            margin-right: 0;
+        }
 
-.article-content li {
-    word-wrap: break-word;    /* 長い単語、URLなどがはみ出さない */
-    overflow-wrap: break-word;
-    line-height: 1.7;
-}
-
+        .article-content li {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.7;
+        }
     </style>
 </head>
 <body>
@@ -1088,7 +1085,7 @@
         </div>
     </footer>
 
-    <!-- 共通スクリプト -->
+    <!-- 共通スクリプト（ここで SERVICE_ID / API_KEY / loadArticles / mapCmsArticle が定義されている想定） -->
     <script src="index.js"></script>
 
     <!-- 検索 UI（スマホの開閉など） -->
@@ -1156,31 +1153,74 @@
         }
     </script>
 
-    <!-- 記事データ読み込み & シェア処理 -->
+    <!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
     <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            const params = new URLSearchParams(location.search);
-            const id = params.get("id");
-
-            // 記事一覧がなければロード
-            if (!window.articles || window.articles.length === 0) {
-                if (typeof loadArticles === "function") {
-                    await loadArticles();
+        // microCMS から単体記事を取得（プレビュー対応）
+        async function fetchArticleFromMicrocms(contentId, draftKey) {
+            try {
+                const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
+                if (typeof API_KEY === "undefined") {
+                    console.error("API_KEY が定義されていません。index.js で定義してください。");
+                    return null;
                 }
+
+                let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
+                if (draftKey) {
+                    url += `?draftKey=${encodeURIComponent(draftKey)}`;
+                }
+
+                const res = await fetch(url, {
+                    headers: {
+                        "X-MICROCMS-API-KEY": API_KEY
+                    }
+                });
+
+                if (!res.ok) {
+                    console.error("microCMS から記事取得に失敗しました", await res.text());
+                    return null;
+                }
+
+                const data = await res.json();
+
+                // index.js 側で mapCmsArticle がある前提
+                if (typeof mapCmsArticle === "function") {
+                    return mapCmsArticle(data);
+                } else {
+                    // mapCmsArticle がなければ最低限の項目だけ整形
+                    return {
+                        id: data.id,
+                        title: data.title || "",
+                        contentHtml: data.content || "",
+                        description: data.description || "",
+                        categoryName: data.category && data.category.name ? data.category.name : "",
+                        category: data.category && data.category.id ? data.category.id : "",
+                        service: data.service || "",
+                        date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
+                        image: data.image && data.image.url ? data.image.url : "",
+                        author: data.author || null,
+                        priceSummary: data.priceSummary || ""
+                    };
+                }
+            } catch (e) {
+                console.error("記事取得中にエラーが発生しました", e);
+                return null;
             }
+        }
 
-            const list    = window.articles || [];
-            const article = list.find((a) => a.id === id) || list[0];
+        document.addEventListener("DOMContentLoaded", async () => {
+            const params    = new URLSearchParams(location.search);
+            const contentId = params.get("id");
+            const draftKey  = params.get("draftKey");
 
-            const kv           = document.getElementById("article-kv");
-            const titleEl      = document.getElementById("article-title");
-            const leadEl       = document.getElementById("article-lead");
-            const serviceEl    = document.getElementById("meta-service");
-            const categoryEl   = document.getElementById("meta-category");
-            const dateEl       = document.getElementById("meta-date");
-            const contentEl    = document.getElementById("article-content");
-            const breadcrumbEl = document.getElementById("breadcrumb");
-            const relatedGrid  = document.getElementById("related-grid");
+            const kv             = document.getElementById("article-kv");
+            const titleEl        = document.getElementById("article-title");
+            const leadEl         = document.getElementById("article-lead");
+            const serviceEl      = document.getElementById("meta-service");
+            const categoryEl     = document.getElementById("meta-category");
+            const dateEl         = document.getElementById("meta-date");
+            const contentEl      = document.getElementById("article-content");
+            const breadcrumbEl   = document.getElementById("breadcrumb");
+            const relatedGrid    = document.getElementById("related-grid");
             const relatedSection = document.getElementById("related-section");
 
             const authorNameEl   = document.getElementById("author-name");
@@ -1190,6 +1230,32 @@
             const priceSection = document.getElementById("price-summary-section");
             const priceBox     = document.getElementById("price-summary-box");
 
+            // ==============================
+            // 1. 記事データを取得
+            // ==============================
+            let article = null;
+            let list    = [];
+
+            if (draftKey && contentId) {
+                // ★ プレビュー用：draftKey 付きで microCMS 詳細 API を叩く
+                article = await fetchArticleFromMicrocms(contentId, draftKey);
+
+                // 関連記事用には公開記事一覧をロード（あれば）
+                if (typeof loadArticles === "function") {
+                    await loadArticles();
+                }
+                list = window.articles || [];
+            } else {
+                // ★ 通常アクセス：既存の一覧から該当記事を探す
+                if (!window.articles || window.articles.length === 0) {
+                    if (typeof loadArticles === "function") {
+                        await loadArticles();
+                    }
+                }
+                list    = window.articles || [];
+                article = list.find((a) => a.id === contentId) || list[0];
+            }
+
             // 記事がなかったとき
             if (!article) {
                 if (contentEl) {
@@ -1197,9 +1263,13 @@
                 }
                 if (relatedSection) relatedSection.style.display = "none";
                 if (priceSection)   priceSection.style.display   = "none";
+                document.title = "記事が見つかりませんでした | SUBSCOPE";
                 return;
             }
 
+            // ==============================
+            // 2. パンくず・メタ情報
+            // ==============================
             const categoryLabel =
                 article.categoryName ||
                 article.category ||
@@ -1235,7 +1305,14 @@
                 kv.style.backgroundImage = `url('${img}')`;
             }
 
-            // 著者
+            // ページタイトル
+            if (article.title) {
+                document.title = `${article.title} | SUBSCOPE`;
+            }
+
+            // ==============================
+            // 3. 著者表示
+            // ==============================
             if (authorNameEl && authorAvatarEl && authorLinkEl) {
                 const authorObj  = article.author || null;
                 const authorName =
@@ -1258,11 +1335,15 @@
                     authorAvatarEl.style.display = "none";
                 }
 
+                // 今はプロフィールページ未実装 → クリック無効
                 authorLinkEl.href = "javascript:void(0)";
                 authorLinkEl.style.cursor = "default";
                 authorLinkEl.style.pointerEvents = "none";
             }
 
+            // ==============================
+            // 4. タイトル & リード
+            // ==============================
             if (titleEl) titleEl.textContent = article.title || "";
 
             if (leadEl) {
@@ -1277,13 +1358,16 @@
                 }
             }
 
+            // ==============================
+            // 5. 本文
+            // ==============================
             if (contentEl) {
                 const bodyHtml = article.contentHtml || article.content || "";
                 contentEl.innerHTML =
                     bodyHtml ||
                     `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
 
-                // ★ 空の段落（空白行用）を検知してクラス付与
+                // 空の段落（空白行用）を検知してクラス付与
                 const ps = contentEl.querySelectorAll("p");
                 ps.forEach((p) => {
                     const inner = p.innerHTML
@@ -1301,7 +1385,9 @@
                 });
             }
 
-            // ★ 黒い丸シェアボタンの動作
+            // ==============================
+            // 6. シェアボタン
+            // ==============================
             const shareButton = document.getElementById("share-button");
             if (shareButton) {
                 shareButton.addEventListener("click", async () => {
@@ -1319,7 +1405,6 @@
                             // キャンセルなどは無視
                         }
                     } else {
-                        // Web Share API が使えない環境 → URLコピーにフォールバック
                         if (navigator.clipboard && navigator.clipboard.writeText) {
                             try {
                                 await navigator.clipboard.writeText(shareUrl);
@@ -1340,7 +1425,9 @@
                 });
             }
 
-            // ★ 料金プラン
+            // ==============================
+            // 7. 料金プラン
+            // ==============================
             if (priceSection && priceBox) {
                 if (article.priceSummary && article.priceSummary.trim() !== "") {
                     priceBox.innerHTML = article.priceSummary;
@@ -1350,8 +1437,11 @@
                 }
             }
 
-            // 関連記事
-            const related = list
+            // ==============================
+            // 8. 関連記事
+            // ==============================
+            // （プレビュー時は公開済み一覧からのみ抽出される）
+            const related = (list || [])
                 .filter(
                     (a) =>
                         a.id !== article.id &&
@@ -1384,7 +1474,9 @@
                     .join("");
             }
 
-            // スクロールリビール
+            // ==============================
+            // 9. スクロールリビール
+            // ==============================
             const reveals = document.querySelectorAll(".reveal");
             const io = new IntersectionObserver(
                 (entries) => {
