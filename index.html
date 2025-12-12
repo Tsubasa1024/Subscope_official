@@ -454,5 +454,110 @@
       <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
     </div>
   </footer>
+  <!-- ✅ index.js を bodyの最後で読み込む（defer不要） -->
+<script src="index.js"></script>
+
+<!-- ✅ トップページ用：メニュー/スクロール/検索UI の最低限を復活 -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // ===== Menu toggle =====
+    const menuBtn = document.getElementById("menuBtn");
+    const nav = document.getElementById("nav-overlay");
+
+    const openMenu = () => nav && nav.classList.add("open");
+    const closeMenu = () => nav && nav.classList.remove("open");
+    const toggleMenu = () => nav && nav.classList.toggle("open");
+
+    if (menuBtn && nav) {
+      menuBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      // メニュー外クリックで閉じる
+      document.addEventListener("click", (e) => {
+        if (!nav.classList.contains("open")) return;
+        if (nav.contains(e.target) || menuBtn.contains(e.target)) return;
+        closeMenu();
+      });
+
+      // ESCで閉じる
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu();
+      });
+    }
+
+    // ===== data-scroll（トップへ戻る） =====
+    document.querySelectorAll("[data-scroll]").forEach((a) => {
+      a.addEventListener("click", (e) => {
+        const sel = a.getAttribute("data-scroll");
+        if (!sel) return;
+        const target = document.querySelector(sel);
+        if (!target) return;
+        e.preventDefault();
+        closeMenu();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    // ===== Mobile search open/close（スマホの虫眼鏡→展開） =====
+    const fixedHeader = document.getElementById("fixedHeader");
+    const searchWrapper = document.getElementById("searchWrapper");
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearBtn");
+
+    let isOpen = false;
+    const isMobile = () => window.innerWidth <= 767;
+
+    if (fixedHeader && searchWrapper && searchInput) {
+      searchWrapper.addEventListener("click", (e) => {
+        if (!isMobile()) {
+          if (e.target !== searchInput) searchInput.focus();
+          return;
+        }
+        if (isOpen && e.target === searchInput) return;
+
+        if (!isOpen) {
+          fixedHeader.classList.add("search-open");
+          isOpen = true;
+          setTimeout(() => searchInput.focus(), 80);
+        } else {
+          fixedHeader.classList.remove("search-open");
+          isOpen = false;
+          searchInput.blur();
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (!isMobile() && isOpen) {
+          fixedHeader.classList.remove("search-open");
+          isOpen = false;
+          searchInput.blur();
+        }
+      });
+
+      if (clearBtn) {
+        const update = () => (clearBtn.style.display = searchInput.value.trim() ? "block" : "none");
+        searchInput.addEventListener("input", update);
+        clearBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          searchInput.value = "";
+          searchInput.dispatchEvent(new Event("input"));
+          update();
+          searchInput.focus();
+        });
+        update();
+      }
+    }
+
+    // ===== 記事ロード（index.jsに loadArticles がある前提） =====
+    // 「最新の記事が出ない」系はここが呼ばれてないことが多い
+    if (typeof loadArticles === "function") {
+      loadArticles().catch(console.error);
+    }
+  });
+</script>
+
 </body>
 </html>
