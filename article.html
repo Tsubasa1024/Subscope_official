@@ -869,6 +869,27 @@
                 font-size: 0.9rem;
             }
         }
+        /* 本文の箇条書きだけ、点・番号を復活させて揃える */
+.article-content ul {
+    list-style: disc;           /* ● を表示 */
+    list-style-position: outside;
+    margin-left: 1.4em;         /* 本文とそろうように微調整 */
+    padding-left: 0;
+}
+
+.article-content ol {
+    list-style: decimal;        /* 1. 2. 3. を表示 */
+    list-style-position: outside;
+    margin-left: 1.6em;
+    padding-left: 0;
+}
+
+.article-content li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.7;
+}
+
         @media (max-width: 767px) {
 
     /* 関連記事を縦1列にする */
