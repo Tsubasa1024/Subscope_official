@@ -454,171 +454,46 @@
       <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
     </div>
   </footer>
-<script src="index.js"></script>
-
 <script>
-  // ============================
-  // Top page renderer (safe)
-  // ============================
-  function openArticle(id){
-    location.href = "article.html?id=" + encodeURIComponent(id);
-  }
+  document.addEventListener("DOMContentLoaded", () => {
+    const menuBtn = document.getElementById("menuBtn");
+    const nav = document.getElementById("nav-overlay");
 
-  function sortByDateDesc(list){
-    return [...list].sort((a,b)=>{
-      const da = (a.date || a.publishedAt || "").replace(/\./g,"-");
-      const db = (b.date || b.publishedAt || "").replace(/\./g,"-");
-      return (db > da) ? 1 : (db < da ? -1 : 0);
-    });
-  }
-
-  function renderHero(article){
-    const mount = document.getElementById("heroMount");
-    if(!mount || !article) return;
-
-    const img = article.image || "images/sample1.jpg";
-    const cat = article.categoryName || article.category || "その他";
-    const svc = article.service || article.serviceName || "";
-
-    mount.innerHTML = `
-      <div class="featured-card" role="button" tabindex="0">
-        <img class="featured-media" src="${img}" alt="">
-        <div class="featured-content">
-          <div class="featured-meta">
-            ${svc ? `<span class="tag">${svc}</span>` : ``}
-            <span>${cat}</span>
-          </div>
-          <h2 class="featured-title">${article.title || ""}</h2>
-          <p class="featured-desc">${article.description || ""}</p>
-        </div>
-      </div>
-    `;
-
-    const card = mount.querySelector(".featured-card");
-    card.addEventListener("click", ()=>openArticle(article.id));
-    card.addEventListener("keydown", (e)=>{ if(e.key==="Enter") openArticle(article.id); });
-  }
-
-  // 3D carousel
-  let carouselIndex = 0;
-  let carouselList = [];
-
-  function applyCarouselPositions(){
-    const items = document.querySelectorAll("#carousel3d .carousel3d-item");
-    if(!items.length) return;
-
-    // classes: center, left, right, back (4枚想定)
-    const cls = ["is-center","is-right","is-back","is-left"];
-    items.forEach((el,i)=>{
-      el.classList.remove("is-center","is-right","is-left","is-back");
-      el.classList.add(cls[(i - carouselIndex + 4) % 4]);
-    });
-  }
-
-  function renderCarousel(list){
-    carouselList = list.slice(0,4);
-    const items = document.querySelectorAll("#carousel3d .carousel3d-item");
-    if(items.length === 0) return;
-
-    items.forEach((el,i)=>{
-      const a = carouselList[i];
-      if(!a){ el.innerHTML = ""; return; }
-      el.innerHTML = `
-        <div class="carousel3d-card" role="button" tabindex="0">
-          <img src="${a.image || "images/sample1.jpg"}" alt="">
-          <p>${a.title || ""}</p>
-        </div>
-      `;
-      const card = el.querySelector(".carousel3d-card");
-      card.addEventListener("click", ()=>openArticle(a.id));
-      card.addEventListener("keydown", (e)=>{ if(e.key==="Enter") openArticle(a.id); });
-    });
-
-    // nav
-    const prev = document.querySelector("#carousel3d .carousel3d-nav-prev");
-    const next = document.querySelector("#carousel3d .carousel3d-nav-next");
-    if(prev) prev.onclick = ()=>{ carouselIndex = (carouselIndex + 3) % 4; applyCarouselPositions(); };
-    if(next) next.onclick = ()=>{ carouselIndex = (carouselIndex + 1) % 4; applyCarouselPositions(); };
-
-    carouselIndex = 0;
-    applyCarouselPositions();
-  }
-
-  function renderLatest(list){
-    const grid = document.getElementById("latest-grid");
-    if(!grid) return;
-
-    const latest = list.slice(0,6);
-    grid.innerHTML = latest.map(a=>{
-      const img = a.image || "images/sample1.jpg";
-      const svc = a.service || a.serviceName || "";
-      const desc = a.description || "";
-      const date = (a.date || "").replace(/-/g,".");
-      return `
-        <div class="article-card" onclick="openArticle('${a.id}')">
-          <div class="card-image" style="background-image:url('${img}')"></div>
-          <div class="card-body">
-            <div class="card-service">${svc}</div>
-            <div class="card-title">${a.title || ""}</div>
-            <div class="card-desc">${desc}</div>
-            <div class="card-date">${date}</div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function setupSearch(list){
-    const input = document.getElementById("searchInput");
-    const results = document.getElementById("searchResults");
-    if(!input || !results) return;
-
-    const render = (q)=>{
-      const query = q.trim().toLowerCase();
-      if(!query){ results.innerHTML=""; return; }
-
-      const hit = list.filter(a=>{
-        const t = (a.title||"").toLowerCase();
-        const d = (a.description||"").toLowerCase();
-        return t.includes(query) || d.includes(query);
-      }).slice(0,8);
-
-      results.innerHTML = hit.map(a=>{
-        const img = a.image || "images/sample1.jpg";
-        return `
-          <div class="search-item" onclick="openArticle('${a.id}')">
-            <img src="${img}" alt="">
-            <div>
-              <h3>${a.title||""}</h3>
-              <p>${a.description||""}</p>
-            </div>
-          </div>
-        `;
-      }).join("");
-    };
-
-    input.addEventListener("input", ()=>render(input.value));
-  }
-
-  document.addEventListener("DOMContentLoaded", async ()=>{
-    // loadArticles がある前提（あなたの index.js）
-    if(typeof loadArticles === "function"){
-      await loadArticles();
-    }
-
-    const list = sortByDateDesc(window.articles || []);
-    // ここで0件なら、API/読み込みエラー確定
-    if(list.length === 0){
-      console.error("articles が0件です。index.jsの読み込み or microCMS取得に失敗しています。");
+    if (!menuBtn || !nav) {
+      console.error("menuBtn / nav-overlay が見つからない");
       return;
     }
 
-    renderHero(list[0]);
-    renderCarousel(list.slice(0,4));
-    renderLatest(list);
-    setupSearch(list);
+    const open = () => nav.classList.add("open");
+    const close = () => nav.classList.remove("open");
+    const toggle = () => nav.classList.toggle("open");
+
+    // ✅ メニュー開閉
+    menuBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggle();
+    });
+
+    // ✅ メニュー内クリックは閉じる（リンクはそのまま遷移）
+    nav.querySelectorAll("a").forEach((a) => {
+      a.addEventListener("click", () => close());
+    });
+
+    // ✅ 外を押したら閉じる
+    document.addEventListener("click", (e) => {
+      if (!nav.classList.contains("open")) return;
+      if (nav.contains(e.target) || menuBtn.contains(e.target)) return;
+      close();
+    });
+
+    // ✅ ESCで閉じる
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
   });
 </script>
+
 
 </body>
 </html>
