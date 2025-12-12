@@ -919,9 +919,99 @@
             overflow-wrap: break-word;
             line-height: 1.7;
         }
+        /* ============================
+   PC/iPad：左右サイドスポンサー
+   ============================ */
+.side-sponsor {
+   position: absolute;   /* ← fixed をやめる */
+  top: 120px;           /* ヘッダー下に固定 */
+  width: 180px;
+  height: auto;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.side-sponsor .side-sponsor-inner {
+  pointer-events: auto;
+  background: #F5F5F7;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 0px;
+    min-height: 630px;
+  padding: 18px;
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.side-sponsor .ad-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: #000;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin: 0 auto 6px;
+}
+
+.side-sponsor .ad-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1D1D1F;
+}
+
+.side-sponsor .ad-desc {
+  font-size: 0.85rem;
+  color: #86868B;
+  line-height: 1.6;
+}
+
+.side-sponsor-left  { left: 18px; }
+.side-sponsor-right { right: 18px; }
+
+/* 画面が狭いときは左右広告は消す（スマホ含む） */
+@media (max-width: 1024px) {
+  .side-sponsor {
+    display: none;
+  }
+}
+
+/* 超ワイド画面でもちょい余裕 */
+@media (min-width: 1400px) {
+  .side-sponsor {
+    width: 200px;
+  }
+}
     </style>
 </head>
 <body>
+    <!-- 左サイドスポンサー（PC/iPadのみ表示） -->
+<aside class="side-sponsor side-sponsor-left" aria-label="スポンサー（左）">
+  <a class="side-sponsor-inner" href="index.html" data-slot-id="SIDE_LEFT_1">
+    <span class="ad-tag">スポンサー</span>
+    <div class="ad-title">サブスクならサブスコープ</div>
+    <div class="ad-desc">
+      音楽・映画・勉強。<br>
+      迷ったらここで比較。
+    </div>
+  </a>
+</aside>
+
+<!-- 右サイドスポンサー（PC/iPadのみ表示） -->
+<aside class="side-sponsor side-sponsor-right" aria-label="スポンサー（右）">
+  <a class="side-sponsor-inner" href="index.html" data-slot-id="SIDE_RIGHT_1">
+    <span class="ad-tag">スポンサー</span>
+    <div class="ad-title">広告掲載はこちら</div>
+    <div class="ad-desc">
+      SUBSCOPEに掲載して<br>
+      サブスクユーザーへ届ける。
+    </div>
+  </a>
+</aside>
     <!-- 固定ヘッダー -->
     <div class="fixed-header">
         <div class="top-header">
