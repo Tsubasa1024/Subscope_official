@@ -1799,13 +1799,11 @@ function createSponsorCard() {
   a.className = "ad-card";
   a.setAttribute("data-slot-id", "HOME_SPONSOR_1");
 
-  // CMS広告が取れたらそれを使う
   if (ad) {
     a.href = ad.url || "index.html";
     a.target = "_blank";
     a.rel = "noopener";
 
-    // 画像があるなら、カードの中を画像寄りにする
     if (ad.image && ad.image.url) {
       a.innerHTML = `
         <span class="ad-tag">スポンサー</span>
@@ -1819,7 +1817,6 @@ function createSponsorCard() {
       return a;
     }
 
-    // 画像なしの場合
     a.innerHTML = `
       <span class="ad-tag">スポンサー</span>
       <div class="ad-title">${ad.title || "スポンサー"}</div>
@@ -1828,28 +1825,16 @@ function createSponsorCard() {
     return a;
   }
 
-  // CMSがまだ無い/取得できない時は今の固定表示（保険）
+  // CMS取得できない時の保険（今の固定）
   a.href = "index.html";
-  const tag = document.createElement("span");
-  tag.className = "ad-tag";
-  tag.textContent = "スポンサー";
-
-  const title = document.createElement("div");
-  title.className = "ad-title";
-  title.textContent = "サブスクならサブスコープ";
-
-  const desc = document.createElement("div");
-  desc.className = "ad-desc";
-  desc.innerText =
-    "迷ったときは、ここを見ればいい。\n" +
-    "音楽、映画、勉強、全部まとめて比べられる“サブスクの地図”。";
-
-  a.appendChild(tag);
-  a.appendChild(title);
-  a.appendChild(desc);
-
+  a.innerHTML = `
+    <span class="ad-tag">スポンサー</span>
+    <div class="ad-title">サブスクならサブスコープ</div>
+    <div class="ad-desc">迷ったときは、ここを見ればいい。</div>
+  `;
   return a;
 }
+
 
       function waitAndRenderLatest() {
         if (Array.isArray(window.articles) && window.articles.length > 0) {
