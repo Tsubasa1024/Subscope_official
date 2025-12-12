@@ -1256,6 +1256,61 @@
     width: 200px;
   }
 }
+/* ============================
+   ヒーロー直下 スポンサー
+   ============================ */
+.between-sponsor {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 28px auto 8px;
+  padding: 0 24px;
+}
+
+.between-sponsor-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px 18px;
+  background: #F5F5F7;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 0;              /* ← 角丸なし */
+  text-decoration: none;
+
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.between-sponsor-inner:hover {
+  background: #eeeeef;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.between-ad-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: #000;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.between-ad-text {
+  font-size: 0.9rem;
+  color: #1D1D1F;
+  line-height: 1.5;
+}
+
+/* スマホは少し余白を詰める */
+@media (max-width: 767px) {
+  .between-sponsor {
+    margin: 20px auto 4px;
+    padding: 0 16px;
+  }
+
+  .between-ad-text {
+    font-size: 0.85rem;
+  }
+}
 
     </style>
 </head>
@@ -1358,6 +1413,16 @@
             </div>
         </div>
     </header>
+<!-- ヒーロー直下 スポンサー -->
+<section class="between-sponsor reveal" aria-label="スポンサー">
+  <a href="index.html" class="between-sponsor-inner" data-slot-id="HERO_BOTTOM_1">
+    <span class="between-ad-tag">スポンサー</span>
+    <span class="between-ad-text">
+      サブスク選び、迷ったらSUBSCOPE。
+      音楽・動画・学習を一気に比較。
+    </span>
+  </a>
+</section>
 
     <!-- おすすめ 3D カルーセル -->
     <section class="carousel3d-section reveal" id="recommend">
