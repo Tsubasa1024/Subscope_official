@@ -67,6 +67,11 @@ function mapCmsArticle(item) {
     item?.image?.url ||
     item?.heroImage?.url ||
     "images/sample1.jpg";
+// ★ アイキャッチ画像（microCMS）
+const imageUrl =
+  (item.eyecatch && item.eyecatch.url)
+  ? item.eyecatch.url
+  : "images/sample1.jpg";
 
     return {
         id: item.id,
@@ -622,5 +627,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAllPageSearch();
     initScrollReveal();
 });
+
 
 
