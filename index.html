@@ -1325,39 +1325,51 @@
       }
     }
 /* ============================
-   PCのみ：サイド広告を sticky（追跡なし）
+   PCのみ：追跡なし（absoluteのまま）で
+   ヒーロー横の外側に固定＆拡大しても被らない
    ============================ */
 @media (min-width: 1200px) {
-  .side-sponsor {
-    position: sticky;
-    top: 120px; /* ヘッダー分 */
-    width: 180px;
-    z-index: 10;
+  :root{
+    --side-w: 180px;         /* 通常幅 */
+    --side-expanded: 320px;  /* 拡大幅 */
+    --side-gap: 24px;        /* ヒーローとの距離 */
   }
 
-  /* ヒーロー横に配置（中央1080pxの外側） */
-  .side-sponsor-left {
-    margin-left: calc(-180px - 24px);
+  /* 追跡なし：absoluteのまま（あなたの現状維持） */
+  .side-sponsor{
+    position: absolute !important;
+    top: 120px !important;
+    width: var(--side-w) !important;
+    z-index: 60;
   }
 
-  .side-sponsor-right {
-    margin-right: calc(-180px - 24px);
+  /* 中央(1080px)の外側に置く：左 */
+  .side-sponsor-left{
+    left: calc(50% - (var(--container-width) / 2) - var(--side-w) - var(--side-gap)) !important;
+    right: auto !important;
   }
 
-  /* 拡大しても記事側に伸びない */
-  .side-sponsor-inner {
-    transition: width 0.25s ease, transform 0.25s ease;
+  /* 中央(1080px)の外側に置く：右 */
+  .side-sponsor-right{
+    left: calc(50% + (var(--container-width) / 2) + var(--side-gap)) !important;
+    right: auto !important;
+  }
+
+  /* 拡大しても記事側に伸びない（外側へ逃がす） */
+  .side-sponsor-inner{
     width: 100%;
+    transition: width .25s ease, transform .25s ease;
+    will-change: width, transform;
   }
 
-  .side-sponsor-left .side-sponsor-inner:hover {
-    width: 320px;
-    transform: translateX(-140px);
+  .side-sponsor-left .side-sponsor-inner:hover{
+    width: var(--side-expanded);
+    transform: translateX(calc(var(--side-w) - var(--side-expanded))); /* 左外へ */
   }
 
-  .side-sponsor-right .side-sponsor-inner:hover {
-    width: 320px;
-    transform: translateX(0);
+  .side-sponsor-right .side-sponsor-inner:hover{
+    width: var(--side-expanded);
+    transform: translateX(0); /* 右外へ */
   }
 }
 
