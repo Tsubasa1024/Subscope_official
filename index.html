@@ -1130,6 +1130,47 @@
                 flex-wrap: wrap;
             }
         }
+        /* ============================
+   PC版：ヒーロー文字を「下半分」に収める
+   ============================ */
+@media (min-width: 1025px) {
+
+  .featured-card {
+    position: relative;
+    min-height: 70vh;  /* 好みで調整OK */
+    padding: 40px;
+  }
+
+  .featured-content {
+    position: absolute;
+
+    /* ★ 左右の余白 */
+    left: 40px;
+    right: 40px;
+
+    /* ★ カードの高さの「下半分」に固定する魔法 */
+    top: 50%;       /* 上端をカードの真ん中に */
+    bottom: 40px;   /* 下端に余白 */
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* 下側に揃える */
+    z-index: 2;
+  }
+
+  .featured-title {
+    font-size: 2rem;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+
+  .featured-desc {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+}
+
     </style>
 </head>
 <body>
