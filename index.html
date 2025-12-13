@@ -454,46 +454,5 @@
       <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
     </div>
   </footer>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const menuBtn = document.getElementById("menuBtn");
-    const nav = document.getElementById("nav-overlay");
-
-    if (!menuBtn || !nav) {
-      console.error("menuBtn / nav-overlay が見つからない");
-      return;
-    }
-
-    const open = () => nav.classList.add("open");
-    const close = () => nav.classList.remove("open");
-    const toggle = () => nav.classList.toggle("open");
-
-    // ✅ メニュー開閉
-    menuBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggle();
-    });
-
-    // ✅ メニュー内クリックは閉じる（リンクはそのまま遷移）
-    nav.querySelectorAll("a").forEach((a) => {
-      a.addEventListener("click", () => close());
-    });
-
-    // ✅ 外を押したら閉じる
-    document.addEventListener("click", (e) => {
-      if (!nav.classList.contains("open")) return;
-      if (nav.contains(e.target) || menuBtn.contains(e.target)) return;
-      close();
-    });
-
-    // ✅ ESCで閉じる
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") close();
-    });
-  });
-</script>
-
-
 </body>
 </html>
