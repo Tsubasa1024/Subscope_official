@@ -351,21 +351,29 @@
   // ============
   // 5. Menu / Reveal
   // ============
-   function initMenuOpen() {
-  const btn = $("#menuBtn");
-  const overlay = $("#nav-overlay");
+function initMenuOpen() {
+  // id が違っても拾えるように保険をかける
+  const btn =
+    document.querySelector("#menuBtn") ||
+    document.querySelector(".menu-btn");
+
+  const overlay = document.querySelector("#nav-overlay");
   if (!btn || !overlay) return;
 
   const onClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleMenu(); // open/close
+    toggleMenu();
   };
 
-  // click + touch どっちも拾う（スマホ/タブ強い）
-  btn.addEventListener("click", onClick);
-  btn.addEventListener("touchstart", onClick, { passive: false });
+  // 二重登録防止
+  if (!btn.dataset.menuBound) {
+    btn.addEventListener("click", onClick);
+    btn.addEventListener("touchstart", onClick, { passive: false });
+    btn.dataset.menuBound = "true";
+  }
 }
+
 
   function toggleMenu(force) {
     const overlay = $("#nav-overlay");
@@ -891,6 +899,7 @@ function renderHero() {
     initScrollReveal();
   });
 })();
+
 
 
 
