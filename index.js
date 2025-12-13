@@ -414,7 +414,7 @@
   // 6. Home（index.html）
   // ============
   function renderHero() {
-    const heroContainer = $("#heroMount"); /
+    const heroContainer = $("#heroMount"); 
     const list = getArticles();
     if (!heroContainer || !list.length) return;
 
@@ -889,5 +889,6 @@
     initScrollReveal();
   });
 })();
+
 
 
