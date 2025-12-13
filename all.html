@@ -115,10 +115,8 @@
       .all-clear-btn{right:6px;width:36px;height:36px;font-size:22px}
     }
 
-    /* ✅ 広告を一旦ぜんぶ非表示（必要なら消してOK） */
-    .side-sponsor,.between-sponsor,.ad-card{display:none !important;}
-    /* ===============================
-   ✅ スマホ：タブ文字が青くなるのを防ぐ
+/* ===============================
+   ✅ スマホ：タブの青文字化防止 + 選択中は白固定
    =============================== */
 .tabs, .tab, .tab *{
   -webkit-tap-highlight-color: transparent;
@@ -131,11 +129,28 @@
   outline: none;
 }
 
-.tab:focus,
-.tab:active{
+/* ← ここがポイント：activeじゃない時だけ黒にする */
+.tab:not(.active):focus,
+.tab:not(.active):active{
   color: var(--color-text-main);
   -webkit-text-fill-color: var(--color-text-main);
 }
+
+/* ✅ 選択中（PCと同じ：黒背景×白文字） */
+.tab.active{
+  background:#000;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-weight:600;
+}
+
+/* ✅ iPhoneで押しても白のまま */
+.tab.active:focus,
+.tab.active:active{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
 
 /* ===============================
    ✅ スマホ：記事一覧を最初から表示
