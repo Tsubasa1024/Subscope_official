@@ -413,29 +413,30 @@
   // ============
   // 6. Home（index.html）
   // ============
-  function renderHero() {
-    const heroContainer = $("#heroMount"); 
-    const list = getArticles();
-    if (!heroContainer || !list.length) return;
+function renderHero() {
+  const heroContainer = document.querySelector("#heroMount");
+  const list = getArticles();
+  if (!heroContainer || !list.length) return;
 
-    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const featured = sorted[0];
+  const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const featured = sorted[0];
 
-    heroContainer.innerHTML = `
-      <article class="featured-card" style="background-image:url('${featured.image}')"
-        onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
-        <div class="featured-content">
-          <div class="featured-meta">
-            <span class="tag">${featured.service || "SUBSCOPE"}</span>
-            <span>${featured.categoryName || featured.category || ""}</span>
-          </div>
-          <h2 class="featured-title">${featured.title}</h2>
-          <p class="featured-desc">${featured.description}</p>
-          <button class="btn-read">詳しく見る</button>
+  heroContainer.innerHTML = `
+    <article class="featured-card"
+      onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
+      <img class="featured-media" src="${featured.image}" alt="">
+      <div class="featured-content">
+        <div class="featured-meta">
+          <span class="tag">${featured.service || "SUBSCOPE"}</span>
+          <span>${featured.categoryName || featured.category || ""}</span>
         </div>
-      </article>
-    `;
-  }
+        <h2 class="featured-title">${featured.title}</h2>
+        <p class="featured-desc">${featured.description}</p>
+      </div>
+    </article>
+  `;
+}
+
 
   function renderLatest(limit = 8) {
     const latestGrid = $("#latest-grid");
@@ -889,6 +890,7 @@
     initScrollReveal();
   });
 })();
+
 
 
 
