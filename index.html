@@ -114,7 +114,16 @@
     .search-item:hover{background:#f5f5f7;transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.06)}
     .search-item img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0}
     .search-item h3{font-size:.95rem;margin-bottom:4px}
-    .search-item p{font-size:.8rem;color:#555}
+    .search-item p{
+  font-size: .8rem;
+  color: var(--color-text-gray); /* 灰色 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;         /* 2行まで */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
     /* ===== Menu ===== */
     .menu-btn{
