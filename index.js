@@ -877,28 +877,28 @@ function renderHero() {
   // ============
   // 10. Boot
   // ============
-  document.addEventListener("DOMContentLoaded", async () => {
-     initMenuOpen();            // ← これを追加（メニューが開くようになる）
-    initMenuCloseBehaviors();
-    initHeaderSearch();
+document.addEventListener("DOMContentLoaded", async () => {
+  initMenuCloseBehaviors();
+  initMenuOpen();            // ← ★これを追加
+  initHeaderSearch();
 
-    await loadArticles();
-    await loadAds();
+  await loadArticles();
+  await loadAds();
 
-    // page detect
-    const page = document.body?.dataset?.page || "";
+  const page = document.body?.dataset?.page || "";
 
-    if (page === "home") {
-      renderHero();
-      renderLatest(8);
-      initCarousel3D();
-    }
-    if (page === "all") initAllPage();
-    if (page === "ranking") initRankingPage();
+  if (page === "home") {
+    renderHero();
+    renderLatest(8);
+    initCarousel3D();
+  }
+  if (page === "all") initAllPage();
+  if (page === "ranking") initRankingPage();
 
-    initScrollReveal();
-  });
+  initScrollReveal();
+});
 })();
+
 
 
 
