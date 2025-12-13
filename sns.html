@@ -167,7 +167,18 @@
     .all-hero-section{padding-top:96px;padding-bottom:32px}
     .all-title{font-size:2.4rem;font-weight:700;letter-spacing:-.03em;margin:10px 0 16px}
     .sns-lead{font-size:.98rem;color:var(--color-text-gray);margin-bottom:16px}
+    /* ✅ SNS：説明文とカードの間の余白を半分にする */
+.sns-section{
+  padding-top: 40px;   /* PC：80px → 40px */
+  padding-bottom: 40px;
+}
 
+@media (max-width: 767px){
+  .sns-section{
+    padding-top: 24px; /* スマホ：60px → 24px */
+    padding-bottom: 24px;
+  }
+}
     .sns-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -326,7 +337,7 @@
       </div>
     </section>
 
-    <section class="section">
+<section class="section sns-section">
       <div class="container reveal">
         <div class="sns-grid">
           <a href="https://instagram.com/subscope_official" target="_blank" rel="noopener" class="sns-card">
