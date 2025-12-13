@@ -117,6 +117,36 @@
 
     /* ✅ 広告を一旦ぜんぶ非表示（必要なら消してOK） */
     .side-sponsor,.between-sponsor,.ad-card{display:none !important;}
+    /* ===============================
+   ✅ スマホ：タブ文字が青くなるのを防ぐ
+   =============================== */
+.tabs, .tab, .tab *{
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab{
+  color: var(--color-text-main);
+  -webkit-text-fill-color: var(--color-text-main);
+  text-decoration: none;
+  outline: none;
+}
+
+.tab:focus,
+.tab:active{
+  color: var(--color-text-main);
+  -webkit-text-fill-color: var(--color-text-main);
+}
+
+/* ===============================
+   ✅ スマホ：記事一覧を最初から表示
+   =============================== */
+@media (max-width:767px){
+  #all-grid.reveal{
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
   </style>
 </head>
 
