@@ -704,6 +704,31 @@
                 flex-wrap: wrap;
             }
         }
+/* ===============================
+   ✅ SNS：PCでメニューボタンを他ページと同じに戻す
+   =============================== */
+@media (min-width: 768px){
+  .menu-btn{
+    width: auto !important;
+    height: auto !important;
+    padding: 12px 24px !important;
+    border-radius: 999px !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .menu-btn > span{
+    display: inline !important; /* ← "Menu" を表示 */
+  }
+
+  .menu-icon-lines{
+    gap: 4px !important;
+  }
+
+  .menu-line{
+    width: 16px !important;
+  }
+}
 
     </style>
 </head>
