@@ -870,6 +870,7 @@ function renderHero() {
   // 10. Boot
   // ============
   document.addEventListener("DOMContentLoaded", async () => {
+     initMenuOpen();            // ← これを追加（メニューが開くようになる）
     initMenuCloseBehaviors();
     initHeaderSearch();
 
@@ -890,6 +891,7 @@ function renderHero() {
     initScrollReveal();
   });
 })();
+
 
 
 
