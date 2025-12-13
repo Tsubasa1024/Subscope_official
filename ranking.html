@@ -150,6 +150,40 @@
 
     /* ✅ 広告を一旦ぜんぶ非表示（必要なら消してOK） */
     .side-sponsor,.between-sponsor,.ad-card{display:none !important;}
+    /* ===============================
+   ✅ ランキング：DAY/WEEK/MONTH/ALL が青くなるの防止
+   =============================== */
+.period-toggle, .period-btn, .period-btn *{
+  -webkit-tap-highlight-color: transparent;
+}
+
+.period-btn{
+  color: var(--color-text-main);
+  -webkit-text-fill-color: var(--color-text-main);
+  outline: none;
+}
+
+/* 押しても青くしない（activeじゃない時だけ） */
+.period-btn:not(.active):focus,
+.period-btn:not(.active):active{
+  color: var(--color-text-main);
+  -webkit-text-fill-color: var(--color-text-main);
+}
+
+/* 選択中は白文字固定 */
+.period-btn.active{
+  background:#000;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border-color:#000;
+}
+
+.period-btn.active:focus,
+.period-btn.active:active{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
   </style>
 </head>
 
