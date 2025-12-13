@@ -1,966 +1,392 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNS | SUBSCOPE</title>
-    <style>
-        /* =========================================
-           Global Styles & Variables
-           ========================================= */
-        :root {
-            --color-bg: #FFFFFF;
-            --color-bg-secondary: #F5F5F7;
-            --color-text-main: #1D1D1F;
-            --color-text-gray: #86868B;
-            --color-border: #D2D2D7;
-            --color-accent: #000000;
-            
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --transition-hover: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            
-            --container-width: 1080px;
-            --spacing-section: 80px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            width: 100%;
-            overflow-x: hidden;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--color-bg);
-            color: var(--color-text-main);
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.5;
-            overflow-x: hidden;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        .container {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 0 24px;
-            width: 100%;
-        }
-
-        .section-title {
-            font-size: 2.2rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            letter-spacing: -0.02em;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .tag {
-            display: inline-block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 0.05em;
-        }
-
-        /* =========================================
-           Scroll Reveal Animation
-           ========================================= */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity var(--transition-fade), transform var(--transition-fade);
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* =========================================
-           Fixed Header（検索バー＋Menu＋SUBSCOPE）
-           ========================================= */
-        .fixed-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 150;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-        }
-
-        .top-header {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 12px 24px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-left,
-        .nav-right {
-            pointer-events: auto;
-        }
-
-        .nav-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .header-logo-link {
-            display: inline-block;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .header-logo {
-            font-size: 1.6rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            color: var(--color-text-main);
-            user-select: none;
-            cursor: pointer;
-        }
-
-        /* Search Bar（PCデフォルト） */
-        .search-wrapper {
-            width: 280px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 40px 10px 44px;
-            border-radius: 50px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(20px);
-            font-size: 0.9rem;
-            color: var(--color-text-main);
-            outline: none;
-            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-
-        .search-input:focus {
-            background: #fff;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-            border-color: rgba(0,0,0,0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: var(--color-text-gray);
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .clear-btn {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            color: #999;
-            cursor: pointer;
-            opacity: 0;
-            transition: 0.2s;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .search-input:not(:placeholder-shown) ~ .clear-btn {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* 検索結果エリア（常に画面上部固定） */
-        .search-results-container {
-            position: fixed;
-            top: 72px;
-            left: 0;
-            right: 0;
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 0 24px 16px;
-            z-index: 130;
-        }
-
-        #searchResults {
-            margin-top: 8px;
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        .search-item {
-            display: flex;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 16px;
-            background: #fff;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-        }
-
-        .search-item:hover {
-            background: #f5f5f7;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
-        }
-
-        .search-item img {
-            width: 64px;
-            height: 64px;
-            border-radius: 12px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .search-item h3 {
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-        }
-
-        .search-item p {
-            font-size: 0.8rem;
-            color: #555;
-        }
-
-        /* Menu Button */
-        .menu-btn {
-            position: relative;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 12px 24px;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--color-text-main);
-            cursor: pointer;
-            transition: background 0.3s ease, box-shadow 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            overflow: visible;
-        }
-
-        .menu-btn:hover {
-            background: #fff;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .menu-icon-lines {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-            transform: translateY(0.5px);
-        }
-
-        .menu-line {
-            width: 16px;
-            height: 2px;
-            border-radius: 999px;
-            background-color: var(--color-text-main);
-        }
-
-        /* Navigation Menu Overlay */
-        .nav-overlay {
-            position: fixed;
-            top: 72px;
-            right: 40px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            border: 1px solid rgba(0,0,0,0.05);
-            transform: translateY(-20px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            z-index: 140;
-            min-width: 200px;
-        }
-
-        .nav-overlay.open {
-            transform: translateY(0);
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .nav-list li {
-            margin-bottom: 8px;
-        }
-
-        .nav-list li:last-child {
-            margin-bottom: 0;
-        }
-
-        .nav-link {
-            display: block;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--color-text-main);
-            transition: background 0.2s;
-        }
-
-        .nav-link:hover {
-            background: var(--color-bg-secondary);
-        }
-
-        /* =========================================
-           General Sections
-           ========================================= */
-        .section {
-            padding: 40px 0;
-        }
-
-        /* =========================================
-           SNS タイトルセクション（他ページと統一）
-           ========================================= */
-        .all-hero-section {
-            padding-top: 96px;
-            padding-bottom: 32px;
-        }
-
-        .all-title {
-            font-size: 2.4rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            margin-bottom: 16px;
-        }
-
-        /* =========================================
-           SNS Section
-           ========================================= */
-        .sns-lead {
-            font-size: 0.98rem;
-            color: var(--color-text-gray);
-            margin-bottom: 32px;
-        }
-
-        .sns-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 24px;
-        }
-
-        .sns-card {
-            border-radius: 24px;
-            border: 1px solid rgba(0,0,0,0.06);
-            background: #fff;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
-        }
-
-        .sns-card:hover {
-            background: #F5F5F7;
-            transform: translateY(-3px);
-            box-shadow: 0 14px 30px rgba(0,0,0,0.12);
-        }
-
-        .sns-icon-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 999px;
-            background: #ffffff;
-            border: 1px solid rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .sns-icon-circle img {
-            width: 24px;
-            height: 24px;
-            display: block;
-        }
-
-        .sns-card-body h3 {
-            font-size: 1rem;
-            margin-bottom: 4px;
-        }
-
-        .sns-card-body p {
-            font-size: 0.85rem;
-            color: var(--color-text-gray);
-        }
-
-        .sns-handle {
-            font-size: 0.8rem;
-            color: var(--color-text-gray);
-            margin-top: 2px;
-        }
-
-        /* =========================================
-           Footer
-           ========================================= */
-        .footer {
-            background: #F5F5F7;
-            padding: 40px 0;
-            border-top: 1px solid #D2D2D7;
-            margin-top: 80px;
-        }
-
-        .footer-container {
-            max-width: 1080px;
-            margin: 0 auto;
-            text-align: center;
-            font-family: var(--font-family);
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 20px;
-        }
-
-        .footer-links a {
-            color: #1D1D1F;
-            text-decoration: none;
-            font-size: 15px;
-            transition: opacity .3s ease;
-        }
-
-        .footer-links a:hover {
-            opacity: .6;
-        }
-
-        .footer-copy {
-            color: #86868B;
-            font-size: 13px;
-        }
-
-        /* =========================================
-           Responsive（PC / タブレット）
-           ========================================= */
-        @media (min-width: 769px) {
-            .search-wrapper {
-                width: 280px !important;
-                transform: none !important;
-                transition: none !important;
-            }
-
-            .search-input {
-                opacity: 1 !important;
-                pointer-events: auto !important;
-            }
-
-            .search-icon {
-                left: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-                position: absolute;
-            }
-
-            .fixed-header.search-open .search-wrapper {
-                width: 280px !important;
-            }
-        }
-
-        /* iPad（縦・横どちらもタブレット扱い） */
-        @media (min-width: 768px) and (max-width: 1024px) and (pointer: coarse) {
-            .search-wrapper {
-                width: 280px !important;
-                transition: none !important;
-                transform: none !important;
-            }
-
-            .search-input {
-                opacity: 1 !important;
-                pointer-events: auto !important;
-            }
-
-            .search-icon {
-                position: absolute !important;
-                left: 16px !important;
-                top: 50% !important;
-                transform: translateY(-50%) !important;
-            }
-
-            .fixed-header.search-open .search-wrapper {
-                width: 280px !important;
-            }
-
-            .fixed-header.search-open .nav-center {
-                display: block !important;
-            }
-        }
-
-        /* =========================================
-           Responsive（スマホ）
-           ========================================= */
-        @media (max-width: 767px) {
-
-            :root {
-                --spacing-section: 60px;
-            }
-
-            .top-header {
-                padding: 10px 16px;
-            }
-
-            .nav-left {
-                display: flex;
-                align-items: center;
-            }
-
-            .nav-left .search-wrapper {
-                transform: translateY(-2px);
-            }
-
-            /* 丸い検索ボタン（閉じてる時） */
-            .search-wrapper {
-                width: 44px;
-                height: 44px;
-                border-radius: 999px;
-                border: 2px solid #e5e5e7;
-                background: #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-                overflow: hidden;
-                transition:
-                    width 0.35s ease,
-                    box-shadow 0.3s ease,
-                    border 0.3s ease,
-                    background 0.3s ease;
-            }
-
-            .search-input {
-                width: 100%;
-                box-shadow: none;
-                border: none;
-                padding: 0;
-                font-size: 0.9rem;
-                color: var(--color-text-main);
-                background: transparent;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.25s ease;
-            }
-
-            .search-icon {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                width: 22px;
-                height: 22px;
-                color: #a7a7aa;
-                transition: transform 0.25s ease;
-            }
-    .search-item p {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;       /* 表示する行数（2行） */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SNS | SUBSCOPE</title>
+
+  <style>
+    :root{
+      --color-bg:#fff;
+      --color-bg-secondary:#f5f5f7;
+      --color-text-main:#1d1d1f;
+      --color-text-gray:#86868b;
+      --color-border:#d2d2d7;
+
+      --font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+      --transition-hover:0.4s cubic-bezier(0.25,0.8,0.25,1);
+      --transition-fade:0.8s cubic-bezier(0.2,0.8,0.2,1);
+
+      --container-width:1080px;
+      --spacing-section:80px;
+      --header-h:72px;
     }
-}
-            .clear-btn {
-                display: none;
-            }
 
-            .fixed-header.search-open .nav-center {
-                display: none;
-            }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;overflow-x:hidden}
+    body{
+      font-family:var(--font-family);
+      background:var(--color-bg);
+      color:var(--color-text-main);
+      -webkit-font-smoothing:antialiased;
+      line-height:1.5;
+    }
+    a{text-decoration:none;color:inherit}
+    ul{list-style:none}
+    .container{max-width:var(--container-width);margin:0 auto;padding:0 24px;width:100%}
 
-            .fixed-header.search-open .nav-left {
-                flex: 1 1 auto;
-            }
+    /* ===== Scroll Reveal ===== */
+    .reveal{opacity:0;transform:translateY(40px);transition:opacity var(--transition-fade),transform var(--transition-fade)}
+    .reveal.active{opacity:1;transform:translateY(0)}
+    @media (prefers-reduced-motion: reduce){
+      .reveal{transition:none;transform:none;opacity:1}
+      .reveal.active{transform:none}
+    }
 
-            .fixed-header.search-open .search-wrapper {
-                width: 100%;
-                max-width: 100%;
-                border: none;
-                box-shadow: none;
-                justify-content: flex-start;
-                background: transparent;
-            }
+    /* ===== Fixed Header (index.htmlと統一) ===== */
+    .fixed-header{
+      position:fixed;top:0;left:0;width:100%;
+      z-index:150;
+      background:rgba(255,255,255,.9);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .top-header{
+      max-width:var(--container-width);
+      margin:0 auto;
+      padding:12px 24px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:relative;
+    }
+    .nav-center{position:absolute;left:50%;transform:translateX(-50%)}
+    .header-logo{font-size:1.6rem;font-weight:700;letter-spacing:-.03em;user-select:none}
 
-            .fixed-header.search-open .search-input {
-                opacity: 1;
-                pointer-events: auto;
-                padding: 10px 40px 10px 44px;
-                border-radius: 999px;
-                border: 1px solid rgba(0,0,0,0.1);
-                background: #fff;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            }
+    /* ===== Search (PC/iPad base) ===== */
+    .search-wrapper{width:280px;position:relative}
+    .search-input{
+      width:100%;
+      padding:10px 40px 10px 44px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.1);
+      background:rgba(255,255,255,.8);
+      font-size:.9rem;
+      outline:none;
+      box-shadow:0 4px 20px rgba(0,0,0,.05);
+      transition:box-shadow .25s ease, background .25s ease;
+    }
+    .search-input:focus{background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+    .search-icon{
+      position:absolute;left:16px;top:50%;transform:translateY(-50%);
+      width:16px;height:16px;color:var(--color-text-gray);
+      pointer-events:none;z-index:2;
+    }
+    .clear-btn{
+      position:absolute;right:18px;top:50%;transform:translateY(-50%);
+      font-size:18px;color:#999;cursor:pointer;user-select:none;
+      display:none;
+    }
 
-            .fixed-header.search-open .search-icon {
-                position: absolute;
-                left: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-            }
+    /* 検索結果（ヘッダー下固定） */
+    .search-results-container{
+      position:fixed;
+      top:var(--header-h);
+      left:0;right:0;
+      max-width:var(--container-width);
+      margin:0 auto;
+      padding:0 24px 16px;
+      z-index:130;
+      pointer-events:none;
+    }
+    #searchResults{margin-top:8px;max-height:380px;overflow-y:auto;pointer-events:auto}
+    .search-item{
+      display:flex;gap:12px;
+      padding:10px 12px;
+      border-radius:16px;
+      background:#fff;
+      margin-bottom:8px;
+      cursor:pointer;
+      transition:transform .15s, box-shadow .2s, background .2s;
+      box-shadow:0 4px 10px rgba(0,0,0,.03);
+    }
+    .search-item:hover{background:#f5f5f7;transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.06)}
+    .search-item img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0}
+    .search-item h3{font-size:.95rem;margin-bottom:4px}
+    .search-item p{
+      font-size:.8rem;color:#555;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-            .fixed-header.search-open .clear-btn {
-                display: block;
-                right: 18px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 22px;
-                width: 36px;
-                height: 36px;
-                line-height: 36px;
-                text-align: center;
-            }
+    /* ===== Menu ===== */
+    .menu-btn{
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(0,0,0,.1);
+      padding:12px 24px;border-radius:999px;
+      font-size:.9rem;font-weight:600;
+      cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;
+      box-shadow:0 4px 20px rgba(0,0,0,.05);
+      transition:box-shadow .25s ease, background .25s ease;
+    }
+    .menu-btn:hover{background:#fff;box-shadow:0 8px 25px rgba(0,0,0,.1)}
+    .menu-icon-lines{display:flex;flex-direction:column;gap:4px}
+    .menu-line{width:16px;height:2px;border-radius:999px;background:var(--color-text-main)}
 
-            .search-results-container {
-                padding: 0 16px 12px;
-            }
+    .nav-overlay{
+      position:fixed;
+      top:var(--header-h);
+      right:40px;
+      background:rgba(255,255,255,.95);
+      padding:20px;
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,.2);
+      border:1px solid rgba(0,0,0,.05);
+      transform:translateY(-20px);
+      opacity:0;visibility:hidden;
+      transition:all .25s cubic-bezier(.2,.8,.2,1);
+      z-index:140;
+      min-width:200px;
+    }
+    .nav-overlay.open{transform:translateY(0);opacity:1;visibility:visible}
+    .nav-link{
+      display:block;
+      padding:10px 16px;
+      border-radius:12px;
+      font-size:.95rem;font-weight:500;
+      transition:background .2s;
+    }
+    .nav-link:hover{background:var(--color-bg-secondary)}
 
-            .all-hero-section {
-                padding-top: 90px;
-                padding-bottom: 24px;
-            }
+    /* ===== Page ===== */
+    .section{padding:var(--spacing-section) 0}
+    .all-hero-section{padding-top:96px;padding-bottom:32px}
+    .all-title{font-size:2.4rem;font-weight:700;letter-spacing:-.03em;margin:10px 0 16px}
+    .sns-lead{font-size:.98rem;color:var(--color-text-gray);margin-bottom:32px}
 
-            .all-title {
-                font-size: 2rem;
-            }
+    .sns-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:24px;
+    }
+    .sns-card{
+      border-radius:24px;
+      border:1px solid rgba(0,0,0,.06);
+      background:#fff;
+      padding:18px 20px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      transition:box-shadow .25s ease, transform .25s ease, background .25s ease;
+    }
+    .sns-card:hover{
+      background:#f5f5f7;
+      transform:translateY(-3px);
+      box-shadow:0 14px 30px rgba(0,0,0,.12);
+    }
+    .sns-icon-circle{
+      width:44px;height:44px;border-radius:999px;
+      background:#fff;border:1px solid rgba(0,0,0,.08);
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;
+    }
+    .sns-icon-circle img{width:24px;height:24px;display:block}
+    .sns-card-body h3{font-size:1rem;margin-bottom:4px}
+    .sns-card-body p{font-size:.85rem;color:var(--color-text-gray)}
+    .sns-handle{font-size:.8rem;color:var(--color-text-gray);margin-top:2px}
 
-            .sns-grid {
-                grid-template-columns: 1fr;
-            }
+    /* ===== Footer ===== */
+    .footer{background:#f5f5f7;padding:40px 0;border-top:1px solid var(--color-border);margin-top:80px}
+    .footer-container{max-width:1080px;margin:0 auto;text-align:center}
+    .footer-links{display:flex;justify-content:center;gap:40px;margin-bottom:20px;flex-wrap:wrap}
+    .footer-links a{font-size:15px;transition:opacity .2s}
+    .footer-links a:hover{opacity:.6}
+    .footer-copy{color:var(--color-text-gray);font-size:13px}
 
-            .nav-overlay {
-                right: 16px;
-            }
+    /* ===== Mobile ===== */
+    @media (max-width: 767px){
+      :root{--spacing-section:60px}
 
-            /* Menu ボタンを丸アイコンだけにする */
-            .menu-btn > span {
-                display: none;
-            }
+      .top-header{padding:10px 16px}
+      .search-results-container{padding:0 16px 12px}
 
-            .menu-btn {
-                width: 44px;
-                height: 44px;
-                padding: 0;
-                border-radius: 999px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0;
-            }
+      /* スマホ検索：アイコン→展開（index.htmlと同じ） */
+      .search-wrapper{
+        width:44px;height:44px;border-radius:999px;border:2px solid #e5e5e7;background:#fff;
+        display:flex;align-items:center;justify-content:center;overflow:hidden;
+        box-shadow:0 4px 15px rgba(0,0,0,.06);
+        transition:width .35s ease, box-shadow .3s ease, border .3s ease, background .3s ease;
+      }
+      .search-input{
+        border:none;box-shadow:none;background:transparent;padding:0;
+        opacity:0;pointer-events:none;transition:opacity .25s ease;
+      }
+      .search-icon{left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;color:#a7a7aa}
+      .clear-btn{display:none}
 
-            .menu-icon-lines {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                align-items: center;
-                justify-content: center;
-            }
+      .fixed-header.search-open .nav-center{display:none}
+      .fixed-header.search-open .nav-left{flex:1 1 auto}
+      .fixed-header.search-open .search-wrapper{
+        width:100%;border:none;box-shadow:none;justify-content:flex-start;background:transparent;
+      }
+      .fixed-header.search-open .search-input{
+        opacity:1;pointer-events:auto;
+        padding:10px 40px 10px 44px;border-radius:999px;border:1px solid rgba(0,0,0,.1);
+        background:#fff;box-shadow:0 8px 25px rgba(0,0,0,.15);
+      }
+      .fixed-header.search-open .search-icon{left:16px;top:50%;transform:translateY(-50%)}
 
-            .menu-line {
-                width: 18px;
-                height: 2px;
-                background-color: var(--color-text-main);
-                border-radius: 2px;
-            }
+      .all-hero-section{padding-top:90px;padding-bottom:24px}
+      .all-title{font-size:2rem}
+      .sns-grid{grid-template-columns:1fr}
+      .nav-overlay{right:16px}
 
-            .footer-links {
-                gap: 24px;
-                flex-wrap: wrap;
-            }
-        }
-/* ===============================
-   ✅ SNS：PCでメニューボタンを他ページと同じに戻す
-   =============================== */
-@media (min-width: 768px){
-  .menu-btn{
-    width: auto !important;
-    height: auto !important;
-    padding: 12px 24px !important;
-    border-radius: 999px !important;
-    justify-content: center !important;
-    gap: 8px !important;
-  }
+      .menu-btn > span{display:none}
+      .menu-btn{width:44px;height:44px;padding:0;justify-content:center}
+      .menu-line{width:18px}
+    }
 
-  .menu-btn > span{
-    display: inline !important; /* ← "Menu" を表示 */
-  }
+    /* ===== Performance: blur only on desktop ===== */
+    @media (min-width:1025px){
+      .fixed-header{backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);}
+      .nav-overlay{backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);}
+      .menu-btn{backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);}
+      .search-input{backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);}
+    }
+  </style>
 
-  .menu-icon-lines{
-    gap: 4px !important;
-  }
-
-  .menu-line{
-    width: 16px !important;
-  }
-}
-
-    </style>
+  <script src="index.js" defer></script>
 </head>
-<body>
 
-    <!-- 固定ヘッダー -->
-    <div class="fixed-header">
-        <div class="top-header">
-            <!-- 左：検索 -->
-            <div class="nav-left">
-                <div class="search-wrapper">
-                    <input type="text" class="search-input" id="searchInput" placeholder="">
-                    <span class="clear-btn" id="clear-btn">×</span>
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- 中央：ロゴ -->
-            <div class="nav-center">
-                <a href="index.html" class="header-logo-link">
-                    <h1 class="header-logo">SUBSCOPE</h1>
-                </a>
-            </div>
-
-            <!-- 右：Menu -->
-            <div class="nav-right">
-                <button class="menu-btn" onclick="toggleMenu()">
-                    <div class="menu-icon-lines">
-                        <span class="menu-line"></span>
-                        <span class="menu-line"></span>
-                    </div>
-                    <span>Menu</span>
-                </button>
-            </div>
+<body data-page="sns">
+  <!-- Fixed Header（index.htmlと同型） -->
+  <div class="fixed-header" id="fixedHeader">
+    <div class="top-header">
+      <div class="nav-left">
+        <div class="search-wrapper" id="searchWrapper" aria-label="検索">
+          <input type="text" class="search-input" id="searchInput" placeholder="" autocomplete="off" />
+          <!-- ✅ index.jsが拾えるように id は clear-btn に統一 -->
+          <span class="clear-btn" id="clear-btn" aria-label="クリア">×</span>
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
         </div>
+      </div>
+
+      <div class="nav-center">
+        <a href="index.html" class="header-logo-link">
+          <h1 class="header-logo">SUBSCOPE</h1>
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="メニュー">
+          <div class="menu-icon-lines" aria-hidden="true">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+          </div>
+          <span>Menu</span>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Menu オーバーレイ -->
-    <div class="nav-overlay" id="nav-overlay">
-        <ul class="nav-list">
-            <li>
-                <a href="index.html" class="nav-link" onclick="toggleMenu();">
-                    トップ
-                </a>
-            </li>
-            <li>
-                <a href="all.html" class="nav-link" onclick="toggleMenu();">
-                    すべての記事
-                </a>
-            </li>
-            <li>
-                <a href="ranking.html" class="nav-link" onclick="toggleMenu();">
-                    ランキング
-                </a>
-            </li>
-            <li>
-                <a href="sns.html" class="nav-link" onclick="toggleMenu();">
-                    SNS
-                </a>
-            </li>
-        </ul>
-    </div>
+  <!-- Menu Overlay -->
+  <div class="nav-overlay" id="nav-overlay">
+    <ul class="nav-list">
+      <li><a href="index.html" class="nav-link">トップ</a></li>
+      <li><a href="all.html" class="nav-link">すべての記事</a></li>
+      <li><a href="ranking.html" class="nav-link">ランキング</a></li>
+      <li><a href="sns.html" class="nav-link">SNS</a></li>
+    </ul>
+  </div>
 
-    <!-- 検索結果エリア -->
-    <div class="search-results-container">
-        <div id="searchResults"></div>
-    </div>
+  <!-- Search Results -->
+  <div class="search-results-container">
+    <div id="searchResults"></div>
+  </div>
 
-    <!-- SNS ページ本体 -->
-    <main>
-        <!-- タイトルセクション -->
-        <section class="all-hero-section">
-            <div class="container">
-                <div class="reveal active">
-                    <h1 class="all-title">SNS</h1>
-                    <p class="sns-lead">
-                        SUBSCOPE の最新記事やアップデート、ちょっとした裏話などは、各種 SNS でも発信しています。<br>
-                        好きなプラットフォームでフォローして、いつでも “サブスクの今” をチェックしよう。
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- カード一覧 -->
-        <section class="section">
-            <div class="container reveal">
-                <div class="sns-grid">
-                    <!-- Instagram -->
-                    <a href="https://instagram.com/subscope_official" target="_blank" class="sns-card">
-                        <div class="sns-icon-circle">
-                            <img src="assets/icons/brand-instagram.svg" alt="Instagram">
-                        </div>
-                        <div class="sns-card-body">
-                            <h3>Instagram</h3>
-                            <p>新着記事のお知らせや、日常のスナップ、世界観が伝わるビジュアルを中心に発信。</p>
-                            <div class="sns-handle">@subscope_official</div>
-                        </div>
-                    </a>
-
-                    <!-- TikTok -->
-                    <a href="https://www.tiktok.com/@あなたのアカウント" target="_blank" class="sns-card">
-                        <div class="sns-icon-circle">
-                            <img src="assets/icons/brand-tiktok.svg" alt="TikTok">
-                        </div>
-                        <div class="sns-card-body">
-                            <h3>TikTok</h3>
-                            <p>サブスクの機能紹介や、使いこなしテクをショート動画でテンポよく解説。</p>
-                            <div class="sns-handle">@your_tiktok</div>
-                        </div>
-                    </a>
-
-                    <!-- YouTube -->
-                    <a href="https://youtube.com/@Subscope" target="_blank" class="sns-card">
-                        <div class="sns-icon-circle">
-                            <img src="assets/icons/brand-youtube.svg" alt="YouTube">
-                        </div>
-                        <div class="sns-card-body">
-                            <h3>YouTube / Shorts</h3>
-                            <p>よりじっくり観たい人向けに、ロングめのレビューやまとめ系コンテンツを配信。</p>
-                            <div class="sns-handle">@Subscope</div>
-                        </div>
-                    </a>
-
-                    <!-- X -->
-                    <a href="https://x.com/あなたのアカウント" target="_blank" class="sns-card">
-                        <div class="sns-icon-circle">
-                            <img src="assets/icons/brand-x.svg" alt="X">
-                        </div>
-                        <div class="sns-card-body">
-                            <h3>X</h3>
-                            <p>速報系のアップデート情報や、ちょっとした気づき・メモをライトに投稿。</p>
-                            <div class="sns-handle">@your_x</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-links">
-                <a href="privacy.html">プライバシーポリシー</a>
-                <a href="terms.html">利用規約</a>
-                <a href="company.html">運営会社</a>
-            </div>
-            <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+  <!-- Main -->
+  <main>
+    <section class="all-hero-section">
+      <div class="container">
+        <div class="reveal active">
+          <h1 class="all-title">SNS</h1>
+          <p class="sns-lead">
+            SUBSCOPE の最新記事やアップデート、ちょっとした裏話などは、各種 SNS でも発信しています。<br>
+            好きなプラットフォームでフォローして、いつでも “サブスクの今” をチェックしよう。
+          </p>
         </div>
-    </footer>
+      </div>
+    </section>
 
-    <!-- 共通JS（検索・記事データなど） -->
-    <script src="index.js"></script>
+    <section class="section">
+      <div class="container reveal">
+        <div class="sns-grid">
+          <a href="https://instagram.com/subscope_official" target="_blank" rel="noopener" class="sns-card">
+            <div class="sns-icon-circle">
+              <img src="assets/icons/brand-instagram.svg" alt="Instagram">
+            </div>
+            <div class="sns-card-body">
+              <h3>Instagram</h3>
+              <p>新着記事のお知らせや、日常のスナップ、世界観が伝わるビジュアルを中心に発信。</p>
+              <div class="sns-handle">@subscope_official</div>
+            </div>
+          </a>
 
-    <!-- スマホ検索アニメーション制御 -->
-    <script>
-    window.addEventListener("DOMContentLoaded", function () {
-        const fixedHeader  = document.querySelector(".fixed-header");
-        const searchWrapper = document.querySelector(".search-wrapper");
-        const searchInput   = document.getElementById("searchInput");
+          <a href="https://www.tiktok.com/@あなたのアカウント" target="_blank" rel="noopener" class="sns-card">
+            <div class="sns-icon-circle">
+              <img src="assets/icons/brand-tiktok.svg" alt="TikTok">
+            </div>
+            <div class="sns-card-body">
+              <h3>TikTok</h3>
+              <p>サブスクの機能紹介や、使いこなしテクをショート動画でテンポよく解説。</p>
+              <div class="sns-handle">@your_tiktok</div>
+            </div>
+          </a>
 
-        if (!fixedHeader || !searchWrapper || !searchInput) return;
+          <a href="https://youtube.com/@Subscope" target="_blank" rel="noopener" class="sns-card">
+            <div class="sns-icon-circle">
+              <img src="assets/icons/brand-youtube.svg" alt="YouTube">
+            </div>
+            <div class="sns-card-body">
+              <h3>YouTube / Shorts</h3>
+              <p>よりじっくり観たい人向けに、ロングめのレビューやまとめ系コンテンツを配信。</p>
+              <div class="sns-handle">@Subscope</div>
+            </div>
+          </a>
 
-        let isOpen = false;
+          <a href="https://x.com/あなたのアカウント" target="_blank" rel="noopener" class="sns-card">
+            <div class="sns-icon-circle">
+              <img src="assets/icons/brand-x.svg" alt="X">
+            </div>
+            <div class="sns-card-body">
+              <h3>X</h3>
+              <p>速報系のアップデート情報や、ちょっとした気づき・メモをライトに投稿。</p>
+              <div class="sns-handle">@your_x</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
 
-        const isMobile = () => window.innerWidth <= 767;
-
-        searchWrapper.addEventListener("click", function (e) {
-            if (!isMobile()) {
-                if (e.target !== searchInput) {
-                    searchInput.focus();
-                }
-                return;
-            }
-
-            if (isOpen && e.target === searchInput) return;
-
-            if (!isOpen) {
-                fixedHeader.classList.add("search-open");
-                isOpen = true;
-                setTimeout(() => searchInput.focus(), 80);
-            } else {
-                fixedHeader.classList.remove("search-open");
-                isOpen = false;
-                searchInput.blur();
-            }
-        });
-
-        window.addEventListener("resize", () => {
-            if (!isMobile() && isOpen) {
-                fixedHeader.classList.remove("search-open");
-                isOpen = false;
-                searchInput.blur();
-            }
-        });
-    });
-
-    function toggleMenu() {
-        const nav = document.getElementById("nav-overlay");
-        if (nav) nav.classList.toggle("open");
-    }
-    </script>
-
-    <!-- × ボタンの表示切り替え -->
-    <script>
-    window.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("searchInput");
-        const clearBtn = document.getElementById("clear-btn");
-
-        if (!searchInput || !clearBtn) return;
-
-        function updateClearBtn() {
-            if (searchInput.value.trim() === "") {
-                clearBtn.style.display = "none";
-            } else {
-                clearBtn.style.display = "block";
-            }
-        }
-
-        searchInput.addEventListener("input", updateClearBtn);
-
-        clearBtn.addEventListener("click", function () {
-            searchInput.value = "";
-            updateClearBtn();
-            searchInput.focus();
-        });
-
-        updateClearBtn();
-    });
-    </script>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="privacy.html">プライバシーポリシー</a>
+        <a href="terms.html">利用規約</a>
+        <a href="company.html">運営会社</a>
+      </div>
+      <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+    </div>
+  </footer>
 </body>
 </html>
