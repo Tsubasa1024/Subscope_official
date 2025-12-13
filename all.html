@@ -58,6 +58,18 @@
       box-shadow:0 4px 20px rgba(0,0,0,.05)}
     .menu-icon-lines{display:flex;flex-direction:column;gap:4px}
     .menu-line{width:16px;height:2px;border-radius:999px;background:var(--color-text-main)}
+    /* ✅ iPad Safari の青文字化を防止（Menuボタン） */
+.menu-btn{
+  color: var(--color-text-main);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.menu-btn,
+.menu-btn *{
+  color: var(--color-text-main) !important;
+  -webkit-tap-highlight-color: transparent;
+}
 
     .nav-overlay{position:fixed;top:72px;right:40px;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);
       padding:20px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.05);
