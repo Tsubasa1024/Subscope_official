@@ -211,10 +211,15 @@
             font-size: 0.95rem;
             margin-bottom: 4px;
         }
-        .search-item p {
-            font-size: 0.8rem;
-            color: #555;
-        }
+.search-item p{
+  font-size: .8rem;
+  color: #86868b;              /* 灰色 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;       /* 2行で… */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
         .menu-btn {
             position: relative;
