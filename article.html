@@ -1279,7 +1279,30 @@
     </script>
 
     <!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
+        function toggleMenu() {
+            const nav = document.getElementById("nav-overlay");
+            if (nav) nav.classList.toggle("open");
+        }
+    </script>
+
+    <!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
     <script>
+        // microCMS から単体記事を取得（プレビュー対応）
+        async function fetchArticleFromMicrocms(contentId, draftKey) {
+            try {
+                const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
+                if (typeof API_KEY === "undefined") {
+                    console.error("API_KEY が定義されていません。index.js で定義してください。");
+                    return null;
+                }
+
+                let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
+                if (draftKey) {
+                    url += `?draftKey=${encodeURIComponent(draftKey)}`;
+                }
+
+                const res = await fetch(url, {
+                    headers: 
         // microCMS から単体記事を取得（プレビュー対応）
         async function fetchArticleFromMicrocms(contentId, draftKey) {
             try {
