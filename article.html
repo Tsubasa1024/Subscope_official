@@ -1,1473 +1,878 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>記事詳細 | SUBSCOPE</title>
-<!-- Canonical（あとでJSで上書き） -->
-<link rel="canonical" href="https://www.subscope.jp/article.html">
-
-<!-- OGP（ベース） -->
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="SUBSCOPE">
-<meta property="og:title" content="記事 | SUBSCOPE">
-<meta property="og:description" content="SUBSCOPEの記事ページ">
-<meta property="og:url" content="https://www.subscope.jp/article.html">
-
-<meta property="og:image" content="https://www.subscope.jp/ogp-default-v3.png">
-<meta property="og:image:secure_url" content="https://www.subscope.jp/ogp-default-v3.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="記事 | SUBSCOPE">
-<meta name="twitter:description" content="SUBSCOPEの記事ページ">
-<meta name="twitter:image" content="https://www.subscope.jp/ogp-default-v3.png">
-
-    <style>
-        :root {
-            --color-bg: #ffffff;
-            --color-bg-secondary: #f5f5f7;
-            --color-text-main: #1d1d1f;
-            --color-text-gray: #86868b;
-            --color-border: #d2d2d7;
-            --color-accent: #000000;
-
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                Helvetica, Arial, sans-serif;
-            --transition-hover: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            --container-width: 1080px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            width: 100%;
-            overflow-x: hidden;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--color-bg);
-            color: var(--color-text-main);
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        .container {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 0 24px;
-            width: 100%;
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity var(--transition-fade),
-                transform var(--transition-fade);
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .fixed-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 150;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .top-header {
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 12px 24px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-left,
-        .nav-right {
-            pointer-events: auto;
-        }
-
-        .nav-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .header-logo-link {
-            display: inline-block;
-        }
-
-        .header-logo {
-            font-size: 1.6rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            color: var(--color-text-main);
-            user-select: none;
-        }
-
-        .search-wrapper {
-            width: 280px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 40px 10px 44px;
-            border-radius: 50px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            font-size: 0.9rem;
-            color: var(--color-text-main);
-            outline: none;
-            transition: box-shadow 0.3s ease, background 0.3s ease,
-                border-color 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .search-input:focus {
-            background: #fff;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            border-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: var(--color-text-gray);
-            pointer-events: none;
-        }
-
-        .clear-btn {
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18px;
-            color: #999;
-            cursor: pointer;
-            opacity: 0;
-            transition: 0.2s;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .search-input:not(:placeholder-shown) ~ .clear-btn {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .search-results-container {
-            position: fixed;
-            top: 72px;
-            left: 0;
-            right: 0;
-            max-width: var(--container-width);
-            margin: 0 auto;
-            padding: 0 24px 16px;
-            z-index: 130;
-        }
-
-        #searchResults {
-            margin-top: 8px;
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        .search-item {
-            display: flex;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 16px;
-            background: #fff;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.15s,
-                box-shadow 0.2s;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-        }
-        .search-item:hover {
-            background: #f5f5f7;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-        }
-        .search-item img {
-            width: 64px;
-            height: 64px;
-            border-radius: 12px;
-            object-fit: cover;
-        }
-        .search-item h3 {
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-        }
-.search-item p{
-  font-size: .8rem;
-  color: #86868b;              /* 灰色 */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;       /* 2行で… */
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-        .menu-btn {
-            position: relative;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 12px 24px;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--color-text-main);
-            cursor: pointer;
-            transition: background 0.3s ease, box-shadow 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .menu-btn:hover {
-            background: #fff;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .menu-icon-lines {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .menu-line {
-            width: 16px;
-            height: 2px;
-            border-radius: 999px;
-            background-color: var(--color-text-main);
-        }
-
-        .nav-overlay {
-            position: fixed;
-            top: 72px;
-            right: 40px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transform: translateY(-20px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            z-index: 140;
-            min-width: 200px;
-        }
-
-        .nav-overlay.open {
-            transform: translateY(0);
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .nav-list li {
-            margin-bottom: 8px;
-        }
-
-        .nav-link {
-            display: block;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .nav-link:hover {
-            background: var(--color-bg-secondary);
-        }
-
-        main {
-            padding-top: 104px;
-            padding-bottom: 64px;
-        }
-
-        .breadcrumb {
-            font-size: 0.8rem;
-            color: var(--color-text-gray);
-            margin-bottom: 16px;
-        }
-
-        .breadcrumb a {
-            color: var(--color-text-gray);
-        }
-
-        .article-hero {
-            margin-bottom: 50px;
-        }
-
-        .article-kv {
-            width: 100%;
-            border-radius: 32px;
-            overflow: hidden;
-            background-color: #f0f0f0;
-            background-size: cover;
-            background-position: center;
-            min-height: 390px;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-        }
-
-        .article-header-block {
-            margin-bottom: 0;
-            position: relative;
-            padding-right: 60px; /* 右上ボタン分の余白 */
-        }
-
-        .article-meta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 16px;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--color-text-gray);
-            margin-bottom: 8px;
-        }
-
-        .article-meta-pill {
-            padding: 4px 12px;
-            border-radius: 999px;
-            background: #f2f2f7;
-            font-size: 0.78rem;
-        }
-
-        .article-date {
-            font-size: 0.85rem;
-        }
-
-        .article-title {
-            font-size: 2.4rem;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            margin-bottom: 10px;
-        }
-
-        .article-lead {
-            font-size: 1rem;
-            color: #4b4b4b;
-            margin-top: 4px;
-            margin-bottom: 30px;
-        }
-
-        .article-content {
-            font-size: 0.98rem;
-            color: #1d1d1f;
-            line-height: 1.9;
-        }
-
-        .article-content h2 {
-            font-size: 1.4rem;
-            margin: 28px 0 12px;
-        }
-
-        .article-content h3 {
-            font-size: 1.15rem;
-            margin: 20px 0 8px;
-        }
-
-        /* 白丸 × 黒アイコン × フチなしの自然なシェアボタン */
-        .share-circle-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: #ffffffee;
-            backdrop-filter: blur(6px);
-            color: #000000;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.10);
-            transition: transform .18s ease,
-                        box-shadow .18s ease,
-                        background .18s ease;
-        }
-
-        .share-circle-btn:hover {
-            background: #ffffff;
-            box-shadow: 0 10px 26px rgba(0,0,0,0.16);
-            transform: translateY(-1px);
-        }
-
-        .share-circle-btn span {
-            font-size: 0.9rem;
-            line-height: 1;
-        }
-
-        /* 公式サイトリンクセクション（今は非表示でもOK） */
-        .official-site-section {
-            margin-top: 40px;
-            margin-bottom: 24px;
-        }
-
-        .official-site-inner {
-            background: #f5f5f7;
-            border-radius: 24px;
-            padding: 20px 24px;
-            text-align: center;
-            border: 1px solid #e5e5ea;
-        }
-
-        .official-site-label {
-            font-size: 0.85rem;
-            color: #86868b;
-            margin-bottom: 12px;
-        }
-
-        .official-site-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .official-site-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 9px 20px;
-            border-radius: 999px;
-            border: 1px solid #000;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-decoration: none;
-            color: #ffffff;
-            background: #000000;
-            white-space: nowrap;
-            transition: transform 0.25s var(--transition-hover),
-                        box-shadow 0.25s var(--transition-hover),
-                        background 0.25s var(--transition-hover);
-        }
-
-        .official-site-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
-            background: #111111;
-        }
-
-        @media (max-width: 767px) {
-            .official-site-inner {
-                padding: 16px 16px;
-            }
-            .official-site-button {
-                font-size: 0.85rem;
-                padding: 8px 16px;
-            }
-
-            .share-circle-btn {
-                width: 36px;
-                height: 36px;
-                top: 2px;
-            }
-            .article-header-block {
-                padding-right: 20px;
-            }
-        }
-
-        .article-content p {
-            margin-bottom: 24px;
-        }
-
-        /* 空の段落を大きな空白として扱う */
-        .article-content p.empty-space {
-            height: 32px;
-            margin: 0;
-        }
-
-        .article-content ul {
-            margin: 8px 0 16px 18px;
-        }
-
-        .article-content li {
-            margin-bottom: 6px;
-        }
-
-        /* 料金プランボックス */
-        .price-summary-section {
-            margin-top: 40px;
-        }
-
-        .price-summary-box {
-            background: #f5f5f7;
-            border-radius: 24px;
-            padding: 24px 28px;
-            font-size: 0.95rem;
-            line-height: 1.8;
-            color: #1d1d1f;
-            white-space: pre-line;
-        }
-
-        .related-section {
-            margin-top: 56px;
-            padding-top: 28px;
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
-        }
-
-        .related-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .related-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-        }
-
-        .related-card {
-            border-radius: 20px;
-            background: #fff;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-            cursor: pointer;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            flex: 0 0 calc((100% - 48px) / 3);
-            max-width: calc((100% - 48px) / 3);
-        }
-
-        .related-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        .related-thumb {
-            width: 100%;
-            height: 140px;
-            background-size: cover;
-            background-position: center;
-            background-color: #f0f0f0;
-        }
-
-        .related-body {
-            padding: 10px 14px 14px;
-        }
-
-        .related-service {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--color-text-gray);
-            margin-bottom: 4px;
-        }
-
-        .related-title-text {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .related-date {
-            font-size: 0.75rem;
-            color: var(--color-text-gray);
-        }
-
-        .footer {
-            background: #f5f5f7;
-            padding: 40px 0;
-            border-top: 1px solid #d2d2d7;
-            margin-top: 40px;
-        }
-
-        .footer-container {
-            max-width: 1080px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 20px;
-        }
-
-        .footer-links a {
-            font-size: 15px;
-            color: #1d1d1f;
-        }
-
-        .footer-copy {
-            font-size: 13px;
-            color: #86868b;
-        }
-
-        .article-author {
-            margin: 8px 0 24px;
-        }
-
-        .author-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-
-        .author-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .author-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--color-text-main);
-        }
-
-        @media (max-width: 767px) {
-            .article-author {
-                margin: 6px 0 18px;
-            }
-
-            .author-avatar {
-                width: 28px;
-                height: 28px;
-            }
-
-            .author-name {
-                font-size: 0.85rem;
-            }
-        }
-
-        @media (max-width: 767px) {
-            :root {
-                --spacing-section: 60px;
-            }
-
-            .top-header {
-                padding: 10px 16px;
-            }
-
-            .nav-left {
-                display: flex;
-                align-items: center;
-            }
-
-            .nav-left .search-wrapper {
-                transform: translateY(-2px);
-            }
-
-            .search-wrapper {
-                width: 44px;
-                height: 44px;
-                border-radius: 999px;
-                border: 2px solid #e5e5e7;
-                background: #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-                overflow: hidden;
-                transition: width 0.35s ease, box-shadow 0.3s ease,
-                    border 0.3s ease, background 0.3s ease;
-            }
-
-            .search-input {
-                width: 100%;
-                box-shadow: none;
-                border: none;
-                padding: 0;
-                font-size: 0.9rem;
-                background: transparent;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.25s ease;
-            }
-
-            .search-icon {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                width: 22px;
-                height: 22px;
-                color: #a7a7aa;
-            }
-
-            .search-item p {
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .clear-btn {
-                display: none;
-            }
-
-            .fixed-header.search-open .nav-center {
-                display: none;
-            }
-
-            .fixed-header.search-open .nav-left {
-                flex: 1 1 auto;
-            }
-
-            .fixed-header.search-open .search-wrapper {
-                width: 100%;
-                max-width: 100%;
-                border: none;
-                box-shadow: none;
-                justify-content: flex-start;
-                background: transparent;
-            }
-
-            .fixed-header.search-open .search-input {
-                opacity: 1;
-                pointer-events: auto;
-                padding: 10px 40px 10px 44px;
-                border-radius: 999px;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                background: #fff;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            }
-
-            .fixed-header.search-open .search-icon {
-                left: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-            }
-
-            .fixed-header.search-open .clear-btn {
-                display: block;
-                right: 18px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 22px;
-                width: 36px;
-                height: 36px;
-                line-height: 36px;
-                text-align: center;
-            }
-
-            .search-results-container {
-                padding: 0 16px 12px;
-            }
-
-            .menu-btn > span {
-                display: none;
-            }
-
-            .menu-btn {
-                width: 44px;
-                height: 44px;
-                padding: 0;
-                border-radius: 999px;
-                justify-content: center;
-            }
-
-            .menu-line {
-                width: 18px;
-            }
-
-            main {
-                padding-top: 96px;
-            }
-
-            .article-title {
-                font-size: 1.7rem;
-                line-height: 1.35;
-                margin-bottom: 6px;
-            }
-
-            .article-lead {
-                font-size: 0.98rem;
-                line-height: 1.7;
-                color: #4b4b4b;
-                margin-top: 0;
-                margin-bottom: 18px;
-            }
-
-            .article-hero {
-                margin: 0 0 20px;
-                height: 220px;
-                border-radius: 18px;
-                overflow: hidden;
-            }
-
-            .article-kv {
-                min-height: 100%;
-                box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
-            }
-
-            .article-content {
-                font-size: 0.98rem;
-                line-height: 1.8;
-            }
-
-            .article-content p {
-                margin-bottom: 24px;
-            }
-
-            .article-content h2 {
-                margin: 28px 0 12px;
-            }
-
-            .article-content h3 {
-                margin: 20px 0 8px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .search-wrapper {
-                width: 280px !important;
-                transform: none !important;
-                transition: none !important;
-            }
-
-            .search-input {
-                opacity: 1 !important;
-                pointer-events: auto !important;
-            }
-
-            .search-icon {
-                left: 16px;
-                top: 50%;
-                transform: translateY(-50%);
-                position: absolute;
-            }
-
-            .fixed-header.search-open .search-wrapper {
-                width: 280px !important;
-            }
-        }
-
-        @media (max-width: 767px) {
-            .author-avatar {
-                width: 38px;
-                height: 38px;
-            }
-            .author-name {
-                font-size: 0.9rem;
-            }
-        }
-
-        /* 本文の箇条書きだけ、点・番号を復活させて揃える */
-        .article-content ul {
-            list-style: disc;
-            list-style-position: outside;
-            margin-left: 1.4em;
-            padding-left: 0;
-        }
-
-        .article-content ol {
-            list-style: decimal;
-            list-style-position: outside;
-            margin-left: 1.6em;
-            padding-left: 0;
-        }
-
-        .article-content li {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            line-height: 1.7;
-        }
-
-        @media (max-width: 767px) {
-            /* 関連記事を縦1列にする */
-            .related-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .related-card {
-                flex: 1 1 100%;
-                max-width: 100%;
-            }
-
-            .related-thumb {
-                height: 180px;
-            }
-        }
-
-        /* 本文のリストを横幅に収める（はみ出し防止 & 整列） */
-        .article-content ul,
-        .article-content ol {
-            padding-left: 1.2em;
-            margin-left: 0;
-            margin-right: 0;
-        }
-
-        .article-content li {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            line-height: 1.7;
-        }
-        /* ============================
-   PC/iPad：左右サイドスポンサー
-   ============================ */
-.side-sponsor {
-   position: absolute;   /* ← fixed をやめる */
-  top: 120px;           /* ヘッダー下に固定 */
-  width: 180px;
-  height: auto;
-  z-index: 60;
-  pointer-events: none;
-}
-
-.side-sponsor .side-sponsor-inner {
-  pointer-events: auto;
-  background: #F5F5F7;
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 0px;
-    min-height: 630px;
-  padding: 18px;
-  height: 100%;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  text-align: center;
-}
-
-.side-sponsor .ad-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #fff;
-  background: #000;
-  padding: 4px 12px;
-  border-radius: 999px;
-  margin: 0 auto 6px;
-}
-
-.side-sponsor .ad-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1D1D1F;
-}
-
-.side-sponsor .ad-desc {
-  font-size: 0.85rem;
-  color: #86868B;
-  line-height: 1.6;
-}
-
-.side-sponsor-left  { left: 18px; }
-.side-sponsor-right { right: 18px; }
-
-/* ✅ iPad & スマホ（タッチ端末）はサイド広告を消す */
-@media (pointer: coarse) {
-  .side-sponsor {
-    display: none;
-  }
-}
-
-
-/* 超ワイド画面でもちょい余裕 */
-@media (min-width: 1400px) {
-  .side-sponsor {
-    width: 200px;
-  }
-}
-        /* ============================
-   広告を一旦ぜんぶ非表示
-   ============================ */
-.side-sponsor,
-.between-sponsor,
-.ad-card {
-  display: none !important;
-}
-
-    </style>
-</head>
-<body>
-    <!-- 左サイドスポンサー（PC/iPadのみ表示） -->
-<aside class="side-sponsor side-sponsor-left" aria-label="スポンサー（左）">
-  <a class="side-sponsor-inner" href="index.html" data-slot-id="SIDE_LEFT_1">
-    <span class="ad-tag">スポンサー</span>
-    <div class="ad-title">サブスクならサブスコープ</div>
-    <div class="ad-desc">
-      音楽・映画・勉強。<br>
-      迷ったらここで比較。
-    </div>
-  </a>
-</aside>
-
-<!-- 右サイドスポンサー（PC/iPadのみ表示） -->
-<aside class="side-sponsor side-sponsor-right" aria-label="スポンサー（右）">
-  <a class="side-sponsor-inner" href="index.html" data-slot-id="SIDE_RIGHT_1">
-    <span class="ad-tag">スポンサー</span>
-    <div class="ad-title">広告掲載はこちら</div>
-    <div class="ad-desc">
-      SUBSCOPEに掲載して<br>
-      サブスクユーザーへ届ける。
-    </div>
-  </a>
-</aside>
-    <!-- 固定ヘッダー -->
-    <div class="fixed-header">
-        <div class="top-header">
-            <div class="nav-left">
-                <div class="search-wrapper">
-                    <input
-                        type="text"
-                        class="search-input"
-                        id="searchInput"
-                        placeholder=""
-                    />
-                    <span class="clear-btn" id="clear-btn">×</span>
-                    <svg
-                        class="search-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line
-                            x1="21"
-                            y1="21"
-                            x2="16.65"
-                            y2="16.65"
-                        ></line>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="nav-center">
-                <a href="index.html" class="header-logo-link">
-                    <h1 class="header-logo">SUBSCOPE</h1>
-                </a>
-            </div>
-
-            <div class="nav-right">
-                <button class="menu-btn" id="menuBtn" type="button" aria-label="メニュー">
-                    <div class="menu-icon-lines">
-                        <span class="menu-line"></span>
-                        <span class="menu-line"></span>
-                    </div>
-                    <span>Menu</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="nav-overlay" id="nav-overlay">
-        <ul class="nav-list">
-            <li>
-                <a href="index.html" class="nav-link" onclick="toggleMenu()">
-                    トップ
-                </a>
-            </li>
-            <li>
-                <a href="all.html" class="nav-link" onclick="toggleMenu()">
-                    すべての記事
-                </a>
-            </li>
-            <li>
-                <a href="ranking.html" class="nav-link" onclick="toggleMenu()">
-                    ランキング
-                </a>
-            </li>
-            <li>
-                <a href="sns.html" class="nav-link" onclick="toggleMenu()">
-                    SNS
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <div class="search-results-container">
-        <div id="searchResults"></div>
-    </div>
-
-    <main>
-        <div class="container reveal" id="article-wrap">
-            <div class="breadcrumb" id="breadcrumb"></div>
-
-            <section class="article-header-block">
-                <div class="article-meta-row">
-                    <span
-                        class="article-meta-pill"
-                        id="meta-service"
-                    ></span>
-                    <span
-                        class="article-meta-pill"
-                        id="meta-category"
-                    ></span>
-                    <span class="article-date" id="meta-date"></span>
-                </div>
-
-                <!-- 著者 -->
-                <div class="article-author">
-                    <a href="#" class="author-link" id="author-link">
-                        <img
-                            id="author-avatar"
-                            class="author-avatar"
-                            alt="著者アイコン"
-                        />
-                        <span id="author-name" class="author-name"></span>
-                    </a>
-                </div>
-
-                <h1 class="article-title" id="article-title"></h1>
-                <p class="article-lead" id="article-lead"></p>
-
-                <!-- 黒い丸シェアボタン（右上） -->
-                <button
-                    class="share-circle-btn"
-                    id="share-button"
-                    aria-label="この記事をシェアする"
-                >
-                    <span>⇪</span>
-                </button>
-            </section>
-
-            <section class="article-hero">
-                <div class="article-kv" id="article-kv"></div>
-            </section>
-
-            <!-- 本文 -->
-            <article class="article-content" id="article-content">
-                <!-- JS で注入 -->
-            </article>
-
-            <!-- 料金プラン -->
-            <section
-                class="price-summary-section reveal"
-                id="price-summary-section"
-                style="display: none"
-            >
-                <div
-                    class="price-summary-box"
-                    id="price-summary-box"
-                ></div>
-            </section>
-
-            <!-- 関連記事 -->
-            <section class="related-section reveal" id="related-section">
-                <h2 class="related-title">関連する記事</h2>
-                <div class="related-grid" id="related-grid"></div>
-            </section>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-links">
-                <a href="privacy.html">プライバシーポリシー</a>
-                <a href="terms.html">利用規約</a>
-                <a href="company.html">運営会社</a>
-            </div>
-            <p class="footer-copy">
-                © 2025 SUBSCOPE. All rights reserved.
-            </p>
-        </div>
-    </footer>
-
-    <!-- 共通スクリプト（ここで SERVICE_ID / API_KEY / loadArticles / mapCmsArticle が定義されている想定） -->
-    <script src="index.js"></script>
-
-  <!-- 検索 UI（スマホの開閉など） -->
-<script>
-window.addEventListener("DOMContentLoaded", function () {
-  const fixedHeader = document.querySelector(".fixed-header");
-  const searchWrapper = document.querySelector(".search-wrapper");
-  const searchInput = document.getElementById("searchInput");
-  const clearBtn = document.getElementById("clear-btn");
-  if (!fixedHeader || !searchWrapper || !searchInput) return;
-
-  let isOpen = false;
-  const isMobile = () => window.innerWidth <= 767;
-
-  searchWrapper.addEventListener("click", function (e) {
-    if (!isMobile()) {
-      if (e.target !== searchInput) searchInput.focus();
-      return;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>記事詳細 | SUBSCOPE</title>
+
+  <!-- Canonical（JSで上書き） -->
+  <link rel="canonical" href="https://www.subscope.jp/article.html">
+
+  <!-- OGP（ベース：JSで上書き） -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SUBSCOPE">
+  <meta property="og:title" content="記事 | SUBSCOPE">
+  <meta property="og:description" content="SUBSCOPEの記事ページ">
+  <meta property="og:url" content="https://www.subscope.jp/article.html">
+  <meta property="og:image" content="https://www.subscope.jp/ogp-default-v3.png">
+  <meta property="og:image:secure_url" content="https://www.subscope.jp/ogp-default-v3.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter（JSで上書き） -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="記事 | SUBSCOPE">
+  <meta name="twitter:description" content="SUBSCOPEの記事ページ">
+  <meta name="twitter:image" content="https://www.subscope.jp/ogp-default-v3.png">
+
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-bg-secondary: #f5f5f7;
+      --color-text-main: #1d1d1f;
+      --color-text-gray: #86868b;
+      --color-border: #d2d2d7;
+      --color-accent: #000000;
+
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --transition-hover: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      --container-width: 1080px;
     }
-    if (isOpen && e.target === searchInput) return;
 
-    if (!isOpen) {
-      fixedHeader.classList.add("search-open");
-      isOpen = true;
-      setTimeout(() => searchInput.focus(), 80);
-    } else {
-      fixedHeader.classList.remove("search-open");
-      isOpen = false;
-      searchInput.blur();
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { width: 100%; overflow-x: hidden; }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg);
+      color: var(--color-text-main);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+      overflow-x: hidden;
     }
-  });
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
 
-  window.addEventListener("resize", () => {
-    if (!isMobile() && isOpen) {
-      fixedHeader.classList.remove("search-open");
-      isOpen = false;
-      searchInput.blur();
+    .container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
     }
-  });
 
-  if (clearBtn) {
-    function updateClearBtn() {
-      clearBtn.style.display = searchInput.value.trim() === "" ? "none" : "block";
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity var(--transition-fade), transform var(--transition-fade);
     }
-    searchInput.addEventListener("input", updateClearBtn);
-    clearBtn.addEventListener("click", () => {
-      searchInput.value = "";
-      searchInput.dispatchEvent(new Event("input"));
-      updateClearBtn();
-      searchInput.focus();
-    });
-    updateClearBtn();
-  }
-});
+    .reveal.active { opacity: 1; transform: translateY(0); }
 
-function toggleMenu() {
-  const nav = document.getElementById("nav-overlay");
-  if (nav) nav.classList.toggle("open");
-}
-</script>
-<!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
-<script>
-  // microCMS から単体記事を取得（プレビュー対応）
-  async function fetchArticleFromMicrocms(contentId, draftKey) {
-    try {
-      const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
-      if (typeof API_KEY === "undefined") {
-        console.error("API_KEY が定義されていません。index.js で定義してください。");
-        return null;
+    .fixed-header {
+      position: fixed; top: 0; left: 0; width: 100%;
+      z-index: 150;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .top-header {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 12px 24px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .nav-left, .nav-right { pointer-events: auto; }
+    .nav-center { position: absolute; left: 50%; transform: translateX(-50%); }
+
+    .header-logo { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; user-select: none; }
+
+    .search-wrapper { width: 280px; position: relative; }
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 44px;
+      border-radius: 50px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(20px);
+      font-size: 0.9rem;
+      outline: none;
+      transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .search-input:focus {
+      background: #fff;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      border-color: rgba(0,0,0,0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      color: var(--color-text-gray);
+      pointer-events: none;
+    }
+    .clear-btn {
+      position: absolute; right: 18px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      user-select: none;
+    }
+    .search-input:not(:placeholder-shown) ~ .clear-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .search-results-container {
+      position: fixed;
+      top: 72px;
+      left: 0; right: 0;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 24px 16px;
+      z-index: 130;
+    }
+    #searchResults { margin-top: 8px; max-height: 380px; overflow-y: auto; }
+
+    .search-item {
+      display: flex; gap: 12px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: #fff;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    .search-item:hover {
+      background: #f5f5f7;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+    .search-item img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
+    .search-item h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .search-item p{
+      font-size: .8rem;
+      color: #86868b;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-btn {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .menu-btn:hover { background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .menu-icon-lines { display: flex; flex-direction: column; gap: 4px; }
+    .menu-line { width: 16px; height: 2px; border-radius: 999px; background-color: var(--color-text-main); }
+
+    .nav-overlay {
+      position: fixed;
+      top: 72px;
+      right: 40px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      padding: 20px;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,0,0,0.05);
+      transform: translateY(-20px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 140;
+      min-width: 200px;
+    }
+    .nav-overlay.open { transform: translateY(0); opacity: 1; visibility: visible; }
+    .nav-list li { margin-bottom: 8px; }
+    .nav-link {
+      display: block;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .nav-link:hover { background: var(--color-bg-secondary); }
+
+    main { padding-top: 104px; padding-bottom: 64px; }
+
+    .breadcrumb { font-size: 0.8rem; color: var(--color-text-gray); margin-bottom: 16px; }
+    .breadcrumb a { color: var(--color-text-gray); }
+
+    .article-hero { margin-bottom: 50px; }
+    .article-kv {
+      width: 100%;
+      border-radius: 32px;
+      overflow: hidden;
+      background-color: #f0f0f0;
+      background-size: cover;
+      background-position: center;
+      min-height: 390px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    }
+
+    .article-header-block { margin-bottom: 0; position: relative; padding-right: 60px; }
+
+    .article-meta-row {
+      display: flex; flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--color-text-gray);
+      margin-bottom: 8px;
+    }
+    .article-meta-pill { padding: 4px 12px; border-radius: 999px; background: #f2f2f7; font-size: 0.78rem; }
+    .article-date { font-size: 0.85rem; }
+
+    .article-title { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 10px; }
+    .article-lead { font-size: 1rem; color: #4b4b4b; margin-top: 4px; margin-bottom: 30px; }
+
+    .article-content { font-size: 0.98rem; color: #1d1d1f; line-height: 1.9; }
+    .article-content h2 { font-size: 1.4rem; margin: 28px 0 12px; }
+    .article-content h3 { font-size: 1.15rem; margin: 20px 0 8px; }
+    .article-content p { margin-bottom: 24px; }
+    .article-content p.empty-space { height: 32px; margin: 0; }
+
+    /* 本文の箇条書きだけ復活 */
+    .article-content ul { list-style: disc; list-style-position: outside; padding-left: 1.2em; margin: 8px 0 16px; }
+    .article-content ol { list-style: decimal; list-style-position: outside; padding-left: 1.2em; margin: 8px 0 16px; }
+    .article-content li { overflow-wrap: break-word; line-height: 1.7; margin-bottom: 6px; }
+
+    .share-circle-btn {
+      position: absolute; top: 0; right: 0;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffffee;
+      backdrop-filter: blur(6px);
+      color: #000;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .share-circle-btn:hover { background: #fff; box-shadow: 0 10px 26px rgba(0,0,0,0.16); transform: translateY(-1px); }
+    .share-circle-btn span { font-size: 0.9rem; line-height: 1; }
+
+    .price-summary-section { margin-top: 40px; }
+    .price-summary-box {
+      background: #f5f5f7;
+      border-radius: 24px;
+      padding: 24px 28px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #1d1d1f;
+      white-space: pre-line;
+    }
+
+    .related-section { margin-top: 56px; padding-top: 28px; border-top: 1px solid rgba(0,0,0,0.06); }
+    .related-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; }
+    .related-grid { display: flex; flex-wrap: wrap; gap: 24px; }
+    .related-card {
+      border-radius: 20px; background: #fff; overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      flex: 0 0 calc((100% - 48px) / 3);
+      max-width: calc((100% - 48px) / 3);
+    }
+    .related-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
+    .related-thumb { width: 100%; height: 140px; background-size: cover; background-position: center; background-color: #f0f0f0; }
+    .related-body { padding: 10px 14px 14px; }
+    .related-service { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-gray); margin-bottom: 4px; }
+    .related-title-text { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .related-date { font-size: 0.75rem; color: var(--color-text-gray); }
+
+    .article-author { margin: 8px 0 24px; }
+    .author-link { display: inline-flex; align-items: center; gap: 10px; }
+    .author-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .author-name { font-size: 0.9rem; font-weight: 600; }
+
+    .footer { background: #f5f5f7; padding: 40px 0; border-top: 1px solid #d2d2d7; margin-top: 40px; }
+    .footer-container { max-width: 1080px; margin: 0 auto; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; }
+    .footer-links a { font-size: 15px; color: #1d1d1f; }
+    .footer-copy { font-size: 13px; color: #86868b; }
+
+    /* スマホ調整 */
+    @media (max-width: 767px) {
+      .top-header { padding: 10px 16px; }
+      .menu-btn > span { display: none; }
+      .menu-btn { width: 44px; height: 44px; padding: 0; border-radius: 999px; justify-content: center; }
+      .menu-line { width: 18px; }
+      main { padding-top: 96px; }
+      .article-title { font-size: 1.7rem; line-height: 1.35; margin-bottom: 6px; }
+      .article-lead { font-size: 0.98rem; line-height: 1.7; margin-bottom: 18px; }
+      .article-hero { margin: 0 0 20px; height: 220px; border-radius: 18px; overflow: hidden; }
+      .article-kv { min-height: 100%; box-shadow: 0 12px 26px rgba(0,0,0,0.12); }
+      .related-grid { flex-direction: column; gap: 16px; }
+      .related-card { flex: 1 1 100%; max-width: 100%; }
+      .related-thumb { height: 180px; }
+      .author-avatar { width: 38px; height: 38px; }
+      .author-name { font-size: 0.9rem; }
+
+      /* スマホ検索開閉 */
+      .search-wrapper {
+        width: 44px; height: 44px;
+        border-radius: 999px;
+        border: 2px solid #e5e5e7;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        overflow: hidden;
+        transition: width 0.35s ease, box-shadow 0.3s ease, border 0.3s ease, background 0.3s ease;
       }
+      .search-input {
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        background: transparent;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .search-icon {
+        position: absolute;
+        left: 50%; top: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px; height: 22px;
+        color: #a7a7aa;
+      }
+      .clear-btn { display: none; }
 
-      let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
-      if (draftKey) url += `?draftKey=${encodeURIComponent(draftKey)}`;
+      .fixed-header.search-open .nav-center { display: none; }
+      .fixed-header.search-open .nav-left { flex: 1 1 auto; }
+      .fixed-header.search-open .search-wrapper {
+        width: 100%;
+        max-width: 100%;
+        border: none;
+        box-shadow: none;
+        justify-content: flex-start;
+        background: transparent;
+      }
+      .fixed-header.search-open .search-input {
+        opacity: 1;
+        pointer-events: auto;
+        padding: 10px 40px 10px 44px;
+        border-radius: 999px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: #fff;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+      .fixed-header.search-open .search-icon {
+        left: 16px; top: 50%;
+        transform: translateY(-50%);
+      }
+      .fixed-header.search-open .clear-btn {
+        display: block;
+        right: 18px; top: 50%;
+        transform: translateY(-50%);
+        font-size: 22px;
+        width: 36px; height: 36px;
+        line-height: 36px;
+        text-align: center;
+      }
+      .search-results-container { padding: 0 16px 12px; }
+    }
 
-      const res = await fetch(url, {
-        headers: { "X-MICROCMS-API-KEY": API_KEY }
+    @media (min-width: 768px) {
+      .search-wrapper { width: 280px !important; transform: none !important; transition: none !important; }
+      .search-input { opacity: 1 !important; pointer-events: auto !important; }
+      .search-icon { left: 16px; top: 50%; transform: translateY(-50%); position: absolute; }
+      .fixed-header.search-open .search-wrapper { width: 280px !important; }
+    }
+
+    /* ============================
+       広告一旦すべて非表示（あなたの設定）
+       ============================ */
+    .side-sponsor, .between-sponsor, .ad-card { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <!-- 固定ヘッダー -->
+  <div class="fixed-header">
+    <div class="top-header">
+      <div class="nav-left">
+        <div class="search-wrapper">
+          <input type="text" class="search-input" id="searchInput" placeholder="" />
+          <span class="clear-btn" id="clear-btn">×</span>
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <a href="index.html" class="header-logo-link">
+          <h1 class="header-logo">SUBSCOPE</h1>
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="メニュー">
+          <div class="menu-icon-lines">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+          </div>
+          <span>Menu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-overlay" id="nav-overlay">
+    <ul class="nav-list">
+      <li><a href="index.html" class="nav-link" onclick="toggleMenu()">トップ</a></li>
+      <li><a href="all.html" class="nav-link" onclick="toggleMenu()">すべての記事</a></li>
+      <li><a href="ranking.html" class="nav-link" onclick="toggleMenu()">ランキング</a></li>
+      <li><a href="sns.html" class="nav-link" onclick="toggleMenu()">SNS</a></li>
+    </ul>
+  </div>
+
+  <div class="search-results-container">
+    <div id="searchResults"></div>
+  </div>
+
+  <main>
+    <div class="container reveal" id="article-wrap">
+      <div class="breadcrumb" id="breadcrumb"></div>
+
+      <section class="article-header-block">
+        <div class="article-meta-row">
+          <span class="article-meta-pill" id="meta-service"></span>
+          <span class="article-meta-pill" id="meta-category"></span>
+          <span class="article-date" id="meta-date"></span>
+        </div>
+
+        <!-- 著者 -->
+        <div class="article-author">
+          <a href="#" class="author-link" id="author-link">
+            <img id="author-avatar" class="author-avatar" alt="著者アイコン" />
+            <span id="author-name" class="author-name"></span>
+          </a>
+        </div>
+
+        <h1 class="article-title" id="article-title"></h1>
+        <p class="article-lead" id="article-lead"></p>
+
+        <button class="share-circle-btn" id="share-button" aria-label="この記事をシェアする">
+          <span>⇪</span>
+        </button>
+      </section>
+
+      <section class="article-hero">
+        <div class="article-kv" id="article-kv"></div>
+      </section>
+
+      <article class="article-content" id="article-content"></article>
+
+      <section class="price-summary-section reveal" id="price-summary-section" style="display:none">
+        <div class="price-summary-box" id="price-summary-box"></div>
+      </section>
+
+      <section class="related-section reveal" id="related-section">
+        <h2 class="related-title">関連する記事</h2>
+        <div class="related-grid" id="related-grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="privacy.html">プライバシーポリシー</a>
+        <a href="terms.html">利用規約</a>
+        <a href="company.html">運営会社</a>
+      </div>
+      <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- 共通スクリプト（SERVICE_ID / API_KEY / loadArticles / mapCmsArticle が定義されている想定） -->
+  <script src="index.js"></script>
+
+  <!-- 検索UI + メニュー -->
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      const fixedHeader = document.querySelector(".fixed-header");
+      const searchWrapper = document.querySelector(".search-wrapper");
+      const searchInput = document.getElementById("searchInput");
+      const clearBtn = document.getElementById("clear-btn");
+      const menuBtn = document.getElementById("menuBtn");
+
+      if (!fixedHeader || !searchWrapper || !searchInput) return;
+
+      let isOpen = false;
+      const isMobile = () => window.innerWidth <= 767;
+
+      searchWrapper.addEventListener("click", function (e) {
+        if (!isMobile()) {
+          if (e.target !== searchInput) searchInput.focus();
+          return;
+        }
+        if (isOpen && e.target === searchInput) return;
+
+        if (!isOpen) {
+          fixedHeader.classList.add("search-open");
+          isOpen = true;
+          setTimeout(() => searchInput.focus(), 80);
+        } else {
+          fixedHeader.classList.remove("search-open");
+          isOpen = false;
+          searchInput.blur();
+        }
       });
 
-      if (!res.ok) {
-        console.error("microCMS から記事取得に失敗しました", await res.text());
+      window.addEventListener("resize", () => {
+        if (!isMobile() && isOpen) {
+          fixedHeader.classList.remove("search-open");
+          isOpen = false;
+          searchInput.blur();
+        }
+      });
+
+      if (clearBtn) {
+        function updateClearBtn() {
+          clearBtn.style.display = searchInput.value.trim() === "" ? "none" : "block";
+        }
+        searchInput.addEventListener("input", updateClearBtn);
+        clearBtn.addEventListener("click", () => {
+          searchInput.value = "";
+          searchInput.dispatchEvent(new Event("input"));
+          updateClearBtn();
+          searchInput.focus();
+        });
+        updateClearBtn();
+      }
+
+      // ✅ メニュー開閉（必須）
+      if (menuBtn) menuBtn.addEventListener("click", toggleMenu);
+    });
+
+    function toggleMenu() {
+      const nav = document.getElementById("nav-overlay");
+      if (nav) nav.classList.toggle("open");
+    }
+  </script>
+
+  <!-- 記事データ読み込み & シェア（プレビュー対応 + OGP更新） -->
+  <script>
+    async function fetchArticleFromMicrocms(contentId, draftKey) {
+      try {
+        const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
+        if (typeof API_KEY === "undefined") {
+          console.error("API_KEY が定義されていません。index.js で定義してください。");
+          return null;
+        }
+
+        let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
+        if (draftKey) url += `?draftKey=${encodeURIComponent(draftKey)}`;
+
+        const res = await fetch(url, {
+          headers: { "X-MICROCMS-API-KEY": API_KEY }
+        });
+
+        if (!res.ok) {
+          console.error("microCMS から記事取得に失敗しました", await res.text());
+          return null;
+        }
+
+        const data = await res.json();
+        if (typeof mapCmsArticle === "function") return mapCmsArticle(data);
+
+        return {
+          id: data.id,
+          title: data.title || "",
+          contentHtml: data.content || "",
+          description: data.description || "",
+          categoryName: data.category?.name || "",
+          category: data.category?.id || "",
+          service: data.service || "",
+          date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
+          image: data.image?.url || "",
+          author: data.author || null,
+          authorName: data.author?.name || "",
+          authorImage: data.author?.avatar?.url || "",
+          priceSummary: data.priceSummary || ""
+        };
+      } catch (e) {
+        console.error("記事取得中にエラーが発生しました", e);
         return null;
       }
-
-      const data = await res.json();
-
-      if (typeof mapCmsArticle === "function") return mapCmsArticle(data);
-
-      return {
-        id: data.id,
-        title: data.title || "",
-        contentHtml: data.content || "",
-        description: data.description || "",
-        categoryName: data.category?.name || "",
-        category: data.category?.id || "",
-        service: data.service || "",
-        date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
-        image: data.image?.url || "",
-        author: data.author || null,
-        priceSummary: data.priceSummary || ""
-      };
-    } catch (e) {
-      console.error("記事取得中にエラーが発生しました", e);
-      return null;
     }
-  }
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    const params = new URLSearchParams(location.search);
-    const contentId = params.get("id");
-    const draftKey  = params.get("draftKey");
-
-    const kv             = document.getElementById("article-kv");
-    const titleEl        = document.getElementById("article-title");
-    const leadEl         = document.getElementById("article-lead");
-    const serviceEl      = document.getElementById("meta-service");
-    const categoryEl     = document.getElementById("meta-category");
-    const dateEl         = document.getElementById("meta-date");
-    const contentEl      = document.getElementById("article-content");
-    const breadcrumbEl   = document.getElementById("breadcrumb");
-    const relatedGrid    = document.getElementById("related-grid");
-    const relatedSection = document.getElementById("related-section");
-
-    const authorNameEl   = document.getElementById("author-name");
-    const authorAvatarEl = document.getElementById("author-avatar");
-    const authorLinkEl   = document.getElementById("author-link");
-
-    const priceSection = document.getElementById("price-summary-section");
-    const priceBox     = document.getElementById("price-summary-box");
-
-    let article = null;
-    let list = [];
-
-    if (draftKey && contentId) {
-      article = await fetchArticleFromMicrocms(contentId, draftKey);
-      if (typeof loadArticles === "function") await loadArticles();
-      list = window.articles || [];
-    } else {
-      if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
-        await loadArticles();
+    function setMeta(propertyOrName, content, isName=false) {
+      if (!content) return;
+      const selector = isName ? `meta[name="${propertyOrName}"]` : `meta[property="${propertyOrName}"]`;
+      let tag = document.querySelector(selector);
+      if (!tag) {
+        tag = document.createElement("meta");
+        if (isName) tag.setAttribute("name", propertyOrName);
+        else tag.setAttribute("property", propertyOrName);
+        document.head.appendChild(tag);
       }
-      list = window.articles || [];
-      article = list.find((a) => a.id === contentId) || list[0];
+      tag.setAttribute("content", content);
     }
 
-    if (!article) {
-      if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
-      if (relatedSection) relatedSection.style.display = "none";
-      if (priceSection) priceSection.style.display = "none";
-      document.title = "記事が見つかりませんでした | SUBSCOPE";
-      return;
-    }
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(location.search);
+      const contentId = params.get("id");
+      const draftKey  = params.get("draftKey");
 
-    const categoryLabel = article.categoryName || article.category || "その他";
+      const kv             = document.getElementById("article-kv");
+      const titleEl        = document.getElementById("article-title");
+      const leadEl         = document.getElementById("article-lead");
+      const serviceEl      = document.getElementById("meta-service");
+      const categoryEl     = document.getElementById("meta-category");
+      const dateEl         = document.getElementById("meta-date");
+      const contentEl      = document.getElementById("article-content");
+      const breadcrumbEl   = document.getElementById("breadcrumb");
+      const relatedGrid    = document.getElementById("related-grid");
+      const relatedSection = document.getElementById("related-section");
 
-    if (breadcrumbEl) {
-      breadcrumbEl.innerHTML = `
-        <a href="index.html">トップ</a> /
-        <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">${categoryLabel}</a> /
-        <span>${article.title}</span>
-      `;
-    }
+      const authorNameEl   = document.getElementById("author-name");
+      const authorAvatarEl = document.getElementById("author-avatar");
+      const authorLinkEl   = document.getElementById("author-link");
 
-    if (serviceEl) {
-      const serviceName = article.service || article.serviceName || "";
-      if (serviceName) {
-        serviceEl.textContent = serviceName;
-        serviceEl.style.display = "inline-block";
+      const priceSection = document.getElementById("price-summary-section");
+      const priceBox     = document.getElementById("price-summary-box");
+
+      let article = null;
+      let list = [];
+
+      // 1) 取得
+      if (draftKey && contentId) {
+        article = await fetchArticleFromMicrocms(contentId, draftKey);
+        if (typeof loadArticles === "function") await loadArticles();
+        list = window.articles || [];
       } else {
-        serviceEl.style.display = "none";
-      }
-    }
-
-    if (categoryEl) categoryEl.textContent = categoryLabel;
-    if (dateEl) dateEl.textContent = (article.date || "").replace(/-/g, ".");
-
-    if (kv) {
-      const img = article.image || "images/sample1.jpg";
-      kv.style.backgroundImage = `url('${img}')`;
-    }
-
-    if (article.title) document.title = `${article.title} | SUBSCOPE`;
-
-    // 著者
-    if (authorNameEl && authorAvatarEl && authorLinkEl) {
-      const authorObj = article.author || null;
-      const authorName = (authorObj && authorObj.name) || article.authorName || "";
-      const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
-
-      if (authorName) authorNameEl.textContent = authorName;
-      else {
-        const block = authorNameEl.closest(".article-author");
-        if (block) block.style.display = "none";
+        if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
+          await loadArticles();
+        }
+        list = window.articles || [];
+        article = list.find((a) => a.id === contentId) || list[0];
       }
 
-      if (authorImage) authorAvatarEl.src = authorImage;
-      else authorAvatarEl.style.display = "none";
-
-      authorLinkEl.href = "javascript:void(0)";
-      authorLinkEl.style.cursor = "default";
-      authorLinkEl.style.pointerEvents = "none";
-    }
-
-    // タイトル & リード
-    if (titleEl) titleEl.textContent = article.title || "";
-
-    if (leadEl) {
-      const leadFromCms = (article.description || "").trim();
-      if (leadFromCms) leadEl.textContent = leadFromCms;
-      else {
-        const tmp = document.createElement("div");
-        tmp.innerHTML = article.contentHtml || article.content || "";
-        const firstP = tmp.querySelector("p");
-        leadEl.textContent = firstP ? firstP.textContent : "";
+      // 2) ない場合
+      if (!article) {
+        if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+        if (relatedSection) relatedSection.style.display = "none";
+        if (priceSection) priceSection.style.display = "none";
+        document.title = "記事が見つかりませんでした | SUBSCOPE";
+        return;
       }
-    }
 
-    // 本文
-    if (contentEl) {
-      const bodyHtml = article.contentHtml || article.content || "";
-      contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
-    }
+      // 3) URL（canonical/og:url 用）
+      const currentUrl = new URL(window.location.href);
+      const shareUrl = currentUrl.origin + currentUrl.pathname
+        + `?id=${encodeURIComponent(article.id)}`
+        + (draftKey ? `&draftKey=${encodeURIComponent(draftKey)}` : "");
 
-    // 料金プラン
-    if (priceSection && priceBox) {
-      if (article.priceSummary && article.priceSummary.trim() !== "") {
-        priceBox.innerHTML = article.priceSummary;
-        priceSection.style.display = "block";
-      } else {
-        priceSection.style.display = "none";
+      // 4) ページタイトル / OGP更新
+      const ogTitle = article.title ? `${article.title} | SUBSCOPE` : "SUBSCOPE";
+      const ogDesc  = (article.description || "").trim() || "SUBSCOPEの記事ページ";
+      const ogImg   = article.image || "https://www.subscope.jp/ogp-default-v3.png";
+
+      document.title = ogTitle;
+
+      // canonical 更新
+      let canonical = document.querySelector('link[rel="canonical"]');
+      if (!canonical) {
+        canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        document.head.appendChild(canonical);
       }
-    }
+      canonical.href = shareUrl;
 
-    // 関連記事
-    const related = (list || [])
-      .filter((a) => a.id !== article.id && ((a.categoryName || a.category) === categoryLabel || a.service === article.service))
-      .slice(0, 6);
+      // OGP
+      setMeta("og:title", ogTitle);
+      setMeta("og:description", ogDesc);
+      setMeta("og:url", shareUrl);
+      setMeta("og:image", ogImg);
+      setMeta("og:image:secure_url", ogImg);
 
-    if (!related.length) {
-      if (relatedSection) relatedSection.style.display = "none";
-    } else if (relatedGrid) {
-      relatedGrid.innerHTML = related.map((a) => `
-        <div class="related-card" onclick="openArticle('${a.id}')">
-          <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-          <div class="related-body">
-            <div class="related-service">${a.service || ""}</div>
-            <div class="related-title-text">${a.title || ""}</div>
-            <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
+      // Twitter
+      setMeta("twitter:title", ogTitle, true);
+      setMeta("twitter:description", ogDesc, true);
+      setMeta("twitter:image", ogImg, true);
+
+      // 5) パンくず / メタ
+      const categoryLabel = article.categoryName || article.category || "その他";
+
+      if (breadcrumbEl) {
+        breadcrumbEl.innerHTML = `
+          <a href="index.html">トップ</a> /
+          <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">${categoryLabel}</a> /
+          <span>${article.title || ""}</span>
+        `;
+      }
+
+      if (serviceEl) {
+        const serviceName = article.service || article.serviceName || "";
+        if (serviceName) {
+          serviceEl.textContent = serviceName;
+          serviceEl.style.display = "inline-block";
+        } else {
+          serviceEl.style.display = "none";
+        }
+      }
+
+      if (categoryEl) categoryEl.textContent = categoryLabel;
+      if (dateEl) dateEl.textContent = (article.date || "").replace(/-/g, ".");
+
+      // KV
+      if (kv) {
+        const img = article.image || "images/sample1.jpg";
+        kv.style.backgroundImage = `url('${img}')`;
+      }
+
+      // 6) 著者
+      if (authorNameEl && authorAvatarEl && authorLinkEl) {
+        const authorObj   = article.author || null;
+        const authorName  = (authorObj && authorObj.name) || article.authorName || "";
+        const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
+
+        if (authorName) authorNameEl.textContent = authorName;
+        else {
+          const block = authorNameEl.closest(".article-author");
+          if (block) block.style.display = "none";
+        }
+
+        if (authorImage) authorAvatarEl.src = authorImage;
+        else authorAvatarEl.style.display = "none";
+
+        authorLinkEl.href = "javascript:void(0)";
+        authorLinkEl.style.cursor = "default";
+        authorLinkEl.style.pointerEvents = "none";
+      }
+
+      // 7) タイトル & リード
+      if (titleEl) titleEl.textContent = article.title || "";
+
+      if (leadEl) {
+        const leadFromCms = (article.description || "").trim();
+        if (leadFromCms) {
+          leadEl.textContent = leadFromCms;
+        } else {
+          const tmp = document.createElement("div");
+          tmp.innerHTML = article.contentHtml || article.content || "";
+          const firstP = tmp.querySelector("p");
+          leadEl.textContent = firstP ? firstP.textContent : "";
+        }
+      }
+
+      // 8) 本文
+      if (contentEl) {
+        const bodyHtml = article.contentHtml || article.content || "";
+        contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+
+        // 空段落を余白扱い
+        const ps = contentEl.querySelectorAll("p");
+        ps.forEach((p) => {
+          const inner = p.innerHTML.replace(/&nbsp;/g, "").trim().toLowerCase();
+          if (inner === "" || inner === "<br>" || inner === "<br/>" || inner === "<br />") {
+            p.classList.add("empty-space");
+          }
+        });
+      }
+
+      // 9) シェア
+      const shareButton = document.getElementById("share-button");
+      if (shareButton) {
+        shareButton.addEventListener("click", async () => {
+          const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
+          if (navigator.share) {
+            try {
+              await navigator.share({ title: shareText, text: shareText, url: shareUrl });
+            } catch (e) {}
+          } else {
+            try {
+              await navigator.clipboard.writeText(shareUrl);
+              alert("記事のURLをコピーしました");
+            } catch (e) {
+              alert("コピーに失敗しました…");
+            }
+          }
+        });
+      }
+
+      // 10) 料金プラン
+      if (priceSection && priceBox) {
+        if (article.priceSummary && article.priceSummary.trim() !== "") {
+          priceBox.innerHTML = article.priceSummary;
+          priceSection.style.display = "block";
+        } else {
+          priceSection.style.display = "none";
+        }
+      }
+
+      // 11) 関連記事
+      const related = (list || [])
+        .filter((a) => a.id !== article.id && ((a.categoryName || a.category) === categoryLabel || a.service === article.service))
+        .slice(0, 6);
+
+      if (!related.length) {
+        if (relatedSection) relatedSection.style.display = "none";
+      } else if (relatedGrid) {
+        relatedGrid.innerHTML = related.map((a) => `
+          <div class="related-card" onclick="openArticle('${a.id}')">
+            <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+            <div class="related-body">
+              <div class="related-service">${a.service || ""}</div>
+              <div class="related-title-text">${a.title || ""}</div>
+              <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
+            </div>
           </div>
-        </div>
-      `).join("");
+        `).join("");
+      }
+
+      // 12) スクロールリビール
+      const reveals = document.querySelectorAll(".reveal");
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("active");
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      reveals.forEach((el) => io.observe(el));
+    });
+
+    function openArticle(id) {
+      window.location.href = "article.html?id=" + encodeURIComponent(id);
     }
-  });
-
-  function openArticle(id) {
-    window.location.href = "article.html?id=" + encodeURIComponent(id);
-  }
-</script>
-
+  </script>
 </body>
 </html>
