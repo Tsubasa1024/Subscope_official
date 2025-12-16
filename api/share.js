@@ -19,11 +19,11 @@ export default async function handler(req, res) {
     const title = (data.title || "SUBSCOPE") + " | SUBSCOPE";
     const desc =
       (data.description || "").trim() || "SUBSCOPEの記事ページ";
-    const img =
-      data.eyecatch?.url || "https://www.subscope.jp/ogp-default-v3.png";
-    const img = baseImg.includes("?")
-  ? `${baseImg}&w=1200&h=630&fit=crop`
-  : `${baseImg}?w=1200&h=630&fit=crop`;
+const baseImg = data.eyecatch?.url || "https://www.subscope.jp/ogp-default-v3.png";
+const img = baseImg.includes("?")
+  ? `${baseImg}&w=1200&h=630&fit=crop&fm=jpg`
+  : `${baseImg}?w=1200&h=630&fit=crop&fm=jpg`;
+
 
     // 実際に読む記事ページURL（あなたの既存）
     const dest = `https://www.subscope.jp/article.html?id=${encodeURIComponent(id)}`;
