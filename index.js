@@ -607,7 +607,7 @@ function renderHero() {
     const categories = [
       "すべて",
       "音楽",
-      "映画・ドラマ",
+      "映像",
       "学習・資格",
       "健康・フィットネス",
       "ゲーム・エンタメ",
@@ -898,6 +898,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initScrollReveal();
 });
 })();
+
 
 
 
