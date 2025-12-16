@@ -695,9 +695,9 @@
 
       // 3) URL（canonical/og:url 用）
       const currentUrl = new URL(window.location.href);
-      const shareUrl = currentUrl.origin + currentUrl.pathname
-        + `?id=${encodeURIComponent(article.id)}`
-        + (draftKey ? `&draftKey=${encodeURIComponent(draftKey)}` : "");
+      const shareUrl =
+  `${currentUrl.origin}/api/share?id=${encodeURIComponent(article.id)}` +
+  (draftKey ? `&draftKey=${encodeURIComponent(draftKey)}` : "");
 
       // 4) ページタイトル / OGP更新
       const ogTitle = article.title ? `${article.title} | SUBSCOPE` : "SUBSCOPE";
