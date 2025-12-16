@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const desc =
       (data.description || "").trim() || "SUBSCOPEの記事ページ";
     const img =
-      data.image?.url || "https://www.subscope.jp/ogp-default-v3.png";
+      data.eyecatch?.url || "https://www.subscope.jp/ogp-default-v3.png";
 
     // 実際に読む記事ページURL（あなたの既存）
     const dest = `https://www.subscope.jp/article.html?id=${encodeURIComponent(id)}`;
