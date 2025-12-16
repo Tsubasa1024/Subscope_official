@@ -457,6 +457,22 @@
 
     /* 広告非表示 */
     .side-sponsor, .between-sponsor, .ad-card { display: none !important; }
+    /* =========================
+   ✅ PC版：Menuが押せない対策
+   ========================= */
+
+/* 1) 中央ロゴの当たり判定が広がってMenuを塞ぐのを防ぐ */
+.nav-center { pointer-events: none; }
+.nav-center a { pointer-events: auto; } /* ロゴ自体はクリック可 */
+
+/* 2) 検索結果コンテナ（透明でもfixed）がクリックを奪わないように */
+.search-results-container { pointer-events: none; }
+#searchResults { pointer-events: auto; } /* 結果の中身だけクリック可 */
+
+/* 3) Menuボタンを最前面に固定 */
+.nav-right { position: relative; z-index: 999; }
+.menu-btn { position: relative; z-index: 1000; }
+
   </style>
 </head>
 
