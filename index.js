@@ -11,6 +11,9 @@
   // ============
   const SERVICE_ID = "subscope";
   const API_KEY = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
+   // ✅ article.html から参照できるようにグローバル公開
+window.SERVICE_ID = SERVICE_ID;
+window.API_KEY = API_KEY;
 
   const ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
   const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
@@ -898,6 +901,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initScrollReveal();
 });
 })();
+
 
 
 
