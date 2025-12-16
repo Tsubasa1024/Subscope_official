@@ -651,6 +651,11 @@
 
         const data = await res.json();
         if (typeof mapCmsArticle === "function") return mapCmsArticle(data);
+        const eyecatchUrl =
+  data?.eyecatch?.url ||
+  data?.image?.url ||
+  "";
+
 
         return {
           id: data.id,
@@ -661,7 +666,7 @@
           category: data.category?.id || "",
           service: data.service || "",
           date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
-          image: data.image?.url || "",
+          image: eyecatchUrl,
           author: data.author || null,
           authorName: data.author?.name || "",
           authorImage: data.author?.avatar?.url || "",
