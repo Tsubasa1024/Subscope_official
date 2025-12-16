@@ -1213,66 +1213,64 @@
     <!-- 共通スクリプト（ここで SERVICE_ID / API_KEY / loadArticles / mapCmsArticle が定義されている想定） -->
     <script src="index.js"></script>
 
-    <!-- 検索 UI（スマホの開閉など） -->
-    <script>
-        window.addEventListener("DOMContentLoaded", function () {
-            const fixedHeader = document.querySelector(".fixed-header");
-            const searchWrapper =
-                document.querySelector(".search-wrapper");
-            const searchInput = document.getElementById("searchInput");
-            const clearBtn = document.getElementById("clear-btn");
+  <!-- 検索 UI（スマホの開閉など） -->
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  const fixedHeader = document.querySelector(".fixed-header");
+  const searchWrapper = document.querySelector(".search-wrapper");
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clear-btn");
+  if (!fixedHeader || !searchWrapper || !searchInput) return;
 
-            if (!fixedHeader || !searchWrapper || !searchInput) return;
+  let isOpen = false;
+  const isMobile = () => window.innerWidth <= 767;
 
-            let isOpen = false;
-            const isMobile = () => window.innerWidth <= 767;
+  searchWrapper.addEventListener("click", function (e) {
+    if (!isMobile()) {
+      if (e.target !== searchInput) searchInput.focus();
+      return;
+    }
+    if (isOpen && e.target === searchInput) return;
 
-            searchWrapper.addEventListener("click", function (e) {
-                if (!isMobile()) {
-                    if (e.target !== searchInput) searchInput.focus();
-                    return;
-                }
-                if (isOpen && e.target === searchInput) return;
+    if (!isOpen) {
+      fixedHeader.classList.add("search-open");
+      isOpen = true;
+      setTimeout(() => searchInput.focus(), 80);
+    } else {
+      fixedHeader.classList.remove("search-open");
+      isOpen = false;
+      searchInput.blur();
+    }
+  });
 
-                if (!isOpen) {
-                    fixedHeader.classList.add("search-open");
-                    isOpen = true;
-                    setTimeout(() => searchInput.focus(), 80);
-                } else {
-                    fixedHeader.classList.remove("search-open");
-                    isOpen = false;
-                    searchInput.blur();
-                }
-            });
+  window.addEventListener("resize", () => {
+    if (!isMobile() && isOpen) {
+      fixedHeader.classList.remove("search-open");
+      isOpen = false;
+      searchInput.blur();
+    }
+  });
 
-            window.addEventListener("resize", () => {
-                if (!isMobile() && isOpen) {
-                    fixedHeader.classList.remove("search-open");
-                    isOpen = false;
-                    searchInput.blur();
-                }
-            });
+  if (clearBtn) {
+    function updateClearBtn() {
+      clearBtn.style.display = searchInput.value.trim() === "" ? "none" : "block";
+    }
+    searchInput.addEventListener("input", updateClearBtn);
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      searchInput.dispatchEvent(new Event("input"));
+      updateClearBtn();
+      searchInput.focus();
+    });
+    updateClearBtn();
+  }
+});
 
-            if (clearBtn) {
-                function updateClearBtn() {
-                    if (searchInput.value.trim() === "") {
-                        clearBtn.style.display = "none";
-                    } else {
-                        clearBtn.style.display = "block";
-                    }
-                }
-                searchInput.addEventListener("input", updateClearBtn);
-                clearBtn.addEventListener("click", () => {
-                    searchInput.value = "";
-                    searchInput.dispatchEvent(new Event("input"));
-                    updateClearBtn();
-                    searchInput.focus();
-                });
-                updateClearBtn();
-            }
-        });
-
-
+function toggleMenu() {
+  const nav = document.getElementById("nav-overlay");
+  if (nav) nav.classList.toggle("open");
+}
+</script>
     <!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
     <script>
         // microCMS から単体記事を取得（プレビュー対応）
