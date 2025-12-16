@@ -1271,365 +1271,203 @@ function toggleMenu() {
   if (nav) nav.classList.toggle("open");
 }
 </script>
-    <!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
-    <script>
-        // microCMS から単体記事を取得（プレビュー対応）
-        async function fetchArticleFromMicrocms(contentId, draftKey) {
-            try {
-                const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
-                if (typeof API_KEY === "undefined") {
-                    console.error("API_KEY が定義されていません。index.js で定義してください。");
-                    return null;
-                }
+<!-- 記事データ読み込み & シェア処理（★プレビュー対応版） -->
+<script>
+  // microCMS から単体記事を取得（プレビュー対応）
+  async function fetchArticleFromMicrocms(contentId, draftKey) {
+    try {
+      const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
+      if (typeof API_KEY === "undefined") {
+        console.error("API_KEY が定義されていません。index.js で定義してください。");
+        return null;
+      }
 
-                let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
-                if (draftKey) {
-                    url += `?draftKey=${encodeURIComponent(draftKey)}`;
-                }
+      let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
+      if (draftKey) url += `?draftKey=${encodeURIComponent(draftKey)}`;
 
-                const res = await fetch(url, {
-                    headers: 
-        // microCMS から単体記事を取得（プレビュー対応）
-        async function fetchArticleFromMicrocms(contentId, draftKey) {
-            try {
-                const serviceId = typeof SERVICE_ID !== "undefined" ? SERVICE_ID : "subscope";
-                if (typeof API_KEY === "undefined") {
-                    console.error("API_KEY が定義されていません。index.js で定義してください。");
-                    return null;
-                }
+      const res = await fetch(url, {
+        headers: { "X-MICROCMS-API-KEY": API_KEY }
+      });
 
-                let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
-                if (draftKey) {
-                    url += `?draftKey=${encodeURIComponent(draftKey)}`;
-                }
+      if (!res.ok) {
+        console.error("microCMS から記事取得に失敗しました", await res.text());
+        return null;
+      }
 
-                const res = await fetch(url, {
-                    headers: {
-                        "X-MICROCMS-API-KEY": API_KEY
-                    }
-                });
+      const data = await res.json();
 
-                if (!res.ok) {
-                    console.error("microCMS から記事取得に失敗しました", await res.text());
-                    return null;
-                }
+      if (typeof mapCmsArticle === "function") return mapCmsArticle(data);
 
-                const data = await res.json();
+      return {
+        id: data.id,
+        title: data.title || "",
+        contentHtml: data.content || "",
+        description: data.description || "",
+        categoryName: data.category?.name || "",
+        category: data.category?.id || "",
+        service: data.service || "",
+        date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
+        image: data.image?.url || "",
+        author: data.author || null,
+        priceSummary: data.priceSummary || ""
+      };
+    } catch (e) {
+      console.error("記事取得中にエラーが発生しました", e);
+      return null;
+    }
+  }
 
-                // index.js 側で mapCmsArticle がある前提
-                if (typeof mapCmsArticle === "function") {
-                    return mapCmsArticle(data);
-                } else {
-                    // mapCmsArticle がなければ最低限の項目だけ整形
-                    return {
-                        id: data.id,
-                        title: data.title || "",
-                        contentHtml: data.content || "",
-                        description: data.description || "",
-                        categoryName: data.category && data.category.name ? data.category.name : "",
-                        category: data.category && data.category.id ? data.category.id : "",
-                        service: data.service || "",
-                        date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
-                        image: data.image && data.image.url ? data.image.url : "",
-                        author: data.author || null,
-                        priceSummary: data.priceSummary || ""
-                    };
-                }
-            } catch (e) {
-                console.error("記事取得中にエラーが発生しました", e);
-                return null;
-            }
-        }
+  document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(location.search);
+    const contentId = params.get("id");
+    const draftKey  = params.get("draftKey");
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const params    = new URLSearchParams(location.search);
-            const contentId = params.get("id");
-            const draftKey  = params.get("draftKey");
+    const kv             = document.getElementById("article-kv");
+    const titleEl        = document.getElementById("article-title");
+    const leadEl         = document.getElementById("article-lead");
+    const serviceEl      = document.getElementById("meta-service");
+    const categoryEl     = document.getElementById("meta-category");
+    const dateEl         = document.getElementById("meta-date");
+    const contentEl      = document.getElementById("article-content");
+    const breadcrumbEl   = document.getElementById("breadcrumb");
+    const relatedGrid    = document.getElementById("related-grid");
+    const relatedSection = document.getElementById("related-section");
 
-            const kv             = document.getElementById("article-kv");
-            const titleEl        = document.getElementById("article-title");
-            const leadEl         = document.getElementById("article-lead");
-            const serviceEl      = document.getElementById("meta-service");
-            const categoryEl     = document.getElementById("meta-category");
-            const dateEl         = document.getElementById("meta-date");
-            const contentEl      = document.getElementById("article-content");
-            const breadcrumbEl   = document.getElementById("breadcrumb");
-            const relatedGrid    = document.getElementById("related-grid");
-            const relatedSection = document.getElementById("related-section");
+    const authorNameEl   = document.getElementById("author-name");
+    const authorAvatarEl = document.getElementById("author-avatar");
+    const authorLinkEl   = document.getElementById("author-link");
 
-            const authorNameEl   = document.getElementById("author-name");
-            const authorAvatarEl = document.getElementById("author-avatar");
-            const authorLinkEl   = document.getElementById("author-link");
+    const priceSection = document.getElementById("price-summary-section");
+    const priceBox     = document.getElementById("price-summary-box");
 
-            const priceSection = document.getElementById("price-summary-section");
-            const priceBox     = document.getElementById("price-summary-box");
+    let article = null;
+    let list = [];
 
-            // ==============================
-            // 1. 記事データを取得
-            // ==============================
-            let article = null;
-            let list    = [];
+    if (draftKey && contentId) {
+      article = await fetchArticleFromMicrocms(contentId, draftKey);
+      if (typeof loadArticles === "function") await loadArticles();
+      list = window.articles || [];
+    } else {
+      if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
+        await loadArticles();
+      }
+      list = window.articles || [];
+      article = list.find((a) => a.id === contentId) || list[0];
+    }
 
-            if (draftKey && contentId) {
-                // ★ プレビュー用：draftKey 付きで microCMS 詳細 API を叩く
-                article = await fetchArticleFromMicrocms(contentId, draftKey);
+    if (!article) {
+      if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+      if (relatedSection) relatedSection.style.display = "none";
+      if (priceSection) priceSection.style.display = "none";
+      document.title = "記事が見つかりませんでした | SUBSCOPE";
+      return;
+    }
 
-                // 関連記事用には公開記事一覧をロード（あれば）
-                if (typeof loadArticles === "function") {
-                    await loadArticles();
-                }
-                list = window.articles || [];
-            } else {
-                // ★ 通常アクセス：既存の一覧から該当記事を探す
-                if (!window.articles || window.articles.length === 0) {
-                    if (typeof loadArticles === "function") {
-                        await loadArticles();
-                    }
-                }
-                list    = window.articles || [];
-                article = list.find((a) => a.id === contentId) || list[0];
-            }
+    const categoryLabel = article.categoryName || article.category || "その他";
 
-            // 記事がなかったとき
-            if (!article) {
-                if (contentEl) {
-                    contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
-                }
-                if (relatedSection) relatedSection.style.display = "none";
-                if (priceSection)   priceSection.style.display   = "none";
-                document.title = "記事が見つかりませんでした | SUBSCOPE";
-                return;
-            }
+    if (breadcrumbEl) {
+      breadcrumbEl.innerHTML = `
+        <a href="index.html">トップ</a> /
+        <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">${categoryLabel}</a> /
+        <span>${article.title}</span>
+      `;
+    }
 
-            // ==============================
-            // 2. パンくず・メタ情報
-            // ==============================
-            const categoryLabel =
-                article.categoryName ||
-                article.category ||
-                "その他";
+    if (serviceEl) {
+      const serviceName = article.service || article.serviceName || "";
+      if (serviceName) {
+        serviceEl.textContent = serviceName;
+        serviceEl.style.display = "inline-block";
+      } else {
+        serviceEl.style.display = "none";
+      }
+    }
 
-            if (breadcrumbEl) {
-                breadcrumbEl.innerHTML = `
-                    <a href="index.html">トップ</a> /
-                    <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">
-                        ${categoryLabel}
-                    </a> /
-                    <span>${article.title}</span>
-                `;
-            }
+    if (categoryEl) categoryEl.textContent = categoryLabel;
+    if (dateEl) dateEl.textContent = (article.date || "").replace(/-/g, ".");
 
-            if (serviceEl) {
-                const serviceName = article.service || article.serviceName || "";
-                if (serviceName) {
-                    serviceEl.textContent = serviceName;
-                    serviceEl.style.display = "inline-block";
-                } else {
-                    serviceEl.style.display = "none";
-                }
-            }
+    if (kv) {
+      const img = article.image || "images/sample1.jpg";
+      kv.style.backgroundImage = `url('${img}')`;
+    }
 
-            if (categoryEl) categoryEl.textContent = categoryLabel;
-            if (dateEl) {
-                dateEl.textContent = (article.date || "").replace(/-/g, ".");
-            }
+    if (article.title) document.title = `${article.title} | SUBSCOPE`;
 
-            if (kv) {
-                const img = article.image || "images/sample1.jpg";
-                kv.style.backgroundImage = `url('${img}')`;
-            }
+    // 著者
+    if (authorNameEl && authorAvatarEl && authorLinkEl) {
+      const authorObj = article.author || null;
+      const authorName = (authorObj && authorObj.name) || article.authorName || "";
+      const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
 
-            // ページタイトル
-            if (article.title) {
-                document.title = `${article.title} | SUBSCOPE`;
-            }
+      if (authorName) authorNameEl.textContent = authorName;
+      else {
+        const block = authorNameEl.closest(".article-author");
+        if (block) block.style.display = "none";
+      }
 
-            // ==============================
-            // 3. 著者表示
-            // ==============================
-            if (authorNameEl && authorAvatarEl && authorLinkEl) {
-                const authorObj  = article.author || null;
-                const authorName =
-                    (authorObj && authorObj.name) || article.authorName || "";
-                const authorImage =
-                    (authorObj && authorObj.avatar && authorObj.avatar.url) ||
-                    article.authorImage ||
-                    "";
+      if (authorImage) authorAvatarEl.src = authorImage;
+      else authorAvatarEl.style.display = "none";
 
-                if (authorName) {
-                    authorNameEl.textContent = authorName;
-                } else {
-                    const block = authorNameEl.closest(".article-author");
-                    if (block) block.style.display = "none";
-                }
+      authorLinkEl.href = "javascript:void(0)";
+      authorLinkEl.style.cursor = "default";
+      authorLinkEl.style.pointerEvents = "none";
+    }
 
-                if (authorImage) {
-                    authorAvatarEl.src = authorImage;
-                } else {
-                    authorAvatarEl.style.display = "none";
-                }
+    // タイトル & リード
+    if (titleEl) titleEl.textContent = article.title || "";
 
-                // 今はプロフィールページ未実装 → クリック無効
-                authorLinkEl.href = "javascript:void(0)";
-                authorLinkEl.style.cursor = "default";
-                authorLinkEl.style.pointerEvents = "none";
-            }
+    if (leadEl) {
+      const leadFromCms = (article.description || "").trim();
+      if (leadFromCms) leadEl.textContent = leadFromCms;
+      else {
+        const tmp = document.createElement("div");
+        tmp.innerHTML = article.contentHtml || article.content || "";
+        const firstP = tmp.querySelector("p");
+        leadEl.textContent = firstP ? firstP.textContent : "";
+      }
+    }
 
-            // ==============================
-            // 4. タイトル & リード
-            // ==============================
-            if (titleEl) titleEl.textContent = article.title || "";
+    // 本文
+    if (contentEl) {
+      const bodyHtml = article.contentHtml || article.content || "";
+      contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+    }
 
-            if (leadEl) {
-                const leadFromCms = (article.description || "").trim();
-                if (leadFromCms) {
-                    leadEl.textContent = leadFromCms;
-                } else {
-                    const tmp = document.createElement("div");
-                    tmp.innerHTML = article.contentHtml || article.content || "";
-                    const firstP = tmp.querySelector("p");
-                    leadEl.textContent = firstP ? firstP.textContent : "";
-                }
-            }
+    // 料金プラン
+    if (priceSection && priceBox) {
+      if (article.priceSummary && article.priceSummary.trim() !== "") {
+        priceBox.innerHTML = article.priceSummary;
+        priceSection.style.display = "block";
+      } else {
+        priceSection.style.display = "none";
+      }
+    }
 
-            // ==============================
-            // 5. 本文
-            // ==============================
-            if (contentEl) {
-                const bodyHtml = article.contentHtml || article.content || "";
-                contentEl.innerHTML =
-                    bodyHtml ||
-                    `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+    // 関連記事
+    const related = (list || [])
+      .filter((a) => a.id !== article.id && ((a.categoryName || a.category) === categoryLabel || a.service === article.service))
+      .slice(0, 6);
 
-                // 空の段落（空白行用）を検知してクラス付与
-                const ps = contentEl.querySelectorAll("p");
-                ps.forEach((p) => {
-                    const inner = p.innerHTML
-                        .replace(/&nbsp;/g, "")
-                        .trim()
-                        .toLowerCase();
-                    if (
-                        inner === "" ||
-                        inner === "<br>" ||
-                        inner === "<br/>" ||
-                        inner === "<br />"
-                    ) {
-                        p.classList.add("empty-space");
-                    }
-                });
-            }
+    if (!related.length) {
+      if (relatedSection) relatedSection.style.display = "none";
+    } else if (relatedGrid) {
+      relatedGrid.innerHTML = related.map((a) => `
+        <div class="related-card" onclick="openArticle('${a.id}')">
+          <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+          <div class="related-body">
+            <div class="related-service">${a.service || ""}</div>
+            <div class="related-title-text">${a.title || ""}</div>
+            <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+  });
 
-            // ==============================
-            // 6. シェアボタン
-            // ==============================
-            const shareButton = document.getElementById("share-button");
-            if (shareButton) {
-                shareButton.addEventListener("click", async () => {
-                    const shareUrl  = window.location.href.split("#")[0];
-                    const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
+  function openArticle(id) {
+    window.location.href = "article.html?id=" + encodeURIComponent(id);
+  }
+</script>
 
-                    if (navigator.share) {
-                        try {
-                            await navigator.share({
-                                title: shareText,
-                                text: shareText,
-                                url: shareUrl,
-                            });
-                        } catch (e) {
-                            // キャンセルなどは無視
-                        }
-                    } else {
-                        if (navigator.clipboard && navigator.clipboard.writeText) {
-                            try {
-                                await navigator.clipboard.writeText(shareUrl);
-                                alert("記事のURLをコピーしました");
-                            } catch (e) {
-                                alert("コピーに失敗しました…");
-                            }
-                        } else {
-                            const tmp = document.createElement("input");
-                            tmp.value = shareUrl;
-                            document.body.appendChild(tmp);
-                            tmp.select();
-                            document.execCommand("copy");
-                            document.body.removeChild(tmp);
-                            alert("記事のURLをコピーしました");
-                        }
-                    }
-                });
-            }
-
-            // ==============================
-            // 7. 料金プラン
-            // ==============================
-            if (priceSection && priceBox) {
-                if (article.priceSummary && article.priceSummary.trim() !== "") {
-                    priceBox.innerHTML = article.priceSummary;
-                    priceSection.style.display = "block";
-                } else {
-                    priceSection.style.display = "none";
-                }
-            }
-
-            // ==============================
-            // 8. 関連記事
-            // ==============================
-            // （プレビュー時は公開済み一覧からのみ抽出される）
-            const related = (list || [])
-                .filter(
-                    (a) =>
-                        a.id !== article.id &&
-                        ((a.categoryName || a.category) === categoryLabel ||
-                            a.service === article.service)
-                )
-                .slice(0, 6);
-
-            if (!related.length) {
-                if (relatedSection) relatedSection.style.display = "none";
-            } else if (relatedGrid) {
-                relatedGrid.innerHTML = related
-                    .map(
-                        (a) => `
-                        <div class="related-card" onclick="openArticle('${a.id}')">
-                            <div class="related-thumb" style="background-image:url('${
-                                a.image || "images/sample1.jpg"
-                            }');"></div>
-                            <div class="related-body">
-                                <div class="related-service">${a.service || ""}</div>
-                                <div class="related-title-text">${a.title || ""}</div>
-                                <div class="related-date">${(a.date || "").replace(
-                                    /-/g,
-                                    "."
-                                )}</div>
-                            </div>
-                        </div>
-                    `
-                    )
-                    .join("");
-            }
-
-            // ==============================
-            // 9. スクロールリビール
-            // ==============================
-            const reveals = document.querySelectorAll(".reveal");
-            const io = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((e) => {
-                        if (e.isIntersecting) {
-                            e.target.classList.add("active");
-                            io.unobserve(e.target);
-                        }
-                    });
-                },
-                { threshold: 0.1 }
-            );
-            reveals.forEach((el) => io.observe(el));
-        });
-
-        function openArticle(id) {
-            window.location.href =
-                "article.html?id=" + encodeURIComponent(id);
-        }
-    </script>
 </body>
 </html>
