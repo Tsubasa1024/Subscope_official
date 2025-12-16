@@ -185,6 +185,19 @@
       gap: 8px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
+    /* iPad Safari対策：Menuが青くなるのを防ぐ */
+.menu-btn,
+.menu-btn * {
+  color: var(--color-text-main) !important;
+  -webkit-text-fill-color: var(--color-text-main) !important;
+  text-decoration: none !important;
+}
+
+/* iOSの青いタップ色を消す */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
     .menu-btn:hover { background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
     .menu-icon-lines { display: flex; flex-direction: column; gap: 4px; }
     .menu-line { width: 16px; height: 2px; border-radius: 999px; background-color: var(--color-text-main); }
