@@ -591,53 +591,21 @@
       const clearBtn = document.getElementById("clear-btn");
       const menuBtn = document.getElementById("menuBtn");
 
-      if (!fixedHeader || !searchWrapper || !searchInput) return;
+if (!fixedHeader || !searchWrapper) return;
 
-      let isOpen = false;
-      const isMobile = () => window.innerWidth <= 767;
+/* 検索UI系だけ searchInput を使う */
+if (searchInput) {
+  // searchWrapper の処理そのまま
+}
 
-      searchWrapper.addEventListener("click", function (e) {
-        if (!isMobile()) {
-          if (e.target !== searchInput) searchInput.focus();
-          return;
-        }
-        if (isOpen && e.target === searchInput) return;
+/* 🔥 Menuは必ず有効化 */
+if (menuBtn) {
+  menuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+}
 
-        if (!isOpen) {
-          fixedHeader.classList.add("search-open");
-          isOpen = true;
-          setTimeout(() => searchInput.focus(), 80);
-        } else {
-          fixedHeader.classList.remove("search-open");
-          isOpen = false;
-          searchInput.blur();
-        }
-      });
-
-      window.addEventListener("resize", () => {
-        if (!isMobile() && isOpen) {
-          fixedHeader.classList.remove("search-open");
-          isOpen = false;
-          searchInput.blur();
-        }
-      });
-
-      if (clearBtn) {
-        function updateClearBtn() {
-          clearBtn.style.display = searchInput.value.trim() === "" ? "none" : "block";
-        }
-        searchInput.addEventListener("input", updateClearBtn);
-        clearBtn.addEventListener("click", () => {
-          searchInput.value = "";
-          searchInput.dispatchEvent(new Event("input"));
-          updateClearBtn();
-          searchInput.focus();
-        });
-        updateClearBtn();
-      }
-
-      if (menuBtn) menuBtn.addEventListener("click", toggleMenu);
-    });
 
     function toggleMenu() {
       const nav = document.getElementById("nav-overlay");
