@@ -693,7 +693,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       const params = new URLSearchParams(location.search);
-      const contentId = params.get("id");
+      const contentId = params.get("id") || params.get("contentId");
       const draftKey  = params.get("draftKey");
 
       const kv             = document.getElementById("article-kv");
