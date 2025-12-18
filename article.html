@@ -620,290 +620,240 @@ if (menuBtn) {
     }
   </script>
 
-  <!-- 記事データ読み込み & シェア（プレビュー対応 + OGP更新） -->
-  <script>
-   async function fetchArticleFromMicrocms(contentId, draftKey) {
-  try {
-    const serviceId = window.SERVICE_ID || "subscope";
-    const apiKey = window.API_KEY;
-
-    if (!apiKey) {
-      console.error("API_KEY が見つかりません（window.API_KEY が未定義）");
-      return null;
+<script>
+  function setMeta(propertyOrName, content, isName=false) {
+    if (!content) return;
+    const selector = isName ? `meta[name="${propertyOrName}"]` : `meta[property="${propertyOrName}"]`;
+    let tag = document.querySelector(selector);
+    if (!tag) {
+      tag = document.createElement("meta");
+      if (isName) tag.setAttribute("name", propertyOrName);
+      else tag.setAttribute("property", propertyOrName);
+      document.head.appendChild(tag);
     }
-
-    let url = `https://${serviceId}.microcms.io/api/v1/articles/${contentId}`;
-    if (draftKey) url += `?draftKey=${encodeURIComponent(draftKey)}`;
-
-    const res = await fetch(url, { headers: { "X-MICROCMS-API-KEY": apiKey } });
-    if (!res.ok) {
-      console.error("microCMS から記事取得に失敗しました", await res.text());
-      return null;
-    }
-
-    const data = await res.json();
-
-    const eyecatchUrl =
-      data?.eyecatch?.url ||
-      data?.image?.url ||
-      "";
-
-    return {
-      id: data.id,
-      title: data.title || "",
-      contentHtml: data.content || "",
-      description: data.description || "",
-      categoryName: data.category?.name || "",
-      category: data.category?.id || "",
-      service: data.service || "",
-      date: data.publishedAt ? data.publishedAt.slice(0, 10) : "",
-      image: eyecatchUrl,
-      author: data.author || null,
-      authorName: data.author?.name || "",
-      authorImage: data.author?.avatar?.url || "",
-      priceSummary: data.priceSummary || ""
-    };
-  } catch (e) {
-    console.error("記事取得中にエラーが発生しました", e);
-    return null;
+    tag.setAttribute("content", content);
   }
-}
 
-    function setMeta(propertyOrName, content, isName=false) {
-      if (!content) return;
-      const selector = isName ? `meta[name="${propertyOrName}"]` : `meta[property="${propertyOrName}"]`;
-      let tag = document.querySelector(selector);
-      if (!tag) {
-        tag = document.createElement("meta");
-        if (isName) tag.setAttribute("name", propertyOrName);
-        else tag.setAttribute("property", propertyOrName);
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute("content", content);
+  document.addEventListener("DOMContentLoaded", async () => {
+    // 0) DOM参照
+    const kv             = document.getElementById("article-kv");
+    const titleEl        = document.getElementById("article-title");
+    const leadEl         = document.getElementById("article-lead");
+    const serviceEl      = document.getElementById("meta-service");
+    const categoryEl     = document.getElementById("meta-category");
+    const dateEl         = document.getElementById("meta-date");
+    const contentEl      = document.getElementById("article-content");
+    const breadcrumbEl   = document.getElementById("breadcrumb");
+    const relatedGrid    = document.getElementById("related-grid");
+    const relatedSection = document.getElementById("related-section");
+
+    const authorNameEl   = document.getElementById("author-name");
+    const authorAvatarEl = document.getElementById("author-avatar");
+    const authorLinkEl   = document.getElementById("author-link");
+
+    const priceSection = document.getElementById("price-summary-section");
+    const priceBox     = document.getElementById("price-summary-box");
+
+    // 1) URLパラメータ
+    const params = new URLSearchParams(location.search);
+    const contentId = params.get("id") || params.get("contentId");
+    const draftKey  = params.get("draftKey");
+
+    // 2) 記事一覧ロード
+    if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
+      await loadArticles();
+    }
+    const list = window.articles || [];
+    const article = list.find((a) => a.id === contentId) || null;
+
+    // 3) 見つからない場合
+    if (!article) {
+      if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+      if (relatedSection) relatedSection.style.display = "none";
+      if (priceSection) priceSection.style.display = "none";
+      document.title = "記事が見つかりませんでした | SUBSCOPE";
+      return;
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const params = new URLSearchParams(location.search);
-      const contentId = params.get("id") || params.get("contentId");
-      const draftKey  = params.get("draftKey");
+    // 4) ✅ GA4：記事ID別閲覧数（ランキング用）※1記事1回
+    try {
+      const sentKey = "ga_article_view_sent_" + article.id;
+      if (!sessionStorage.getItem(sentKey) && typeof gtag === "function") {
+        gtag("event", "article_view", { article_id: article.id });
+        sessionStorage.setItem(sentKey, "1");
+      }
+    } catch (e) {}
 
-      const kv             = document.getElementById("article-kv");
-      const titleEl        = document.getElementById("article-title");
-      const leadEl         = document.getElementById("article-lead");
-      const serviceEl      = document.getElementById("meta-service");
-      const categoryEl     = document.getElementById("meta-category");
-      const dateEl         = document.getElementById("meta-date");
-      const contentEl      = document.getElementById("article-content");
-      const breadcrumbEl   = document.getElementById("breadcrumb");
-      const relatedGrid    = document.getElementById("related-grid");
-      const relatedSection = document.getElementById("related-section");
+    // 5) shareUrl / OGP
+    const currentUrl = new URL(window.location.href);
+    const shareUrl =
+      `${currentUrl.origin}/api/share?id=${encodeURIComponent(article.id)}` +
+      (draftKey ? `&draftKey=${encodeURIComponent(draftKey)}` : "");
 
-      const authorNameEl   = document.getElementById("author-name");
-      const authorAvatarEl = document.getElementById("author-avatar");
-      const authorLinkEl   = document.getElementById("author-link");
+    const ogTitle = article.title ? `${article.title} | SUBSCOPE` : "SUBSCOPE";
+    const ogDesc  = (article.description || "").trim() || "SUBSCOPEの記事ページ";
+    const ogImg   = article.image || "https://www.subscope.jp/ogp-default-v3.png";
 
-      const priceSection = document.getElementById("price-summary-section");
-      const priceBox     = document.getElementById("price-summary-box");
+    document.title = ogTitle;
 
-      let article = null;
-      let list = [];
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = shareUrl;
 
-      if (draftKey && contentId) {
-        article = await fetchArticleFromMicrocms(contentId, draftKey);
-        if (typeof loadArticles === "function") await loadArticles();
-        list = window.articles || [];
+    setMeta("og:title", ogTitle);
+    setMeta("og:description", ogDesc);
+    setMeta("og:url", shareUrl);
+    setMeta("og:image", ogImg);
+    setMeta("og:image:secure_url", ogImg);
+
+    setMeta("twitter:title", ogTitle, true);
+    setMeta("twitter:description", ogDesc, true);
+    setMeta("twitter:image", ogImg, true);
+
+    // 6) 描画
+    const categoryLabel = article.categoryName || article.category || "その他";
+
+    if (breadcrumbEl) {
+      breadcrumbEl.innerHTML = `
+        <a href="index.html">トップ</a> /
+        <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">${categoryLabel}</a> /
+        <span>${article.title || ""}</span>
+      `;
+    }
+
+    if (serviceEl) {
+      const serviceName = article.service || article.serviceName || "";
+      if (serviceName) {
+        serviceEl.textContent = serviceName;
+        serviceEl.style.display = "inline-block";
       } else {
-        if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
-          await loadArticles();
+        serviceEl.style.display = "none";
+      }
+    }
+
+    if (categoryEl) categoryEl.textContent = categoryLabel;
+    if (dateEl) dateEl.textContent = (article.date || "").replace(/-/g, ".");
+
+    if (kv) {
+      const img = article.image || "images/sample1.jpg";
+      kv.style.backgroundImage = `url('${img}')`;
+    }
+
+    if (authorNameEl && authorAvatarEl && authorLinkEl) {
+      const authorObj   = article.author || null;
+      const authorName  = (authorObj && authorObj.name) || article.authorName || "";
+      const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
+
+      if (authorName) authorNameEl.textContent = authorName;
+      else {
+        const block = authorNameEl.closest(".article-author");
+        if (block) block.style.display = "none";
+      }
+
+      if (authorImage) authorAvatarEl.src = authorImage;
+      else authorAvatarEl.style.display = "none";
+
+      authorLinkEl.href = "javascript:void(0)";
+      authorLinkEl.style.cursor = "default";
+      authorLinkEl.style.pointerEvents = "none";
+    }
+
+    if (titleEl) titleEl.textContent = article.title || "";
+
+    if (leadEl) {
+      const leadFromCms = (article.description || "").trim();
+      if (leadFromCms) {
+        leadEl.textContent = leadFromCms;
+      } else {
+        const tmp = document.createElement("div");
+        tmp.innerHTML = article.contentHtml || article.content || "";
+        const firstP = tmp.querySelector("p");
+        leadEl.textContent = firstP ? firstP.textContent : "";
+      }
+    }
+
+    if (contentEl) {
+      const bodyHtml = article.contentHtml || article.content || "";
+      contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+
+      const ps = contentEl.querySelectorAll("p");
+      ps.forEach((p) => {
+        const inner = p.innerHTML.replace(/&nbsp;/g, "").trim().toLowerCase();
+        if (inner === "" || inner === "<br>" || inner === "<br/>" || inner === "<br />") {
+          p.classList.add("empty-space");
         }
-        list = window.articles || [];
-        article = list.find((a) => a.id === contentId) || list[0];
-      }
+      });
+    }
 
-      if (!article) {
-        if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
-        if (relatedSection) relatedSection.style.display = "none";
-        if (priceSection) priceSection.style.display = "none";
-        document.title = "記事が見つかりませんでした | SUBSCOPE";
-        return;
-      }
-// ✅ GA4：記事ID別閲覧数（ランキング用）※1記事1回だけ送る
-try {
-  const sentKey = "ga_article_view_sent_" + article.id;
-
-  if (!sessionStorage.getItem(sentKey) && typeof gtag === "function") {
-    gtag("event", "article_view", {
-      article_id: article.id,
-    });
-    sessionStorage.setItem(sentKey, "1");
-  }
-} catch (e) {}
-
-      const currentUrl = new URL(window.location.href);
-      const shareUrl =
-        `${currentUrl.origin}/api/share?id=${encodeURIComponent(article.id)}` +
-        (draftKey ? `&draftKey=${encodeURIComponent(draftKey)}` : "");
-
-      const ogTitle = article.title ? `${article.title} | SUBSCOPE` : "SUBSCOPE";
-      const ogDesc  = (article.description || "").trim() || "SUBSCOPEの記事ページ";
-      const ogImg   = article.image || "https://www.subscope.jp/ogp-default-v3.png";
-
-      document.title = ogTitle;
-
-      let canonical = document.querySelector('link[rel="canonical"]');
-      if (!canonical) {
-        canonical = document.createElement("link");
-        canonical.rel = "canonical";
-        document.head.appendChild(canonical);
-      }
-      canonical.href = shareUrl;
-
-      setMeta("og:title", ogTitle);
-      setMeta("og:description", ogDesc);
-      setMeta("og:url", shareUrl);
-      setMeta("og:image", ogImg);
-      setMeta("og:image:secure_url", ogImg);
-
-      setMeta("twitter:title", ogTitle, true);
-      setMeta("twitter:description", ogDesc, true);
-      setMeta("twitter:image", ogImg, true);
-
-      const categoryLabel = article.categoryName || article.category || "その他";
-
-      if (breadcrumbEl) {
-        breadcrumbEl.innerHTML = `
-          <a href="index.html">トップ</a> /
-          <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">${categoryLabel}</a> /
-          <span>${article.title || ""}</span>
-        `;
-      }
-
-      if (serviceEl) {
-        const serviceName = article.service || article.serviceName || "";
-        if (serviceName) {
-          serviceEl.textContent = serviceName;
-          serviceEl.style.display = "inline-block";
+    // シェア
+    const shareButton = document.getElementById("share-button");
+    if (shareButton) {
+      shareButton.addEventListener("click", async () => {
+        const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
+        if (navigator.share) {
+          try { await navigator.share({ title: shareText, text: shareText, url: shareUrl }); } catch (e) {}
         } else {
-          serviceEl.style.display = "none";
-        }
-      }
-
-      if (categoryEl) categoryEl.textContent = categoryLabel;
-      if (dateEl) dateEl.textContent = (article.date || "").replace(/-/g, ".");
-
-      if (kv) {
-        const img = article.image || "images/sample1.jpg";
-        kv.style.backgroundImage = `url('${img}')`;
-      }
-
-      if (authorNameEl && authorAvatarEl && authorLinkEl) {
-        const authorObj   = article.author || null;
-        const authorName  = (authorObj && authorObj.name) || article.authorName || "";
-        const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
-
-        if (authorName) authorNameEl.textContent = authorName;
-        else {
-          const block = authorNameEl.closest(".article-author");
-          if (block) block.style.display = "none";
-        }
-
-        if (authorImage) authorAvatarEl.src = authorImage;
-        else authorAvatarEl.style.display = "none";
-
-        authorLinkEl.href = "javascript:void(0)";
-        authorLinkEl.style.cursor = "default";
-        authorLinkEl.style.pointerEvents = "none";
-      }
-
-      if (titleEl) titleEl.textContent = article.title || "";
-
-      if (leadEl) {
-        const leadFromCms = (article.description || "").trim();
-        if (leadFromCms) {
-          leadEl.textContent = leadFromCms;
-        } else {
-          const tmp = document.createElement("div");
-          tmp.innerHTML = article.contentHtml || article.content || "";
-          const firstP = tmp.querySelector("p");
-          leadEl.textContent = firstP ? firstP.textContent : "";
-        }
-      }
-
-      if (contentEl) {
-        const bodyHtml = article.contentHtml || article.content || "";
-        contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
-
-        const ps = contentEl.querySelectorAll("p");
-        ps.forEach((p) => {
-          const inner = p.innerHTML.replace(/&nbsp;/g, "").trim().toLowerCase();
-          if (inner === "" || inner === "<br>" || inner === "<br/>" || inner === "<br />") {
-            p.classList.add("empty-space");
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            alert("記事のURLをコピーしました");
+          } catch (e) {
+            alert("コピーに失敗しました…");
           }
-        });
-      }
-
-      const shareButton = document.getElementById("share-button");
-      if (shareButton) {
-        shareButton.addEventListener("click", async () => {
-          const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
-          if (navigator.share) {
-            try {
-              await navigator.share({ title: shareText, text: shareText, url: shareUrl });
-            } catch (e) {}
-          } else {
-            try {
-              await navigator.clipboard.writeText(shareUrl);
-              alert("記事のURLをコピーしました");
-            } catch (e) {
-              alert("コピーに失敗しました…");
-            }
-          }
-        });
-      }
-
-      if (priceSection && priceBox) {
-        if (article.priceSummary && article.priceSummary.trim() !== "") {
-          priceBox.innerHTML = article.priceSummary;
-          priceSection.style.display = "block";
-        } else {
-          priceSection.style.display = "none";
         }
+      });
+    }
+
+    // 価格まとめ
+    if (priceSection && priceBox) {
+      if (article.priceSummary && article.priceSummary.trim() !== "") {
+        priceBox.innerHTML = article.priceSummary;
+        priceSection.style.display = "block";
+      } else {
+        priceSection.style.display = "none";
       }
+    }
 
-      const related = (list || [])
-        .filter((a) => a.id !== article.id && ((a.categoryName || a.category) === categoryLabel || a.service === article.service))
-        .slice(0, 6);
+    // 関連記事
+    const related = (list || [])
+      .filter((a) => a.id !== article.id && ((a.categoryName || a.category) === categoryLabel || a.service === article.service))
+      .slice(0, 6);
 
-      if (!related.length) {
-        if (relatedSection) relatedSection.style.display = "none";
-      } else if (relatedGrid) {
-        relatedGrid.innerHTML = related.map((a) => `
-          <div class="related-card" onclick="openArticle('${a.id}')">
-            <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-            <div class="related-body">
-              <div class="related-service">${a.service || ""}</div>
-              <div class="related-title-text">${a.title || ""}</div>
-              <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
-            </div>
+    if (!related.length) {
+      if (relatedSection) relatedSection.style.display = "none";
+    } else if (relatedGrid) {
+      relatedGrid.innerHTML = related.map((a) => `
+        <div class="related-card" onclick="openArticle('${a.id}')">
+          <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+          <div class="related-body">
+            <div class="related-service">${a.service || ""}</div>
+            <div class="related-title-text">${a.title || ""}</div>
+            <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
           </div>
-        `).join("");
-      }
+        </div>
+      `).join("");
+    }
 
-      const reveals = document.querySelectorAll(".reveal");
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("active");
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      reveals.forEach((el) => io.observe(el));
-    });
+    // reveal
+    const reveals = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("active");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach((el) => io.observe(el));
+  });
 
-    function openArticle(id) {
-  window.location.href = "/article.html?id=" + encodeURIComponent(id);
-}
-  </script>
+  function openArticle(id) {
+    window.location.href = "/article.html?id=" + encodeURIComponent(id);
+  }
+</script>
+
 </body>
 </html>
