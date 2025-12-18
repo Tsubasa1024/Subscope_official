@@ -727,6 +727,17 @@ if (menuBtn) {
         document.title = "記事が見つかりませんでした | SUBSCOPE";
         return;
       }
+// ✅ GA4：記事ID別閲覧数（ランキング用）※1記事1回だけ送る
+try {
+  const sentKey = "ga_article_view_sent_" + article.id;
+
+  if (!sessionStorage.getItem(sentKey) && typeof gtag === "function") {
+    gtag("event", "article_view", {
+      article_id: article.id,
+    });
+    sessionStorage.setItem(sentKey, "1");
+  }
+} catch (e) {}
 
       const currentUrl = new URL(window.location.href);
       const shareUrl =
