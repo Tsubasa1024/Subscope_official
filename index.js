@@ -758,175 +758,211 @@
     }
   }
 
-  // ============
-  // 8. ranking.html
-  // ============
-  function initRankingPage() {
-    const top3El = $("#ranking-top3");
-    const restEl = $("#ranking-rest");
-    const periodBtns = $$(".period-btn");
-    if (!top3El || !restEl || !periodBtns.length) return;
+// ============
+// 8. ranking.html（Cloud Run / GA4 API）
+// ============
+function initRankingPage() {
+  const top3El = $("#ranking-top3");
+  const restEl = $("#ranking-rest");
+  const periodBtns = $$(".period-btn");
+  if (!top3El || !restEl || !periodBtns.length) return;
 
-    const articles = getArticles();
-    if (!articles.length) return;
+  // ✅ Cloud Run の固定URL（おすすめの方）
+  const RANK_API = "https://subscope-ranking-319660105312.asia-northeast1.run.app";
 
-    let currentPeriod = "all";
+  // period -> days
+  const DAYS_MAP = { day: 1, week: 7, month: 30, all: 365 };
 
-    function getViews(a, period) {
-      const p = (period || "all").toLowerCase();
-      switch (p) {
-        case "day": return a.views_day ?? a.views ?? 0;
-        case "week": return a.views_week ?? a.views ?? 0;
-        case "month": return a.views_month ?? a.views ?? 0;
-        case "all":
-        default: return a.views ?? 0;
-      }
-    }
+  // 表示ラベル（好みで増やしてOK）
+  const TITLE_MAP = {
+    "/index.html": "トップ",
+    "/all.html": "すべての記事",
+    "/ranking.html": "ランキング",
+    "/sns.html": "SNS",
+    "/article.html": "記事ページ（全体）",
+  };
 
-    function getCategoryLabel(a) {
-      return (a && (a.categoryName || a.category || "")) || "";
-    }
+  const DEFAULT_THUMB = "https://www.subscope.jp/ogp-default-v3.png";
+  let currentPeriod = "all";
 
-    function getSortedArticles() {
-      return [...articles].sort((a, b) => getViews(b, currentPeriod) - getViews(a, currentPeriod));
-    }
+  function periodLabel(p) {
+    if (p === "day") return "DAY";
+    if (p === "week") return "WEEK";
+    if (p === "month") return "MONTH";
+    return "ALL";
+  }
 
-    // ✅ GA: クリック/期間イベント（1回だけ）
-    function bindRankingGAOnce() {
-      if (document.body.dataset.rankGaBound) return;
-      document.body.dataset.rankGaBound = "1";
+  // ✅ GA: クリック/期間イベント（1回だけ）
+  function bindRankingGAOnce() {
+    if (document.body.dataset.rankGaBound) return;
+    document.body.dataset.rankGaBound = "1";
 
-      // ランキングアイテムクリック
-      document.addEventListener("click", (e) => {
-        const card =
-          e.target.closest?.("[data-rank-item]") ||
-          e.target.closest?.(".ranking-row");
-        if (!card) return;
+    // ランキングアイテムクリック
+    document.addEventListener("click", (e) => {
+      const card = e.target.closest?.("[data-rank-item]") || e.target.closest?.(".ranking-row");
+      if (!card) return;
 
-        const itemId = card.dataset.itemId || "";
-        const title = card.dataset.title || "";
-        const rank = Number(card.dataset.rank || 0);
-        const period = currentPeriod || "all";
+      const key = card.dataset.key || "";          // 例: "/article.html"
+      const title = card.dataset.title || "";
+      const rank = Number(card.dataset.rank || 0);
+      const period = currentPeriod || "all";
+      const views = Number(card.dataset.views || 0);
 
-        window.gtag?.("event", "rank_item_click", {
-          item_id: itemId,
-          item_name: title,
-          rank: rank,
-          period: period,
-        });
-      });
-
-      // 期間切替
-      periodBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          window.gtag?.("event", "rank_period_change", {
-            period: btn.dataset.period || "all",
-          });
-        });
-      });
-    }
-
-    function renderRanking() {
-      const sorted = getSortedArticles();
-
-      const hero = sorted[0];
-      const mids = sorted.slice(1, 3);
-      const rest = sorted.slice(3, 20);
-
-      top3El.innerHTML = "";
-      restEl.innerHTML = "";
-
-      if (hero) {
-        top3El.innerHTML += `
-          <div class="rank-hero"
-            data-rank-item="1"
-            data-item-id="${hero.id}"
-            data-title="${escapeHtml(hero.title || "")}"
-            data-rank="1"
-            onclick="location.href='article.html?id=${encodeURIComponent(hero.id)}'">
-            <div class="rank-badge rank-1 rank-badge-large">1</div>
-            <div class="rank-hero-thumb" style="background-image:url('${hero.image}');"></div>
-            <div class="rank-hero-content">
-              <div class="ranking-service">${escapeHtml((hero.service || "SUBSCOPE").toUpperCase())}</div>
-              <div class="rank-hero-title">${escapeHtml(hero.title || "")}</div>
-              <div class="rank-hero-desc">${escapeHtml(hero.description || "")}</div>
-              <div class="rank-hero-meta"><span>${escapeHtml(getCategoryLabel(hero))}</span></div>
-            </div>
-          </div>
-        `;
-      }
-
-      mids.forEach((a, idx) => {
-        const rank = idx + 2;
-        top3El.innerHTML += `
-          <div class="rank-mid"
-            data-rank-item="1"
-            data-item-id="${a.id}"
-            data-title="${escapeHtml(a.title || "")}"
-            data-rank="${rank}"
-            onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
-            <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
-            <div class="rank-mid-thumb" style="background-image:url('${a.image}');"></div>
-            <div class="ranking-content">
-              <div class="ranking-service">${escapeHtml((a.service || "SUBSCOPE").toUpperCase())}</div>
-              <div class="rank-mid-title">${escapeHtml(a.title || "")}</div>
-              <div class="rank-mid-desc">${escapeHtml(a.description || "")}</div>
-              <div class="rank-mid-meta"><span>${escapeHtml(getCategoryLabel(a))}</span></div>
-            </div>
-          </div>
-        `;
-      });
-
-      rest.forEach((a, idx) => {
-        const rank = idx + 4;
-        const row = document.createElement("div");
-        row.className = "ranking-row";
-
-        // ✅ data属性（GA用）
-        row.dataset.rankItem = "1";
-        row.dataset.itemId = a.id;
-        row.dataset.title = a.title || "";
-        row.dataset.rank = String(rank);
-
-        row.innerHTML = `
-          <div class="ranking-row-rank">${rank}</div>
-          <div class="ranking-row-thumb" style="background-image:url('${a.image}');"></div>
-          <div class="ranking-row-main">
-            <div class="ranking-row-title">${escapeHtml(a.title || "")}</div>
-            <div class="ranking-row-meta">
-              <span class="ranking-row-service">${escapeHtml((a.service || "SUBSCOPE").toUpperCase())}</span>
-              <span>${escapeHtml(getCategoryLabel(a))}</span>
-            </div>
-          </div>
-        `;
-
-        row.addEventListener("click", () => {
-          location.href = `article.html?id=${encodeURIComponent(a.id)}`;
-        });
-
-        restEl.appendChild(row);
-      });
-
-      [top3El, restEl].forEach((el) => {
-        el.classList.remove("ranking-animate");
-        void el.offsetWidth;
-        el.classList.add("ranking-animate");
-      });
-    }
-
-    // period切替
-    periodBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        periodBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentPeriod = btn.dataset.period || "all";
-        renderRanking();
+      window.gtag?.("event", "rank_item_click", {
+        item_key: key,
+        item_name: title,
+        rank,
+        period,
+        views,
       });
     });
 
-    bindRankingGAOnce();
-    renderRanking();
+    // 期間切替
+    periodBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        window.gtag?.("event", "rank_period_change", {
+          period: btn.dataset.period || "all",
+        });
+      });
+    });
   }
+
+  function render(rows = []) {
+    const items = rows.slice(0, 20); // 上位20
+    top3El.innerHTML = "";
+    restEl.innerHTML = "";
+
+    const hero = items[0];
+    const mids = items.slice(1, 3);
+    const rest = items.slice(3);
+
+    const makeTitle = (key) => TITLE_MAP[key] || key;
+    const makeLink = (key) => `https://www.subscope.jp${key}`;
+
+    // 1位
+    if (hero) {
+      const title = makeTitle(hero.key);
+      top3El.innerHTML += `
+        <a class="rank-hero"
+          href="${makeLink(hero.key)}"
+          data-rank-item="1"
+          data-key="${hero.key}"
+          data-title="${escapeHtml(title)}"
+          data-rank="1"
+          data-views="${hero.views}">
+          <div class="rank-badge rank-1 rank-badge-large">1</div>
+          <div class="rank-hero-thumb" style="background-image:url('${DEFAULT_THUMB}');"></div>
+          <div class="rank-hero-content">
+            <div class="ranking-service">${periodLabel(currentPeriod)} 人気</div>
+            <div class="rank-hero-title">${escapeHtml(title)}</div>
+            <div class="rank-hero-desc">${escapeHtml(hero.key)}</div>
+            <div class="rank-hero-meta"><span>Views: ${hero.views}</span></div>
+          </div>
+        </a>
+      `;
+    }
+
+    // 2-3位
+    mids.forEach((a, idx) => {
+      const rank = idx + 2;
+      const title = makeTitle(a.key);
+      top3El.innerHTML += `
+        <a class="rank-mid"
+          href="${makeLink(a.key)}"
+          data-rank-item="1"
+          data-key="${a.key}"
+          data-title="${escapeHtml(title)}"
+          data-rank="${rank}"
+          data-views="${a.views}">
+          <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
+          <div class="rank-mid-thumb" style="background-image:url('${DEFAULT_THUMB}');"></div>
+          <div class="ranking-content">
+            <div class="ranking-service">${periodLabel(currentPeriod)} 人気</div>
+            <div class="rank-mid-title">${escapeHtml(title)}</div>
+            <div class="rank-mid-desc">${escapeHtml(a.key)}</div>
+            <div class="rank-mid-meta"><span>Views: ${a.views}</span></div>
+          </div>
+        </a>
+      `;
+    });
+
+    // 4位以降
+    rest.forEach((a, idx) => {
+      const rank = idx + 4;
+      const title = makeTitle(a.key);
+
+      const row = document.createElement("a");
+      row.className = "ranking-row";
+      row.href = makeLink(a.key);
+
+      row.dataset.rankItem = "1";
+      row.dataset.key = a.key;
+      row.dataset.title = title;
+      row.dataset.rank = String(rank);
+      row.dataset.views = String(a.views);
+
+      row.innerHTML = `
+        <div class="ranking-row-rank">${rank}</div>
+        <div class="ranking-row-thumb" style="background-image:url('${DEFAULT_THUMB}');"></div>
+        <div class="ranking-row-main">
+          <div class="ranking-row-title">${escapeHtml(title)}</div>
+          <div class="ranking-row-meta">
+            <span class="ranking-row-service">${periodLabel(currentPeriod)}</span>
+            <span>Views: ${a.views}</span>
+            <span>${escapeHtml(a.key)}</span>
+          </div>
+        </div>
+      `;
+      restEl.appendChild(row);
+    });
+
+    // アニメ付け直し
+    [top3El, restEl].forEach((el) => {
+      el.classList.remove("ranking-animate");
+      void el.offsetWidth;
+      el.classList.add("ranking-animate");
+    });
+  }
+
+  async function load(period) {
+    currentPeriod = period || "all";
+    const days = DAYS_MAP[currentPeriod] ?? 7;
+    const url = `${RANK_API}/?days=${days}&limit=20&mode=page`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.ok) {
+        top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得失敗: ${escapeHtml(data.message || "unknown")}</div>`;
+        restEl.innerHTML = "";
+        return;
+      }
+
+      render(data.rows || []);
+    } catch (e) {
+      console.error("[ranking] fetch failed:", e);
+      top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得に失敗しました</div>`;
+      restEl.innerHTML = "";
+    }
+  }
+
+  // period切替
+  periodBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      periodBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      load(btn.dataset.period || "all");
+    });
+  });
+
+  bindRankingGAOnce();
+
+  // 初回（activeから）
+  const active = document.querySelector(".period-btn.active")?.dataset?.period || "all";
+  load(active);
+}
+
 
   // ============
   // 9. Global helpers
@@ -963,3 +999,4 @@
     initScrollReveal();
   });
 })();
+
