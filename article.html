@@ -3,206 +3,874 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>記事 | SUBSCOPE</title>
+  <title>記事詳細 | SUBSCOPE</title>
 
   <!-- Canonical（JSで上書き） -->
   <link rel="canonical" href="https://www.subscope.jp/article.html">
 
-  <!-- OGP（JSで上書き） -->
+  <!-- OGP（ベース：JSで上書き） -->
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="SUBSCOPE">
   <meta property="og:title" content="記事 | SUBSCOPE">
-  <meta property="og:description" content="">
-  <meta property="og:url" content="">
+  <meta property="og:description" content="SUBSCOPEの記事ページ">
+  <meta property="og:url" content="https://www.subscope.jp/article.html">
   <meta property="og:image" content="https://www.subscope.jp/ogp-default-v3.png">
+  <meta property="og:image:secure_url" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
-  <!-- Twitter -->
+  <!-- Twitter（JSで上書き） -->
   <meta name="twitter:card" content="summary_large_image">
-
-  <!-- Google tag -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-9FCHPHJTVE');
-  </script>
+  <meta name="twitter:title" content="記事 | SUBSCOPE">
+  <meta name="twitter:description" content="SUBSCOPEの記事ページ">
+  <meta name="twitter:image" content="https://www.subscope.jp/ogp-default-v3.png">
 
   <style>
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:#fff;
-      color:#1d1d1f;
-      line-height:1.7;
-    }
-    a{text-decoration:none;color:inherit}
+    :root {
+      --color-bg: #ffffff;
+      --color-bg-secondary: #f5f5f7;
+      --color-text-main: #1d1d1f;
+      --color-text-gray: #86868b;
+      --color-border: #d2d2d7;
+      --color-accent: #000000;
 
-    .container{
-      max-width:800px;
-      margin:0 auto;
-      padding:96px 24px 80px;
-    }
-
-    .article-hero img{
-      width:100%;
-      border-radius:20px;
-      margin-bottom:24px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --transition-hover: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      --container-width: 1080px;
     }
 
-    .article-meta{
-      color:#86868b;
-      font-size:.85rem;
-      margin-bottom:8px;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { width: 100%; overflow-x: hidden; }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg);
+      color: var(--color-text-main);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    .container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
     }
 
-    h1{
-      font-size:2.2rem;
-      line-height:1.35;
-      letter-spacing:-.02em;
-      margin-bottom:12px;
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity var(--transition-fade), transform var(--transition-fade);
+    }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+
+    .fixed-header {
+      position: fixed; top: 0; left: 0; width: 100%;
+      z-index: 150;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
-    .article-desc{
-      font-size:1.05rem;
-      color:#555;
-      margin-bottom:32px;
+    .top-header {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 12px 24px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
     }
 
-    .article-content{
-      font-size:1.05rem;
+    .nav-left, .nav-right { pointer-events: auto; }
+    .nav-center { position: absolute; left: 50%; transform: translateX(-50%); }
+
+    .header-logo { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; user-select: none; }
+
+    .search-wrapper { width: 280px; position: relative; }
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 44px;
+      border-radius: 50px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(20px);
+      font-size: 0.9rem;
+      outline: none;
+      transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .search-input:focus {
+      background: #fff;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      border-color: rgba(0,0,0,0.1);
+    }
+    .search-icon {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      color: var(--color-text-gray);
+      pointer-events: none;
+    }
+    .clear-btn {
+      position: absolute; right: 18px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      user-select: none;
+    }
+    .search-input:not(:placeholder-shown) ~ .clear-btn {
+      opacity: 1;
+      pointer-events: auto;
     }
 
-    .article-content img{
-      max-width:100%;
-      border-radius:16px;
+    .search-results-container {
+      position: fixed;
+      top: 72px;
+      left: 0; right: 0;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 24px 16px;
+      z-index: 130;
+    }
+    #searchResults { margin-top: 8px; max-height: 380px; overflow-y: auto; }
+
+    .search-item {
+      display: flex; gap: 12px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: #fff;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    .search-item:hover {
+      background: #f5f5f7;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+    .search-item img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
+    .search-item h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .search-item p{
+      font-size: .8rem;
+      color: #86868b;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .article-footer{
-      margin-top:64px;
-      padding-top:32px;
-      border-top:1px solid #e5e5ea;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:16px;
+    .menu-btn {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
 
-    .back-link{
-      font-size:.9rem;
-      color:#0071e3;
+    /* iPad Safari対策：Menuが青くなるのを防ぐ */
+    .menu-btn,
+    .menu-btn * {
+      color: var(--color-text-main) !important;
+      -webkit-text-fill-color: var(--color-text-main) !important;
+      text-decoration: none !important;
     }
-  </style>
+
+    /* iOSの青いタップ色を消す */
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .menu-btn:hover { background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .menu-icon-lines { display: flex; flex-direction: column; gap: 4px; }
+    .menu-line { width: 16px; height: 2px; border-radius: 999px; background-color: var(--color-text-main); }
+
+    .nav-overlay {
+      position: fixed;
+      top: 72px;
+      right: 40px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      padding: 20px;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,0,0,0.05);
+      transform: translateY(-20px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 140;
+      min-width: 200px;
+    }
+    .nav-overlay.open { transform: translateY(0); opacity: 1; visibility: visible; }
+    .nav-list li { margin-bottom: 8px; }
+    .nav-link {
+      display: block;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .nav-link:hover { background: var(--color-bg-secondary); }
+
+    main { padding-top: 104px; padding-bottom: 64px; }
+
+    .breadcrumb { font-size: 0.8rem; color: var(--color-text-gray); margin-bottom: 16px; }
+    .breadcrumb a { color: var(--color-text-gray); }
+
+    .article-hero { margin-bottom: 50px; }
+    .article-kv {
+      width: 100%;
+      border-radius: 32px;
+      overflow: hidden;
+      background-color: #f0f0f0;
+      background-size: cover;
+      background-position: center;
+      min-height: 390px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+    }
+
+    /* ✅ PCでは右上にシェアボタンを置くため右に余白を確保 */
+    .article-header-block { margin-bottom: 0; position: relative; padding-right: 60px; }
+
+    .article-meta-row {
+      display: flex; flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--color-text-gray);
+      margin-bottom: 8px;
+    }
+    .article-meta-pill { padding: 4px 12px; border-radius: 999px; background: #f2f2f7; font-size: 0.78rem; }
+    .article-date { font-size: 0.85rem; }
+
+    .article-title { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 10px; }
+    .article-lead { font-size: 1rem; color: #4b4b4b; margin-top: 4px; margin-bottom: 30px; }
+
+    .article-content { font-size: 0.98rem; color: #1d1d1f; line-height: 1.9; }
+    .article-content h2 { font-size: 1.4rem; margin: 28px 0 12px; }
+    .article-content h3 { font-size: 1.15rem; margin: 20px 0 8px; }
+    .article-content p { margin-bottom: 24px; }
+    .article-content p.empty-space { height: 32px; margin: 0; }
+
+    /* 本文の箇条書き */
+    .article-content ul { list-style: disc; list-style-position: outside; padding-left: 1.2em; margin: 8px 0 16px; }
+    .article-content ol { list-style: decimal; list-style-position: outside; padding-left: 1.2em; margin: 8px 0 16px; }
+    .article-content li { overflow-wrap: break-word; line-height: 1.7; margin-bottom: 6px; }
+
+    .share-circle-btn {
+      position: absolute; top: 0; right: 0;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffffee;
+      backdrop-filter: blur(6px);
+      color: #000;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .share-circle-btn:hover { background: #fff; box-shadow: 0 10px 26px rgba(0,0,0,0.16); transform: translateY(-1px); }
+    .share-circle-btn span { font-size: 0.9rem; line-height: 1; }
+
+    .price-summary-section { margin-top: 40px; }
+    .price-summary-box {
+      background: #f5f5f7;
+      border-radius: 24px;
+      padding: 24px 28px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #1d1d1f;
+      white-space: pre-line;
+    }
+
+    .related-section { margin-top: 56px; padding-top: 28px; border-top: 1px solid rgba(0,0,0,0.06); }
+    .related-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; }
+    .related-grid { display: flex; flex-wrap: wrap; gap: 24px; }
+    .related-card {
+      border-radius: 20px; background: #fff; overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      flex: 0 0 calc((100% - 48px) / 3);
+      max-width: calc((100% - 48px) / 3);
+    }
+    .related-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
+    .related-thumb { width: 100%; height: 140px; background-size: cover; background-position: center; background-color: #f0f0f0; }
+    .related-body { padding: 10px 14px 14px; }
+    .related-service { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-gray); margin-bottom: 4px; }
+    .related-title-text { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .related-date { font-size: 0.75rem; color: var(--color-text-gray); }
+
+    .article-author { margin: 8px 0 24px; }
+    .author-link { display: inline-flex; align-items: center; gap: 10px; }
+    .author-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .author-name { font-size: 0.9rem; font-weight: 600; }
+
+    .footer { background: #f5f5f7; padding: 40px 0; border-top: 1px solid #d2d2d7; margin-top: 40px; }
+    .footer-container { max-width: 1080px; margin: 0 auto; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; }
+    .footer-links a { font-size: 15px; color: #1d1d1f; }
+    .footer-copy { font-size: 13px; color: #86868b; }
+
+    /* =========================
+       ✅ スマホ調整（重要）
+       - 右の空白を完全に消す
+       - 本文幅を自然にする
+       ========================= */
+    @media (max-width: 767px) {
+      .top-header { padding: 10px 16px; }
+      .menu-btn > span { display: none; }
+      .menu-btn { width: 44px; height: 44px; padding: 0; border-radius: 999px; justify-content: center; }
+      .menu-line { width: 18px; }
+
+      main { padding-top: 96px; }
+
+      /* ✅ コンテナの左右余白をスマホ最適化 */
+      .container {
+        max-width: 100%;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      /* ✅ 右側の空白の原因を除去（ココが本命） */
+      .article-header-block{
+        padding-right: 0 !important;
+      }
+
+      .article-title { font-size: 1.7rem; line-height: 1.35; margin-bottom: 6px; }
+      .article-lead { font-size: 0.98rem; line-height: 1.7; margin-bottom: 18px; }
+
+      /* ✅ 本文の読みやすさ（改行が自然になる） */
+      .article-content{
+        font-size: 15.5px;
+        line-height: 1.9;
+      }
+
+      .article-hero { margin: 0 0 20px; height: 220px; border-radius: 18px; overflow: hidden; }
+      .article-kv { min-height: 100%; box-shadow: 0 12px 26px rgba(0,0,0,0.12); }
+
+      /* シェアボタン（被り防止） */
+      .share-circle-btn{
+        right: 0 !important;
+      }
+
+      .related-grid { flex-direction: column; gap: 16px; }
+      .related-card { flex: 1 1 100%; max-width: 100%; }
+      .related-thumb { height: 180px; }
+
+      .author-avatar { width: 38px; height: 38px; }
+      .author-name { font-size: 0.9rem; }
+
+      /* スマホ検索開閉 */
+      .search-wrapper {
+        width: 44px; height: 44px;
+        border-radius: 999px;
+        border: 2px solid #e5e5e7;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        overflow: hidden;
+        transition: width 0.35s ease, box-shadow 0.3s ease, border 0.3s ease, background 0.3s ease;
+      }
+      .search-input {
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        background: transparent;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .search-icon {
+        position: absolute;
+        left: 50%; top: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px; height: 22px;
+        color: #a7a7aa;
+      }
+      .clear-btn { display: none; }
+
+      .fixed-header.search-open .nav-center { display: none; }
+      .fixed-header.search-open .nav-left { flex: 1 1 auto; }
+      .fixed-header.search-open .search-wrapper {
+        width: 100%;
+        max-width: 100%;
+        border: none;
+        box-shadow: none;
+        justify-content: flex-start;
+        background: transparent;
+      }
+      .fixed-header.search-open .search-input {
+        opacity: 1;
+        pointer-events: auto;
+        padding: 10px 40px 10px 44px;
+        border-radius: 999px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: #fff;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+      .fixed-header.search-open .search-icon {
+        left: 16px; top: 50%;
+        transform: translateY(-50%);
+      }
+      .fixed-header.search-open .clear-btn {
+        display: block;
+        right: 18px; top: 50%;
+        transform: translateY(-50%);
+        font-size: 22px;
+        width: 36px; height: 36px;
+        line-height: 36px;
+        text-align: center;
+      }
+      .search-results-container { padding: 0 16px 12px; }
+    }
+
+    @media (min-width: 768px) {
+      .search-wrapper { width: 280px !important; transform: none !important; transition: none !important; }
+      .search-input { opacity: 1 !important; pointer-events: auto !important; }
+      .search-icon { left: 16px; top: 50%; transform: translateY(-50%); position: absolute; }
+      .fixed-header.search-open .search-wrapper { width: 280px !important; }
+    }
+
+    /* 広告非表示 */
+    .side-sponsor, .between-sponsor, .ad-card { display: none !important; }
+    /* =========================
+   ✅ PC版：Menuが押せない対策
+   ========================= */
+
+/* 1) 中央ロゴの当たり判定が広がってMenuを塞ぐのを防ぐ */
+.nav-center { pointer-events: none; }
+.nav-center a { pointer-events: auto; } /* ロゴ自体はクリック可 */
+
+/* 2) 検索結果コンテナ（透明でもfixed）がクリックを奪わないように */
+.search-results-container { pointer-events: none; }
+#searchResults { pointer-events: auto; } /* 結果の中身だけクリック可 */
+
+/* 3) Menuボタンを最前面に固定 */
+.nav-right { position: relative; z-index: 999; }
+.menu-btn { position: relative; z-index: 1000; }
+</style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9FCHPHJTVE');
+</script>
 </head>
 
 <body>
+  <!-- 固定ヘッダー -->
+  <div class="fixed-header">
+    <div class="top-header">
+      <div class="nav-left">
+        <div class="search-wrapper">
+          <input type="text" class="search-input" id="searchInput" placeholder="" />
+          <span class="clear-btn" id="clear-btn">×</span>
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+      </div>
 
-  <main class="container" id="articleMount">
-    <p>記事を読み込み中…</p>
+      <div class="nav-center">
+        <a href="index.html" class="header-logo-link">
+          <h1 class="header-logo">SUBSCOPE</h1>
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="メニュー"onclick="toggleMenu(event)">
+          <div class="menu-icon-lines">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+          </div>
+          <span>Menu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-overlay" id="nav-overlay">
+    <ul class="nav-list">
+      <li><a href="index.html" class="nav-link" onclick="toggleMenu()">トップ</a></li>
+      <li><a href="all.html" class="nav-link" onclick="toggleMenu()">すべての記事</a></li>
+      <li><a href="ranking.html" class="nav-link" onclick="toggleMenu()">ランキング</a></li>
+      <li><a href="sns.html" class="nav-link" onclick="toggleMenu()">SNS</a></li>
+    </ul>
+  </div>
+
+  <div class="search-results-container">
+    <div id="searchResults"></div>
+  </div>
+
+  <main>
+    <div class="container reveal" id="article-wrap">
+      <div class="breadcrumb" id="breadcrumb"></div>
+
+      <section class="article-header-block">
+        <div class="article-meta-row">
+          <span class="article-meta-pill" id="meta-service"></span>
+          <span class="article-meta-pill" id="meta-category"></span>
+          <span class="article-date" id="meta-date"></span>
+        </div>
+
+        <!-- 著者 -->
+        <div class="article-author">
+          <a href="#" class="author-link" id="author-link">
+            <img id="author-avatar" class="author-avatar" alt="著者アイコン" />
+            <span id="author-name" class="author-name"></span>
+          </a>
+        </div>
+
+        <h1 class="article-title" id="article-title"></h1>
+        <p class="article-lead" id="article-lead"></p>
+
+        <button class="share-circle-btn" id="share-button" aria-label="この記事をシェアする">
+          <span>⇪</span>
+        </button>
+      </section>
+
+      <section class="article-hero">
+        <div class="article-kv" id="article-kv"></div>
+      </section>
+
+      <article class="article-content" id="article-content"></article>
+
+      <section class="price-summary-section reveal" id="price-summary-section" style="display:none">
+        <div class="price-summary-box" id="price-summary-box"></div>
+      </section>
+
+      <section class="related-section reveal" id="related-section">
+        <h2 class="related-title">関連する記事</h2>
+        <div class="related-grid" id="related-grid"></div>
+      </section>
+    </div>
   </main>
 
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="privacy.html">プライバシーポリシー</a>
+        <a href="terms.html">利用規約</a>
+        <a href="company.html">運営会社</a>
+      </div>
+      <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- 共通スクリプト -->
+  <!-- ✅ 反映されない時は ?v=2 にしてキャッシュ破壊する -->
+  <script src="/index.js?v=9"></script>
+
+<!-- 検索UI + メニュー -->
 <script>
-/* ===============================
-   article.html logic
-   =============================== */
-
-(async () => {
-  const params = new URLSearchParams(location.search);
-  const articleId = params.get("id");
-
-  if (!articleId) {
-    document.getElementById("articleMount").innerHTML =
-      "<p>記事IDが指定されていません。</p>";
-    return;
+  function toggleMenu() {
+    const nav = document.getElementById("nav-overlay");
+    if (nav) nav.classList.toggle("open");
   }
 
-  // index.js で公開している値を利用
-  const SERVICE_ID = window.SERVICE_ID;
-  const API_KEY = window.API_KEY;
+  window.addEventListener("DOMContentLoaded", function () {
+    const fixedHeader = document.querySelector(".fixed-header");
+    const searchWrapper = document.querySelector(".search-wrapper");
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clear-btn");
+    const menuBtn = document.getElementById("menuBtn");
 
-  if (!SERVICE_ID || !API_KEY) {
-    document.getElementById("articleMount").innerHTML =
-      "<p>設定エラーが発生しました。</p>";
-    return;
+    if (!fixedHeader || !searchWrapper) return;
+
+    // 検索UI系だけ searchInput を使う（ここは今まで通りでOK）
+    if (searchInput) {
+      // searchWrapper の処理そのまま
+    }
+
+    // 🔥 Menuは必ず有効化
+    if (menuBtn) {
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+    }
+  });
+</script>
+
+    function toggleMenu() {
+      const nav = document.getElementById("nav-overlay");
+      if (nav) nav.classList.toggle("open");
+    }
+  </script>
+
+<script>
+  function setMeta(propertyOrName, content, isName=false) {
+    if (!content) return;
+    const selector = isName ? `meta[name="${propertyOrName}"]` : `meta[property="${propertyOrName}"]`;
+    let tag = document.querySelector(selector);
+    if (!tag) {
+      tag = document.createElement("meta");
+      if (isName) tag.setAttribute("name", propertyOrName);
+      else tag.setAttribute("property", propertyOrName);
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute("content", content);
   }
 
-  const ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/articles/${articleId}`;
+  document.addEventListener("DOMContentLoaded", async () => {
+    // 0) DOM参照
+    const kv             = document.getElementById("article-kv");
+    const titleEl        = document.getElementById("article-title");
+    const leadEl         = document.getElementById("article-lead");
+    const serviceEl      = document.getElementById("meta-service");
+    const categoryEl     = document.getElementById("meta-category");
+    const dateEl         = document.getElementById("meta-date");
+    const contentEl      = document.getElementById("article-content");
+    const breadcrumbEl   = document.getElementById("breadcrumb");
+    const relatedGrid    = document.getElementById("related-grid");
+    const relatedSection = document.getElementById("related-section");
 
-  try {
-    const res = await fetch(ENDPOINT, {
-      headers: { "X-MICROCMS-API-KEY": API_KEY }
-    });
-    if (!res.ok) throw new Error("fetch failed");
+    const authorNameEl   = document.getElementById("author-name");
+    const authorAvatarEl = document.getElementById("author-avatar");
+    const authorLinkEl   = document.getElementById("author-link");
 
-    const item = await res.json();
+    const priceSection = document.getElementById("price-summary-section");
+    const priceBox     = document.getElementById("price-summary-box");
 
-    /* ===============================
-       GA4：記事閲覧イベント（超重要）
-       =============================== */
-    window.gtag?.("event", "article_view", {
-      article_id: item.id,
-      article_title: item.title || "",
-      category: item.category?.name || "",
-    });
+    // 1) URLパラメータ
+    const params = new URLSearchParams(location.search);
+    const contentId = params.get("id") || params.get("contentId");
+    const draftKey  = params.get("draftKey");
 
-    /* ===============================
-       SEO / OGP 差し替え
-       =============================== */
-    document.title = `${item.title} | SUBSCOPE`;
-    document.querySelector("link[rel='canonical']").href =
-      `https://www.subscope.jp/article.html?id=${item.id}`;
+    // 2) 記事一覧ロード
+    if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
+      await loadArticles();
+    }
+    const list = window.articles || [];
+    const article = list.find((a) => a.id === contentId) || null;
 
-    const setMeta = (prop, value) => {
-      const el = document.querySelector(prop);
-      if (el && value) el.setAttribute("content", value);
-    };
+    // 3) 見つからない場合
+    if (!article) {
+      if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
+      if (relatedSection) relatedSection.style.display = "none";
+      if (priceSection) priceSection.style.display = "none";
+      document.title = "記事が見つかりませんでした | SUBSCOPE";
+      return;
+    }
 
-    setMeta("meta[property='og:title']", item.title);
-    setMeta("meta[property='og:description']", item.description);
-    setMeta("meta[property='og:url']",
-      `https://www.subscope.jp/article.html?id=${item.id}`);
-    setMeta("meta[property='og:image']",
-      item.eyecatch?.url || "https://www.subscope.jp/ogp-default-v3.png");
+// 4) ✅ GA4：記事ID別閲覧数（ランキング用）※1記事1回
+try {
+  const sentKey = "ga_article_view_sent_" + article.id;
+  if (!sessionStorage.getItem(sentKey)) {
 
-    /* ===============================
-       HTML描画
-       =============================== */
-    document.getElementById("articleMount").innerHTML = `
-      <article>
-        <div class="article-hero">
-          <img src="${item.eyecatch?.url || "https://placehold.co/1200x630"}" alt="">
-        </div>
+    // ✅(1) GA4
+    if (typeof gtag === "function") {
+      gtag("event", "article_view", { article_id: article.id, article_title: article.title || "" });
+    }
 
-        <div class="article-meta">
-          ${item.publishedAt?.slice(0,10).replace(/-/g,".") || ""}
-          ・ ${item.category?.name || ""}
-        </div>
+    // ✅(2) Cloud Runに加算（←これがランキングの実数になる）
+    fetch("https://subscope-ranking-7ednfs4rtq-an.a.run.app/view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ articleId: article.id })
+    }).catch(()=>{});
 
-        <h1>${item.title}</h1>
-
-        <p class="article-desc">
-          ${item.description || ""}
-        </p>
-
-        <div class="article-content">
-          ${item.content || ""}
-        </div>
-
-        <div class="article-footer">
-          <a href="all.html" class="back-link">← 記事一覧へ戻る</a>
-        </div>
-      </article>
-    `;
-
-  } catch (e) {
-    console.error(e);
-    document.getElementById("articleMount").innerHTML =
-      "<p>記事の読み込みに失敗しました。</p>";
+    sessionStorage.setItem(sentKey, "1");
   }
-})();
+} catch (e) {}
+
+    // 5) shareUrl / OGP
+    const currentUrl = new URL(window.location.href);
+    const shareUrl =
+      `${currentUrl.origin}/api/share?id=${encodeURIComponent(article.id)}` +
+      (draftKey ? `&draftKey=${encodeURIComponent(draftKey)}` : "");
+
+    const ogTitle = article.title ? `${article.title} | SUBSCOPE` : "SUBSCOPE";
+    const ogDesc  = (article.description || "").trim() || "SUBSCOPEの記事ページ";
+    const ogImg   = article.image || "https://www.subscope.jp/ogp-default-v3.png";
+
+    document.title = ogTitle;
+
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = shareUrl;
+
+    setMeta("og:title", ogTitle);
+    setMeta("og:description", ogDesc);
+    setMeta("og:url", shareUrl);
+    setMeta("og:image", ogImg);
+    setMeta("og:image:secure_url", ogImg);
+
+    setMeta("twitter:title", ogTitle, true);
+    setMeta("twitter:description", ogDesc, true);
+    setMeta("twitter:image", ogImg, true);
+
+    // 6) 描画
+    const categoryLabel = article.categoryName || article.category || "その他";
+
+    if (breadcrumbEl) {
+      breadcrumbEl.innerHTML = `
+        <a href="index.html">トップ</a> /
+        <a href="all.html?tab=${encodeURIComponent(categoryLabel)}">${categoryLabel}</a> /
+        <span>${article.title || ""}</span>
+      `;
+    }
+
+    if (serviceEl) {
+      const serviceName = article.service || article.serviceName || "";
+      if (serviceName) {
+        serviceEl.textContent = serviceName;
+        serviceEl.style.display = "inline-block";
+      } else {
+        serviceEl.style.display = "none";
+      }
+    }
+
+    if (categoryEl) categoryEl.textContent = categoryLabel;
+    if (dateEl) dateEl.textContent = (article.date || "").replace(/-/g, ".");
+
+    if (kv) {
+      const img = article.image || "images/sample1.jpg";
+      kv.style.backgroundImage = `url('${img}')`;
+    }
+
+    if (authorNameEl && authorAvatarEl && authorLinkEl) {
+      const authorObj   = article.author || null;
+      const authorName  = (authorObj && authorObj.name) || article.authorName || "";
+      const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
+
+      if (authorName) authorNameEl.textContent = authorName;
+      else {
+        const block = authorNameEl.closest(".article-author");
+        if (block) block.style.display = "none";
+      }
+
+      if (authorImage) authorAvatarEl.src = authorImage;
+      else authorAvatarEl.style.display = "none";
+
+      authorLinkEl.href = "javascript:void(0)";
+      authorLinkEl.style.cursor = "default";
+      authorLinkEl.style.pointerEvents = "none";
+    }
+
+    if (titleEl) titleEl.textContent = article.title || "";
+
+    if (leadEl) {
+      const leadFromCms = (article.description || "").trim();
+      if (leadFromCms) {
+        leadEl.textContent = leadFromCms;
+      } else {
+        const tmp = document.createElement("div");
+        tmp.innerHTML = article.contentHtml || article.content || "";
+        const firstP = tmp.querySelector("p");
+        leadEl.textContent = firstP ? firstP.textContent : "";
+      }
+    }
+
+    if (contentEl) {
+      const bodyHtml = article.contentHtml || article.content || "";
+      contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+
+      const ps = contentEl.querySelectorAll("p");
+      ps.forEach((p) => {
+        const inner = p.innerHTML.replace(/&nbsp;/g, "").trim().toLowerCase();
+        if (inner === "" || inner === "<br>" || inner === "<br/>" || inner === "<br />") {
+          p.classList.add("empty-space");
+        }
+      });
+    }
+
+    // シェア
+    const shareButton = document.getElementById("share-button");
+    if (shareButton) {
+      shareButton.addEventListener("click", async () => {
+        const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
+        if (navigator.share) {
+          try { await navigator.share({ title: shareText, text: shareText, url: shareUrl }); } catch (e) {}
+        } else {
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            alert("記事のURLをコピーしました");
+          } catch (e) {
+            alert("コピーに失敗しました…");
+          }
+        }
+      });
+    }
+
+    // 価格まとめ
+    if (priceSection && priceBox) {
+      if (article.priceSummary && article.priceSummary.trim() !== "") {
+        priceBox.innerHTML = article.priceSummary;
+        priceSection.style.display = "block";
+      } else {
+        priceSection.style.display = "none";
+      }
+    }
+
+    // 関連記事
+    const related = (list || [])
+      .filter((a) => a.id !== article.id && ((a.categoryName || a.category) === categoryLabel || a.service === article.service))
+      .slice(0, 6);
+
+    if (!related.length) {
+      if (relatedSection) relatedSection.style.display = "none";
+    } else if (relatedGrid) {
+      relatedGrid.innerHTML = related.map((a) => `
+        <div class="related-card" onclick="openArticle('${a.id}')">
+          <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+          <div class="related-body">
+            <div class="related-service">${a.service || ""}</div>
+            <div class="related-title-text">${a.title || ""}</div>
+            <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // reveal
+    const reveals = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("active");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach((el) => io.observe(el));
+  });
+
+  function openArticle(id) {
+    window.location.href = "/article.html?id=" + encodeURIComponent(id);
+  }
 </script>
 
 </body>
