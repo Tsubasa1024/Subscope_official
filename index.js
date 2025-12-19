@@ -773,15 +773,6 @@ function initRankingPage() {
   // period -> days
   const DAYS_MAP = { day: 1, week: 7, month: 30, all: 365 };
 
-  // 表示ラベル（好みで増やしてOK）
-  const TITLE_MAP = {
-    "/index.html": "トップ",
-    "/all.html": "すべての記事",
-    "/ranking.html": "ランキング",
-    "/sns.html": "SNS",
-    "/article.html": "記事ページ（全体）",
-  };
-
   const DEFAULT_THUMB = "https://www.subscope.jp/ogp-default-v3.png";
   let currentPeriod = "all";
 
@@ -802,7 +793,7 @@ function initRankingPage() {
       const card = e.target.closest?.("[data-rank-item]") || e.target.closest?.(".ranking-row");
       if (!card) return;
 
-      const key = card.dataset.key || "";          // 例: "/article.html"
+      const key = card.dataset.key || "";          // 例: "xxxxx"（記事ID）
       const title = card.dataset.title || "";
       const rank = Number(card.dataset.rank || 0);
       const period = currentPeriod || "all";
@@ -827,6 +818,7 @@ function initRankingPage() {
     });
   }
 
+  // ✅ rows: [{ key: "microcmsArticleId", views: number, article: {...} }]
   function render(rows = []) {
     const items = rows.slice(0, 20); // 上位20
     top3El.innerHTML = "";
@@ -836,26 +828,28 @@ function initRankingPage() {
     const mids = items.slice(1, 3);
     const rest = items.slice(3);
 
-    const makeTitle = (key) => TITLE_MAP[key] || key;
-    const makeLink = (key) => `https://www.subscope.jp${key}`;
+    const makeTitle = (item) => item?.article?.title || item?.key || "";
+    const makeDesc  = (item) => item?.article?.description || "";
+    const makeThumb = (item) => item?.article?.image || DEFAULT_THUMB;
+    const makeLink  = (item) => `article.html?id=${encodeURIComponent(item.key)}`;
 
     // 1位
     if (hero) {
-      const title = makeTitle(hero.key);
+      const title = makeTitle(hero);
       top3El.innerHTML += `
         <a class="rank-hero"
-          href="${makeLink(hero.key)}"
+          href="${makeLink(hero)}"
           data-rank-item="1"
           data-key="${hero.key}"
           data-title="${escapeHtml(title)}"
           data-rank="1"
           data-views="${hero.views}">
           <div class="rank-badge rank-1 rank-badge-large">1</div>
-          <div class="rank-hero-thumb" style="background-image:url('${DEFAULT_THUMB}');"></div>
+          <div class="rank-hero-thumb" style="background-image:url('${makeThumb(hero)}');"></div>
           <div class="rank-hero-content">
             <div class="ranking-service">${periodLabel(currentPeriod)} 人気</div>
             <div class="rank-hero-title">${escapeHtml(title)}</div>
-            <div class="rank-hero-desc">${escapeHtml(hero.key)}</div>
+            <div class="rank-hero-desc">${escapeHtml(makeDesc(hero))}</div>
             <div class="rank-hero-meta"><span>Views: ${hero.views}</span></div>
           </div>
         </a>
@@ -863,53 +857,53 @@ function initRankingPage() {
     }
 
     // 2-3位
-    mids.forEach((a, idx) => {
+    mids.forEach((item, idx) => {
       const rank = idx + 2;
-      const title = makeTitle(a.key);
+      const title = makeTitle(item);
       top3El.innerHTML += `
         <a class="rank-mid"
-          href="${makeLink(a.key)}"
+          href="${makeLink(item)}"
           data-rank-item="1"
-          data-key="${a.key}"
+          data-key="${item.key}"
           data-title="${escapeHtml(title)}"
           data-rank="${rank}"
-          data-views="${a.views}">
+          data-views="${item.views}">
           <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
-          <div class="rank-mid-thumb" style="background-image:url('${DEFAULT_THUMB}');"></div>
+          <div class="rank-mid-thumb" style="background-image:url('${makeThumb(item)}');"></div>
           <div class="ranking-content">
             <div class="ranking-service">${periodLabel(currentPeriod)} 人気</div>
             <div class="rank-mid-title">${escapeHtml(title)}</div>
-            <div class="rank-mid-desc">${escapeHtml(a.key)}</div>
-            <div class="rank-mid-meta"><span>Views: ${a.views}</span></div>
+            <div class="rank-mid-desc">${escapeHtml(makeDesc(item))}</div>
+            <div class="rank-mid-meta"><span>Views: ${item.views}</span></div>
           </div>
         </a>
       `;
     });
 
     // 4位以降
-    rest.forEach((a, idx) => {
+    rest.forEach((item, idx) => {
       const rank = idx + 4;
-      const title = makeTitle(a.key);
+      const title = makeTitle(item);
 
       const row = document.createElement("a");
       row.className = "ranking-row";
-      row.href = makeLink(a.key);
+      row.href = makeLink(item);
 
       row.dataset.rankItem = "1";
-      row.dataset.key = a.key;
+      row.dataset.key = item.key;              // ✅ 記事ID
       row.dataset.title = title;
       row.dataset.rank = String(rank);
-      row.dataset.views = String(a.views);
+      row.dataset.views = String(item.views);
 
       row.innerHTML = `
         <div class="ranking-row-rank">${rank}</div>
-        <div class="ranking-row-thumb" style="background-image:url('${DEFAULT_THUMB}');"></div>
+        <div class="ranking-row-thumb" style="background-image:url('${makeThumb(item)}');"></div>
         <div class="ranking-row-main">
           <div class="ranking-row-title">${escapeHtml(title)}</div>
           <div class="ranking-row-meta">
             <span class="ranking-row-service">${periodLabel(currentPeriod)}</span>
-            <span>Views: ${a.views}</span>
-            <span>${escapeHtml(a.key)}</span>
+            <span>Views: ${item.views}</span>
+            <span>${escapeHtml(item.article?.service || "")}</span>
           </div>
         </div>
       `;
@@ -927,7 +921,9 @@ function initRankingPage() {
   async function load(period) {
     currentPeriod = period || "all";
     const days = DAYS_MAP[currentPeriod] ?? 7;
-    const url = `${RANK_API}/?days=${days}&limit=20&mode=page`;
+
+    // ✅ ここが本命：記事IDで取る
+    const url = `${RANK_API}/?days=${days}&limit=50&mode=article_id`;
 
     try {
       const res = await fetch(url);
@@ -939,7 +935,24 @@ function initRankingPage() {
         return;
       }
 
-      render(data.rows || []);
+      // ✅ GA側 rows(key=記事ID) を microCMS記事と合体
+      const list = window.articles || [];
+      const merged = (data.rows || [])
+        .map((r) => {
+          const a = list.find((x) => x.id === r.key);
+          if (!a) return null; // microCMSに存在しないIDは除外
+          return { ...r, article: a };
+        })
+        .filter(Boolean)
+        .slice(0, 20); // 表示は上位20に絞る
+
+      if (!merged.length) {
+        top3El.innerHTML = `<div style="padding:16px;color:#666;">記事ランキングのデータがまだありません（article_view送信後に反映されます）</div>`;
+        restEl.innerHTML = "";
+        return;
+      }
+
+      render(merged);
     } catch (e) {
       console.error("[ranking] fetch failed:", e);
       top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得に失敗しました</div>`;
@@ -999,4 +1012,5 @@ function initRankingPage() {
     initScrollReveal();
   });
 })();
+
 
