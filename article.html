@@ -589,44 +589,6 @@
   <!-- ✅ 反映されない時は ?v=2 にしてキャッシュ破壊する -->
   <script src="/index.js?v=9"></script>
 
-<!-- 検索UI + メニュー -->
-<script>
-  function toggleMenu() {
-    const nav = document.getElementById("nav-overlay");
-    if (nav) nav.classList.toggle("open");
-  }
-
-  window.addEventListener("DOMContentLoaded", function () {
-    const fixedHeader = document.querySelector(".fixed-header");
-    const searchWrapper = document.querySelector(".search-wrapper");
-    const searchInput = document.getElementById("searchInput");
-    const clearBtn = document.getElementById("clear-btn");
-    const menuBtn = document.getElementById("menuBtn");
-
-    if (!fixedHeader || !searchWrapper) return;
-
-    // 検索UI系だけ searchInput を使う（ここは今まで通りでOK）
-    if (searchInput) {
-      // searchWrapper の処理そのまま
-    }
-
-    // 🔥 Menuは必ず有効化
-    if (menuBtn) {
-      menuBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleMenu();
-      });
-    }
-  });
-</script>
-
-<script>
-function toggleMenu() {
-  const nav = document.getElementById("nav-overlay");
-  if (nav) nav.classList.toggle("open");
-}
-</script>
-
 <script>
   function setMeta(propertyOrName, content, isName=false) {
     if (!content) return;
