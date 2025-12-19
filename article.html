@@ -620,11 +620,12 @@
   });
 </script>
 
-    function toggleMenu() {
-      const nav = document.getElementById("nav-overlay");
-      if (nav) nav.classList.toggle("open");
-    }
-  </script>
+<script>
+function toggleMenu() {
+  const nav = document.getElementById("nav-overlay");
+  if (nav) nav.classList.toggle("open");
+}
+</script>
 
 <script>
   function setMeta(propertyOrName, content, isName=false) {
@@ -691,12 +692,6 @@ try {
       gtag("event", "article_view", { article_id: article.id, article_title: article.title || "" });
     }
 
-    // ✅(2) Cloud Runに加算（←これがランキングの実数になる）
-    fetch("https://subscope-ranking-7ednfs4rtq-an.a.run.app/view", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ articleId: article.id })
-    }).catch(()=>{});
 
     sessionStorage.setItem(sentKey, "1");
   }
