@@ -651,7 +651,11 @@ try {
 
     // ✅(1) GA4
     if (typeof gtag === "function") {
-      gtag("event", "article_view", { article_id: article.id, article_title: article.title || "" });
+      gtag("event", "article_view", {
+  article_id: article.id,
+  article_title: article.title || "",
+  page_path: location.pathname + location.search
+});
     }
 
 
