@@ -832,6 +832,14 @@ function initRankingPage() {
     const makeDesc  = (item) => item?.article?.description || "";
     const makeThumb = (item) => item?.article?.image || DEFAULT_THUMB;
     const makeLink  = (item) => `article.html?id=${encodeURIComponent(item.key)}`;
+     const makeService = (item) => item?.article?.service || item?.article?.serviceName || "";
+const makeCategory = (item) => item?.article?.categoryName || item?.article?.category || "";
+const makeLabel = (item) => {
+  const s = (makeService(item) || "").trim();
+  const c = (makeCategory(item) || "").trim();
+  return [s, c].filter(Boolean).join(" / ") || "その他";
+};
+
 
     // 1位
     if (hero) {
@@ -847,7 +855,7 @@ function initRankingPage() {
           <div class="rank-badge rank-1 rank-badge-large">1</div>
           <div class="rank-hero-thumb" style="background-image:url('${makeThumb(hero)}');"></div>
           <div class="rank-hero-content">
-            <div class="ranking-service">${periodLabel(currentPeriod)} 人気</div>
+            <div class="ranking-service">${escapeHtml(makeLabel(hero))}</div>
             <div class="rank-hero-title">${escapeHtml(title)}</div>
             <div class="rank-hero-desc">${escapeHtml(makeDesc(hero))}</div>
             <div class="rank-hero-meta"><span>Views: ${hero.views}</span></div>
@@ -871,7 +879,7 @@ function initRankingPage() {
           <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
           <div class="rank-mid-thumb" style="background-image:url('${makeThumb(item)}');"></div>
           <div class="ranking-content">
-            <div class="ranking-service">${periodLabel(currentPeriod)} 人気</div>
+            <div class="ranking-service">${escapeHtml(makeLabel(item))}</div>
             <div class="rank-mid-title">${escapeHtml(title)}</div>
             <div class="rank-mid-desc">${escapeHtml(makeDesc(item))}</div>
             <div class="rank-mid-meta"><span>Views: ${item.views}</span></div>
@@ -901,9 +909,9 @@ function initRankingPage() {
         <div class="ranking-row-main">
           <div class="ranking-row-title">${escapeHtml(title)}</div>
           <div class="ranking-row-meta">
-            <span class="ranking-row-service">${periodLabel(currentPeriod)}</span>
-            <span>Views: ${item.views}</span>
-            <span>${escapeHtml(item.article?.service || "")}</span>
+  <span class="ranking-row-service">${escapeHtml(makeService(item) || "")}</span>
+  <span>${escapeHtml(makeCategory(item) || "")}</span>
+  <span>Views: ${item.views}</span>
           </div>
         </div>
       `;
@@ -1012,5 +1020,6 @@ function initRankingPage() {
     initScrollReveal();
   });
 })();
+
 
 
