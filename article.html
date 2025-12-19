@@ -479,7 +479,7 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-9FCHPHJTVE');
+  gtag('config', 'G-9FCHPHJTVE', { send_page_view: false });
 </script>
 </head>
 
@@ -649,19 +649,27 @@ try {
   const sentKey = "ga_article_view_sent_" + article.id;
   if (!sessionStorage.getItem(sentKey)) {
 
-    // ✅(1) GA4
     if (typeof gtag === "function") {
-      gtag("event", "article_view", {
-  article_id: article.id,
-  article_title: article.title || "",
-  page_path: location.pathname + location.search
-});
-    }
+      // ✅(A) page_view（ランキング集計の本命）
+      gtag("event", "page_view", {
+        page_path: location.pathname + location.search,
+        page_title: document.title || (article.title || ""),
+        article_id: article.id,
+        article_title: article.title || ""
+      });
 
+      // ✅(B) 任意：記事用イベント（残してOK）
+      gtag("event", "article_view", {
+        article_id: article.id,
+        article_title: article.title || "",
+        page_path: location.pathname + location.search
+      });
+    }
 
     sessionStorage.setItem(sentKey, "1");
   }
 } catch (e) {}
+
 
     // 5) shareUrl / OGP
     const currentUrl = new URL(window.location.href);
