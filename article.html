@@ -691,16 +691,15 @@ try {
       gtag("event", "article_view", { article_id: article.id, article_title: article.title || "" });
     }
 
-    // ✅(2) Cloud Runに加算（←これがランキングの実数になる）
-    fetch("https://subscope-ranking-7ednfs4rtq-an.a.run.app/view", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ articleId: article.id })
-    }).catch(()=>{});
+// ✅ ranking.html と同じ Cloud Run に統一
+const RANK_API = "https://subscope-ranking-319660105312.asia-northeast1.run.app";
 
-    sessionStorage.setItem(sentKey, "1");
-  }
-} catch (e) {}
+fetch(`${RANK_API}/view`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ articleId: article.id })
+}).catch(()=>{});
+
 
 
     // 5) shareUrl / OGP
