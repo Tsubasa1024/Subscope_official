@@ -479,7 +479,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-9FCHPHJTVE', { send_page_view: false, debug_mode: true });
+
+  // ✅ config は load 後に実行（DebugViewで安定）
+  window.addEventListener("load", () => {
+    gtag('config', 'G-9FCHPHJTVE', { send_page_view: false, debug_mode: true });
+  });
 </script>
 </head>
 
@@ -673,8 +677,25 @@ try {
       console.log("GA sent", article.id);
     };
 
-    // gtag読み込み待ち（保険）
-    setTimeout(send, 800);
+const waitGtag = (max=40) => new Promise((resolve) => {
+  let n = 0;
+  const t = setInterval(() => {
+    n++;
+    if (typeof window.gtag === "function") {
+      clearInterval(t);
+      resolve(true);
+    }
+    if (n >= max) {
+      clearInterval(t);
+      resolve(false);
+    }
+  }, 100);
+});
+
+(async () => {
+  const ok = await waitGtag();
+  if (ok) send();
+})();
 
     sessionStorage.setItem(sentKey, "1");
   }
