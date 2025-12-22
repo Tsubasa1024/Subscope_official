@@ -649,22 +649,29 @@ try {
   const sentKey = "ga_article_view_sent_" + article.id;
   if (!sessionStorage.getItem(sentKey)) {
 
-    if (typeof gtag === "function") {
-      // ✅(A) page_view（ランキング集計の本命）
-      gtag("event", "page_view", {
-        page_path: location.pathname + location.search,
-        page_title: document.title || (article.title || ""),
-        article_id: article.id,
-        article_title: article.title || ""
-      });
+if (typeof gtag === "function") {
+  const payloadPV = {
+    page_path: location.pathname + location.search,
+    page_title: document.title || (article.title || ""),
+    article_id: article.id,
+    article_title: article.title || ""
+  };
 
-      // ✅(B) 任意：記事用イベント（残してOK）
-      gtag("event", "article_view", {
-        article_id: article.id,
-        article_title: article.title || "",
-        page_path: location.pathname + location.search
-      });
-    }
+  const payloadAV = {
+    article_id: article.id,
+    article_title: article.title || "",
+    page_path: location.pathname + location.search
+  };
+
+  // ✅ gtagの準備が整うまで少し待ってから送る（超重要）
+  setTimeout(() => {
+    gtag("event", "page_view", payloadPV);
+    gtag("event", "article_view", payloadAV);
+
+    console.log("GA sent", payloadPV, payloadAV);
+  }, 800);
+}
+
 
     sessionStorage.setItem(sentKey, "1");
   }
