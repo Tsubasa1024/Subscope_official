@@ -651,55 +651,69 @@
 // 4) ✅ GA4：記事ID別閲覧数（ランキング用）※1記事1回
 try {
   const sentKey = "ga_article_view_sent_" + article.id;
+
+  const waitGtag = (max = 80) => new Promise((resolve) => {
+    let n = 0;
+    const t = setInterval(() => {
+      n++;
+      if (typeof window.gtag === "function") {
+        clearInterval(t);
+        resolve(true);
+      }
+      if (n >= max) {
+        clearInterval(t);
+        resolve(false);
+      }
+    }, 100);
+  });
+
+  const send = () => {
+    if (typeof gtag !== "function") return false;
+
+    gtag("event", "page_view", {
+      debug_mode: true,
+      page_location: location.href,
+      page_path: location.pathname + location.search,
+      page_title: (article.title || document.title || ""),
+      article_id: article.id,
+    });
+
+    gtag("event", "article_view", {
+      debug_mode: true,
+      article_id: article.id,
+      article_title: article.title || "",
+      page_location: location.href,
+      page_path: location.pathname + location.search,
+    });
+
+    console.log("✅ GA sent", article.id);
+    return true;
+  };
+
   if (!sessionStorage.getItem(sentKey)) {
+    (async () => {
+      const ok = await waitGtag();     // gtag待ち（8秒）
+      if (!ok) {
+        console.warn("❌ gtag not ready (timeout). will retry on load");
+        return; // 送れてないならフラグ立てない
+      }
 
-    const send = () => {
-      if (typeof gtag !== "function") return;
+      const sent = send();
+      if (sent) sessionStorage.setItem(sentKey, "1"); // ✅ 送れた時だけフラグ
+    })();
 
-      // ✅ page_view（GA4が最も素直に受ける形）
-      gtag("event", "page_view", {
-        debug_mode: true,
-        page_location: location.href,
-        page_path: location.pathname + location.search,
-        page_title: (article.title || document.title || ""),
-        article_id: article.id,
-      });
-
-      // ✅ article_view（ランキング集計用）
-      gtag("event", "article_view", {
-        debug_mode: true,
-        article_id: article.id,
-        article_title: article.title || "",
-        page_location: location.href,
-        page_path: location.pathname + location.search,
-      });
-
-      console.log("GA sent", article.id);
-    };
-
-const waitGtag = (max=40) => new Promise((resolve) => {
-  let n = 0;
-  const t = setInterval(() => {
-    n++;
-    if (typeof window.gtag === "function") {
-      clearInterval(t);
-      resolve(true);
-    }
-    if (n >= max) {
-      clearInterval(t);
-      resolve(false);
-    }
-  }, 100);
-});
-
-(async () => {
-  const ok = await waitGtag();
-  if (ok) send();
-})();
-
-    sessionStorage.setItem(sentKey, "1");
+    // ✅ 保険：load後にも1回だけ再挑戦（DOMContentLoaded時に間に合わない端末がある）
+    window.addEventListener("load", () => {
+      if (!sessionStorage.getItem(sentKey)) {
+        const sent = send();
+        if (sent) sessionStorage.setItem(sentKey, "1");
+      }
+    }, { once: true });
   }
-} catch (e) {}
+
+} catch (e) {
+  console.warn("GA error", e);
+}
 
 
     // 5) shareUrl / OGP
