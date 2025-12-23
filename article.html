@@ -481,9 +481,8 @@
   gtag('js', new Date());
 
   // ✅ config は load 後に実行（DebugViewで安定）
-  window.addEventListener("load", () => {
-    gtag('config', 'G-9FCHPHJTVE', { send_page_view: false, debug_mode: true });
-  });
+  gtag('config', 'G-9FCHPHJTVE', { send_page_view: false, debug_mode: true });
+
 </script>
 </head>
 
