@@ -47,9 +47,19 @@
     try {
       const days = periodToDays(period);
       const data = await fetchRank(days);
-      const rows = (data.rows || [])
-        .map(r => ({ key: normalizePath(r.key), views: Number(r.views || 0) }))
-        .sort((a, b) => b.views - a.views);
+const merged = new Map();
+
+(data.rows || []).forEach(r => {
+  const key = normalizePath(r.key);
+  const views = Number(r.views || 0);
+  if (!key) return;
+  merged.set(key, (merged.get(key) || 0) + views);
+});
+
+const rows = [...merged.entries()]
+  .map(([key, views]) => ({ key, views }))
+  .sort((a, b) => b.views - a.views);
+
 
       if (!rows.length) {
         rest.innerHTML = `<div style="padding:12px 0;color:#86868b;">データがありません</div>`;
