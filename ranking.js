@@ -50,7 +50,7 @@
 const merged = new Map();
 
 (data.rows || []).forEach(r => {
-  const key = normalizePath(r.key);
+  const key = normalizeKey(r.key);
   const views = Number(r.views || 0);
   if (!key) return;
   merged.set(key, (merged.get(key) || 0) + views);
