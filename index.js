@@ -1011,7 +1011,7 @@ const makeLabel = (item) => {
 
     if (page === "home") {
       renderHero();
-      renderLatest(8);
+      renderLatest(9);
       initCarousel3D();
     }
     if (page === "all") initAllPage();
@@ -1020,6 +1020,7 @@ const makeLabel = (item) => {
     initScrollReveal();
   });
 })();
+
 
 
 
