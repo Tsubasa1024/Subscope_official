@@ -13,26 +13,25 @@
   // DAY/WEEK/MONTH/ALL -> days
   const periodToDays = (p) => (p === "day" ? 1 : p === "week" ? 7 : p === "month" ? 30 : 365);
 
-// ★ id の重複を強制的に消す正規化（ここが修正点）
 const normalizeKey = (k) => {
   if (!k) return "";
   const s = String(k).trim();
 
   try {
-    // /article.html?... でも https://〜 でも両対応
-    const u = new URL(
-      s.startsWith("http") ? s : location.origin + s
-    );
+    const u = new URL(s.startsWith("http") ? s : location.origin + s);
 
-    // id が複数あっても最初の1個だけ使う
-    const id = u.searchParams.get("id");
-    if (!id) return ""; // id 無しは捨てる
+    let id = u.searchParams.get("id");
+    if (!id) return "";
+
+    // ✅ id の中に "?id=..." などが混ざってても最初だけ残す
+    id = String(id).split(/[?&]/)[0];
 
     return `/article.html?id=${id}`;
   } catch {
     return "";
   }
 };
+
 
 
   const fetchRank = async (days) => {
