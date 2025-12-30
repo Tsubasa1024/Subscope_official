@@ -631,6 +631,17 @@
     const contentId = params.get("id") || params.get("contentId");
     const draftKey  = params.get("draftKey");
 
+    // ✅ id が壊れてたら最初のIDだけ使ってURLも綺麗にする
+let cleanId = (contentId || "").split(/[?&]/)[0];
+
+if (cleanId && cleanId !== contentId) {
+  const u = new URL(location.href);
+  u.searchParams.set("id", cleanId);
+  u.searchParams.delete("contentId");
+  history.replaceState(null, "", u.pathname + "?" + u.searchParams.toString());
+}
+
+
     // 2) 記事一覧ロード
     if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
       await loadArticles();
