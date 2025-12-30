@@ -13,22 +13,27 @@
   // DAY/WEEK/MONTH/ALL -> days
   const periodToDays = (p) => (p === "day" ? 1 : p === "week" ? 7 : p === "month" ? 30 : 365);
 
-// ドメイン付き/なしを統一しつつ、?id=xxxx は残す
+// ★ id の重複を強制的に消す正規化（ここが修正点）
 const normalizeKey = (k) => {
   if (!k) return "";
   const s = String(k).trim();
 
-  // /article.html?id=xxx みたいに / から始まるならそのまま
-  if (s.startsWith("/")) return s;
-
-  // https://subscope.jp/article.html?id=xxx → /article.html?id=xxx
   try {
-    const u = new URL(s);
-    return u.pathname + u.search;
+    // /article.html?... でも https://〜 でも両対応
+    const u = new URL(
+      s.startsWith("http") ? s : location.origin + s
+    );
+
+    // id が複数あっても最初の1個だけ使う
+    const id = u.searchParams.get("id");
+    if (!id) return ""; // id 無しは捨てる
+
+    return `/article.html?id=${id}`;
   } catch {
-    return s;
+    return "";
   }
 };
+
 
   const fetchRank = async (days) => {
     const url = new URL(API_BASE);
