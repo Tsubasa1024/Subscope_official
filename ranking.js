@@ -13,14 +13,22 @@
   // DAY/WEEK/MONTH/ALL -> days
   const periodToDays = (p) => (p === "day" ? 1 : p === "week" ? 7 : p === "month" ? 30 : 365);
 
-  // 余計なパスゆれを統一（/Subscope_official/article.html -> /article.html）
-  const normalizePath = (p) => {
-    if (!p) return "/";
-    const s = String(p);
-    if (s.endsWith("/article.html")) return "/article.html";
-    if (s.includes("/article.html")) return "/article.html";
+// ドメイン付き/なしを統一しつつ、?id=xxxx は残す
+const normalizeKey = (k) => {
+  if (!k) return "";
+  const s = String(k).trim();
+
+  // /article.html?id=xxx みたいに / から始まるならそのまま
+  if (s.startsWith("/")) return s;
+
+  // https://subscope.jp/article.html?id=xxx → /article.html?id=xxx
+  try {
+    const u = new URL(s);
+    return u.pathname + u.search;
+  } catch {
     return s;
-  };
+  }
+};
 
   const fetchRank = async (days) => {
     const url = new URL(API_BASE);
@@ -53,8 +61,13 @@ const merged = new Map();
   const key = normalizeKey(r.key);
   const views = Number(r.views || 0);
   if (!key) return;
+
+  // id無しテンプレはランキングに出さない
+  if (key === "/article.html") return;
+
   merged.set(key, (merged.get(key) || 0) + views);
 });
+
 
 const rows = [...merged.entries()]
   .map(([key, views]) => ({ key, views }))
