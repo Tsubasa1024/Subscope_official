@@ -878,16 +878,40 @@ try {
     if (!related.length) {
       if (relatedSection) relatedSection.style.display = "none";
     } else if (relatedGrid) {
-      relatedGrid.innerHTML = related.map((a) => `
-        <div class="related-card" onclick="openArticle('${a.id}')">
-          <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
-          <div class="related-body">
-            <div class="related-service">${a.service || ""}</div>
-            <div class="related-title-text">${a.title || ""}</div>
-            <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
-          </div>
-        </div>
-      `).join("");
+      const getPlainText = (html) => {
+  const d = document.createElement("div");
+  d.innerHTML = html || "";
+  return (d.textContent || "").replace(/\s+/g, " ").trim();
+};
+
+const pickDesc = (a) => {
+  // 1) まず microCMS の description を優先
+  const d = (a.description || "").trim();
+  if (d) return d;
+
+  // 2) 無ければ本文から抜粋
+  const plain = getPlainText(a.contentHtml || a.content || "");
+  return plain;
+};
+
+relatedGrid.innerHTML = related.map((a) => {
+  const desc = pickDesc(a);
+  const safeDesc = (desc || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  return `
+    <div class="related-card" onclick="openArticle('${a.id}')">
+      <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
+      <div class="related-body">
+        <div class="related-service">${a.service || ""}</div>
+        <div class="related-title-text">${a.title || ""}</div>
+
+        ${safeDesc ? `<div class="related-desc">${safeDesc}</div>` : ""}
+
+        <div class="related-date">${(a.date || "").replace(/-/g, ".")}</div>
+      </div>
+    </div>
+  `;
+}).join("");
     }
 
     // reveal
