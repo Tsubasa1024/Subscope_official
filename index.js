@@ -1017,9 +1017,9 @@ const makeLabel = (item) => {
     if (page === "all") initAllPage();
     if (page === "ranking") initRankingPage();
 
-    initScrollReveal();
   });
 })();
+
 
 
 
