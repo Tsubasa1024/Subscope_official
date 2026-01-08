@@ -298,7 +298,7 @@
 
   function initHeaderSearch() {
     const searchInput = $("#searchInput");
-    const clearBtn = $("#clear-btn");
+    const clearBtn = $("#clearBtn");
     const fixedHeader = $(".fixed-header");
     const searchWrapper = $(".search-wrapper");
 
@@ -1020,3 +1020,4 @@ const makeLabel = (item) => {
     initScrollReveal();
   });
 })();
+
