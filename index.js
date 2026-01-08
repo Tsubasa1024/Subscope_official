@@ -135,6 +135,35 @@
     const adGrid = await fetchTopAd("home_grid_sponsor");
     if (adGrid) window.__ADS__["home_grid_sponsor"] = adGrid;
   }
+  // ============
+  // 3.5 Cache（記事の先読み/即表示用）
+  // ============
+  const CACHE_KEY = "subscope_articles_cache_v1";
+  const CACHE_TTL_MS = 1000 * 60 * 10; // 10分（好みで）
+
+  function readArticlesCache() {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed?.ts || !Array.isArray(parsed?.items)) return null;
+
+      const isFresh = Date.now() - parsed.ts < CACHE_TTL_MS;
+      if (!isFresh) return null;
+
+      return parsed.items;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeArticlesCache(items) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items }));
+    } catch {
+      // localStorage が使えない環境でも無視
+    }
+  }
 
   // ============
   // 3. Articles
@@ -214,12 +243,37 @@
   }
 
   async function loadArticles() {
-    if (window.articles && window.articles.length > 0) return window.articles;
+    // ① まずキャッシュがあれば即表示できるように反映（体感が速くなる）
+    if (!window.articles || window.articles.length === 0) {
+      const cached = readArticlesCache();
+      if (cached && cached.length) {
+        window.articles = cached;
+      }
+    }
 
+    // ② すでに articles があれば一旦それを返す（表示を先に進める）
+    if (window.articles && window.articles.length > 0) {
+      // ただし裏で最新を取りにいって更新（キャッシュ更新）
+      fetchJson(`${ENDPOINT}?limit=100&depth=2&ts=${Date.now()}`)
+        .then((data) => {
+          const contents = data?.contents || [];
+          const mapped = contents.map(mapCmsArticle);
+          window.articles = mapped;
+          writeArticlesCache(mapped);
+        })
+        .catch((e) => {
+          console.error("microCMS から記事一覧の取得に失敗:", e);
+        });
+
+      return window.articles;
+    }
+
+    // ③ 何もなければ通常取得
     try {
       const data = await fetchJson(`${ENDPOINT}?limit=100&depth=2&ts=${Date.now()}`);
       const contents = data?.contents || [];
       window.articles = contents.map(mapCmsArticle);
+      writeArticlesCache(window.articles);
     } catch (e) {
       console.error("microCMS から記事一覧の取得に失敗:", e);
       window.articles = [];
@@ -227,9 +281,6 @@
     return window.articles;
   }
 
-  function getArticles() {
-    return window.articles || [];
-  }
 
   // ============
   // 4. Search（共通）
@@ -1004,21 +1055,26 @@ const makeLabel = (item) => {
     initMenuOpen();
     initHeaderSearch();
 
-    await loadArticles();
-    await loadAds();
-
     const page = document.body?.dataset?.page || "";
 
+    // ① まずキャッシュ等で loadArticles が即返せるようにする（描画を早める）
+    await loadArticles();
+
+    // ② homeは先に描画してから、カルーセル等をセット
     if (page === "home") {
       renderHero();
       renderLatest(9);
       initCarousel3D();
     }
+
+    // ③ あとで広告（今OFFだけど）
+    await loadAds();
+
     if (page === "all") initAllPage();
     if (page === "ranking") initRankingPage();
-
   });
 })();
+
 
 
 
