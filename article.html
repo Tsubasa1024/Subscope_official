@@ -495,6 +495,29 @@
   opacity: 1 !important;
   transform: none !important;
 }
+    /* =========================
+   ✅ 本文内画像：枠内に収める（はみ出し防止）
+   ========================= */
+.article-content .image-wrap{
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #f0f0f0;
+  margin: 18px 0 26px;
+}
+
+/* 画像自体は必ず親幅に収める */
+.article-content .image-wrap img{
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* スマホは角丸少し小さめ */
+@media (max-width: 767px){
+  .article-content .image-wrap{ border-radius: 14px; }
+}
 </style>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
@@ -844,6 +867,27 @@ try {
     if (contentEl) {
       const bodyHtml = article.contentHtml || article.content || "";
       contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
+// ✅ 本文内のimgを自動で枠（image-wrap）に入れて、はみ出しを防ぐ
+const imgs = contentEl.querySelectorAll("img");
+imgs.forEach((img) => {
+  // すでにwrap済みなら何もしない
+  if (img.closest(".image-wrap")) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = "image-wrap";
+
+  // width/height属性があると崩れることがあるので外す
+  img.removeAttribute("width");
+  img.removeAttribute("height");
+
+  // 念のためインラインで付いてる幅指定も潰す（microCMS由来対策）
+  img.style.maxWidth = "100%";
+  img.style.height = "auto";
+  img.style.display = "block";
+
+  img.parentNode.insertBefore(wrap, img);
+  wrap.appendChild(img);
+});
 
       const ps = contentEl.querySelectorAll("p");
       ps.forEach((p) => {
