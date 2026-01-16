@@ -52,6 +52,14 @@
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   }
+function hideLoader() {
+  const el = document.getElementById("loader");
+  if (!el) return;
+
+  el.classList.add("is-hide");
+  el.addEventListener("transitionend", () => el.remove(), { once: true });
+  setTimeout(() => el.remove(), 600);
+}
 
   // ============
   // 2. Ads
@@ -1007,6 +1015,19 @@ const makeLabel = (item) => {
     await loadArticles();
     await loadAds();
 
+     hideLoader();
+     
+function hideLoader() {
+  const el = document.getElementById("loader");
+  if (!el) return;
+
+  el.classList.add("is-hide"); // CSSでフェードアウト
+  el.addEventListener("transitionend", () => el.remove(), { once: true });
+
+  // transitionend が来ない保険
+  setTimeout(() => el.remove(), 600);
+}
+
     const page = document.body?.dataset?.page || "";
 
     if (page === "home") {
@@ -1020,5 +1041,6 @@ const makeLabel = (item) => {
     initScrollReveal();
   });
 })();
+
 
 
