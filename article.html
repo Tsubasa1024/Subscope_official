@@ -496,7 +496,7 @@
   transform: none !important;
 }
 /* =========================
-   ✅ 本文内画像：枠内に収める（PCは大きくなりすぎない）
+   ✅ 本文内画像：原型を保って枠内に収める（灰色なし）
    ========================= */
 .article-content .image-wrap{
   width: 100%;
@@ -504,32 +504,38 @@
   border-radius: 18px;
   margin: 18px 0 26px;
 
-  /* ✅ PCだけ縦を抑える（ここが追加ポイント） */
+  /* PCで縦にデカくなりすぎない */
   max-height: 420px;
+
+  /* 縦長画像の左右余白は “透明” のまま */
+  background: transparent;
+
+  /* 画像を中央に置く（余白が出ても自然） */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .article-content .image-wrap img{
   display: block;
   max-width: 100%;
-  height: auto;
+  max-height: 420px;
   width: auto;
+  height: auto;
   object-fit: contain; /* ✅ 切らない */
 }
-.article-content .image-wrap{
-  width: 100%;
-  overflow: hidden;
-  border-radius: 18px;
-  margin: 18px 0 26px;
 
-  max-height: 420px;
+/* スマホは高さ制限を外す */
+@media (max-width: 767px){
+  .article-content .image-wrap{
+    max-height: none;
+    border-radius: 14px;
+  }
+  .article-content .image-wrap img{
+    max-height: none;
+  }
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.article-content .image-wrap img{
-  max-height: 420px;
-}
 
 
 /* ✅ スマホは高さ制限を外す */
@@ -545,6 +551,20 @@
 @media (max-width: 767px){
   .article-content .image-wrap{ border-radius: 14px; }
 }
+    /* =========================
+   ✅ 本文内リンク：青 → 訪問後は紫
+   ========================= */
+.article-content a{
+  color: #007aff;
+  text-decoration: underline;
+}
+.article-content a:visited{
+  color: #6e40c9;
+}
+.article-content a:hover{
+  opacity: 0.75;
+}
+
 </style>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
