@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>すべての記事 | SUBSCOPE</title>
-    <!-- Canonical -->
+
+  <!-- Canonical -->
   <link rel="canonical" href="https://www.subscope.jp/all.html">
 
   <!-- OGP -->
@@ -14,7 +15,6 @@
   <meta property="og:description" content="SUBSCOPEが発信するすべての記事一覧。サブスクリプション選びに役立つ情報をまとめてチェック。">
   <meta property="og:url" content="https://www.subscope.jp/all.html">
 
-  <!-- 共通OGP画像（トップと同じ） -->
   <meta property="og:image" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:secure_url" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:width" content="1200">
@@ -25,7 +25,6 @@
   <meta name="twitter:title" content="すべての記事 | SUBSCOPE">
   <meta name="twitter:description" content="SUBSCOPEが発信するすべての記事一覧。サブスクリプション選びに役立つ情報をまとめてチェック。">
   <meta name="twitter:image" content="https://www.subscope.jp/ogp-default-v3.png">
-
 
   <style>
     :root{
@@ -65,33 +64,32 @@
     .search-item img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0}
     .search-item h3{font-size:.95rem;margin-bottom:4px}
     .search-item p{
-  font-size: .8rem;
-  color: #86868b;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
+      font-size: .8rem;
+      color: #86868b;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .menu-btn{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.1);
       padding:12px 24px;border-radius:999px;font-size:.9rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
       box-shadow:0 4px 20px rgba(0,0,0,.05)}
     .menu-icon-lines{display:flex;flex-direction:column;gap:4px}
     .menu-line{width:16px;height:2px;border-radius:999px;background:var(--color-text-main)}
-    /* ✅ iPad Safari の青文字化を防止（Menuボタン） */
-.menu-btn{
-  color: var(--color-text-main);
-  -webkit-appearance: none;
-  appearance: none;
-}
 
-.menu-btn,
-.menu-btn *{
-  color: var(--color-text-main) !important;
-  -webkit-tap-highlight-color: transparent;
-}
+    /* ✅ iPad Safari の青文字化を防止（Menuボタン） */
+    .menu-btn{
+      color: var(--color-text-main);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .menu-btn,
+    .menu-btn *{
+      color: var(--color-text-main) !important;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     .nav-overlay{position:fixed;top:72px;right:40px;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);
       padding:20px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.05);
@@ -158,65 +156,94 @@
       .all-clear-btn{right:6px;width:36px;height:36px;font-size:22px}
     }
 
-/* ===============================
-   ✅ スマホ：タブの青文字化防止 + 選択中は白固定
-   =============================== */
-.tabs, .tab, .tab *{
-  -webkit-tap-highlight-color: transparent;
-}
+    /* ✅ スマホ：タブの青文字化防止 + 選択中は白固定 */
+    .tabs, .tab, .tab *{ -webkit-tap-highlight-color: transparent; }
+    .tab{
+      color: var(--color-text-main);
+      -webkit-text-fill-color: var(--color-text-main);
+      text-decoration: none;
+      outline: none;
+    }
+    .tab:not(.active):focus,
+    .tab:not(.active):active{
+      color: var(--color-text-main);
+      -webkit-text-fill-color: var(--color-text-main);
+    }
+    .tab.active{
+      background:#000;
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+      font-weight:600;
+    }
+    .tab.active:focus,
+    .tab.active:active{
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+    }
 
-.tab{
-  color: var(--color-text-main);
-  -webkit-text-fill-color: var(--color-text-main);
-  text-decoration: none;
-  outline: none;
-}
+    /* ===== Scroll Reveal 無効化 ===== */
+    .reveal{
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .reveal.active{
+      opacity: 1 !important;
+      transform: none !important;
+    }
 
-/* ← ここがポイント：activeじゃない時だけ黒にする */
-.tab:not(.active):focus,
-.tab:not(.active):active{
-  color: var(--color-text-main);
-  -webkit-text-fill-color: var(--color-text-main);
-}
+    /* =========================
+       ✅ Loading（CSSだけでおしゃれ）
+       ========================= */
+    .loader-wrap{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      z-index: 99999;
+    }
+    .loader-breath{
+      font: 700 14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      opacity: .45;
+      animation: breath 1.4s ease-in-out infinite;
+    }
+    @keyframes breath{
+      0%,100%{ opacity:.35; transform: scale(.98); }
+      50%{ opacity:.9; transform: scale(1.02); }
+    }
+    #loader{
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 99999;
+      opacity: 1;
+      transition: opacity .35s ease;
+    }
+    #loader.is-hide{
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
 
-/* ✅ 選択中（PCと同じ：黒背景×白文字） */
-.tab.active{
-  background:#000;
-  color:#fff !important;
-  -webkit-text-fill-color:#fff !important;
-  font-weight:600;
-}
-
-/* ✅ iPhoneで押しても白のまま */
-.tab.active:focus,
-.tab.active:active{
-  color:#fff !important;
-  -webkit-text-fill-color:#fff !important;
-}
-
-/* ===== Scroll Reveal 無効化（全ページ共通）===== */
-.reveal{
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
-}
-.reveal.active{
-  opacity: 1 !important;
-  transform: none !important;
-}
-</style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-9FCHPHJTVE');
-</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-9FCHPHJTVE');
+  </script>
 </head>
 
-
 <body data-page="all">
+  <!-- Loading -->
+  <div class="loader-wrap" id="loader" aria-label="Loading">
+    <div class="loader-breath">SUBSCOPE</div>
+  </div>
+
   <!-- Header -->
   <div class="fixed-header">
     <div class="top-header">
@@ -297,6 +324,28 @@
     </div>
   </footer>
 
-  <script src="index.js"></script>
+  <!-- ✅ deferで読み込み順安定（ローダーが残りにくい） -->
+  <script src="/index.js?v=11" defer></script>
+
+  <!-- ✅ all.html側で必ずローダーを消す保険 -->
+  <script>
+    function hideLoader() {
+      const el = document.getElementById("loader");
+      if (!el) return;
+      el.classList.add("is-hide");
+      el.addEventListener("transitionend", () => el.remove(), { once: true });
+      setTimeout(() => el.remove(), 600);
+    }
+
+    // DOMが組めたら一旦消す（重い処理はページ側の描画が担保）
+    document.addEventListener("DOMContentLoaded", () => {
+      hideLoader();
+    });
+
+    // さらに保険：window loadでも一回だけ
+    window.addEventListener("load", () => {
+      hideLoader();
+    }, { once: true });
+  </script>
 </body>
 </html>
