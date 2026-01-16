@@ -495,8 +495,8 @@
   opacity: 1 !important;
   transform: none !important;
 }
-    /* =========================
-   ✅ 本文内画像：枠内に収める（はみ出し防止）
+/* =========================
+   ✅ 本文内画像：枠内に収める（PCは大きくなりすぎない）
    ========================= */
 .article-content .image-wrap{
   width: 100%;
@@ -504,15 +504,26 @@
   border-radius: 18px;
   background: #f0f0f0;
   margin: 18px 0 26px;
+
+  /* ✅ PCだけ縦を抑える（ここが追加ポイント） */
+  max-height: 420px;
 }
 
-/* 画像自体は必ず親幅に収める */
 .article-content .image-wrap img{
   display: block;
   width: 100%;
-  height: auto;
-  max-width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
+
+/* ✅ スマホは高さ制限を外す */
+@media (max-width: 767px){
+  .article-content .image-wrap{
+    max-height: none;
+    border-radius: 14px;
+  }
+}
+
 
 /* スマホは角丸少し小さめ */
 @media (max-width: 767px){
