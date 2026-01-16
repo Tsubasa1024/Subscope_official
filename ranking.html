@@ -1,10 +1,14 @@
+<!-- =========================
+     ranking.html（完全版）
+     ========================= -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ランキング | SUBSCOPE</title>
-    <!-- Canonical -->
+
+  <!-- Canonical -->
   <link rel="canonical" href="https://www.subscope.jp/ranking.html">
 
   <!-- OGP -->
@@ -13,8 +17,6 @@
   <meta property="og:title" content="ランキング | SUBSCOPE">
   <meta property="og:description" content="SUBSCOPEで人気の記事をランキング形式でまとめるページ。迷ったらまずここから。">
   <meta property="og:url" content="https://www.subscope.jp/ranking.html">
-
-  <!-- 同じ画像（トップと共通） -->
   <meta property="og:image" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:secure_url" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:width" content="1200">
@@ -25,7 +27,6 @@
   <meta name="twitter:title" content="ランキング | SUBSCOPE">
   <meta name="twitter:description" content="SUBSCOPEで人気の記事をランキング形式でまとめるページ。迷ったらまずここから。">
   <meta name="twitter:image" content="https://www.subscope.jp/ogp-default-v3.png">
-
 
   <style>
     :root{
@@ -39,11 +40,11 @@
     *{margin:0;padding:0;box-sizing:border-box}
     html,body{width:100%;overflow-x:hidden}
     body{font-family:var(--font-family);background:var(--color-bg);color:var(--color-text-main);-webkit-font-smoothing:antialiased;line-height:1.5}
-
     a{text-decoration:none;color:inherit}
     ul{list-style:none}
     .container{max-width:var(--container-width);margin:0 auto;padding:0 24px;width:100%}
 
+    /* reveal（※いまは無効化してる） */
     .reveal{opacity:0;transform:translateY(40px);transition:opacity var(--transition-fade),transform var(--transition-fade)}
     .reveal.active{opacity:1;transform:translateY(0)}
 
@@ -67,32 +68,23 @@
     .search-item img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0}
     .search-item h3{font-size:.95rem;margin-bottom:4px}
     .search-item p{
-  font-size: .8rem;
-  color: var(--color-text-gray); /* 灰色 */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;         /* 2行まで */
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+      font-size:.8rem;
+      color:var(--color-text-gray);
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
     .menu-btn{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.1);
       padding:12px 24px;border-radius:999px;font-size:.9rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
       box-shadow:0 4px 20px rgba(0,0,0,.05)}
     .menu-icon-lines{display:flex;flex-direction:column;gap:4px}
     .menu-line{width:16px;height:2px;border-radius:999px;background:var(--color-text-main)}
-/* ✅ iPad Safari の青文字化を防止（Menuボタン） */
-.menu-btn{
-  color: var(--color-text-main);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.menu-btn,
-.menu-btn *{
-  color: var(--color-text-main) !important;
-  -webkit-tap-highlight-color: transparent;
-}
+    /* iPad Safari 青文字化防止 */
+    .menu-btn{color:var(--color-text-main);-webkit-appearance:none;appearance:none}
+    .menu-btn,.menu-btn *{color:var(--color-text-main)!important;-webkit-tap-highlight-color:transparent}
 
     .nav-overlay{position:fixed;top:72px;right:40px;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);
       padding:20px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.05);
@@ -179,74 +171,81 @@
       .ranking-title{font-size:2rem}
       .footer-links{gap:24px;flex-wrap:wrap}
 
-      /* スマホ：カード縦 */
-      .rank-hero,.rank-mid{flex-direction:column !important;align-items:flex-start !important;padding:16px !important;gap:10px !important;border-radius:20px !important}
-      .rank-hero-thumb,.rank-mid-thumb{width:100% !important;height:180px !important;border-radius:16px !important}
-      .rank-hero-title,.rank-mid-title{font-size:1.2rem !important}
+      .rank-hero,.rank-mid{flex-direction:column!important;align-items:flex-start!important;padding:16px!important;gap:10px!important;border-radius:20px!important}
+      .rank-hero-thumb,.rank-mid-thumb{width:100%!important;height:180px!important;border-radius:16px!important}
+      .rank-hero-title,.rank-mid-title{font-size:1.2rem!important}
       .rank-hero-desc,.rank-mid-desc{
-        font-size:.92rem !important;line-height:1.45 !important;color:#444 !important;
+        font-size:.92rem!important;line-height:1.45!important;color:#444!important;
         display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden
       }
-      .rank-badge-large,.rank-badge-medium{position:absolute !important;top:12px;left:12px;z-index:10}
+      .rank-badge-large,.rank-badge-medium{position:absolute!important;top:12px;left:12px;z-index:10}
     }
 
-    /* ✅ 広告を一旦ぜんぶ非表示（必要なら消してOK） */
-    .side-sponsor,.between-sponsor,.ad-card{display:none !important;}
-    /* ===============================
-   ✅ ランキング：DAY/WEEK/MONTH/ALL が青くなるの防止
-   =============================== */
-.period-toggle, .period-btn, .period-btn *{
-  -webkit-tap-highlight-color: transparent;
-}
+    /* 広告非表示（必要なら外してOK） */
+    .side-sponsor,.between-sponsor,.ad-card{display:none!important;}
 
-.period-btn{
-  color: var(--color-text-main);
-  -webkit-text-fill-color: var(--color-text-main);
-  outline: none;
-}
+    /* periodボタン青文字化防止 */
+    .period-toggle, .period-btn, .period-btn *{ -webkit-tap-highlight-color:transparent; }
+    .period-btn{ color:var(--color-text-main); -webkit-text-fill-color:var(--color-text-main); outline:none; }
+    .period-btn:not(.active):focus,.period-btn:not(.active):active{
+      color:var(--color-text-main); -webkit-text-fill-color:var(--color-text-main);
+    }
+    .period-btn.active{
+      background:#000;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#000;
+    }
+    .period-btn.active:focus,.period-btn.active:active{
+      color:#fff!important;-webkit-text-fill-color:#fff!important;
+    }
 
-/* 押しても青くしない（activeじゃない時だけ） */
-.period-btn:not(.active):focus,
-.period-btn:not(.active):active{
-  color: var(--color-text-main);
-  -webkit-text-fill-color: var(--color-text-main);
-}
+    /* Scroll Reveal 無効化（全ページ共通） */
+    .reveal{opacity:1!important;transform:none!important;transition:none!important}
+    .reveal.active{opacity:1!important;transform:none!important}
 
-/* 選択中は白文字固定 */
-.period-btn.active{
-  background:#000;
-  color:#fff !important;
-  -webkit-text-fill-color:#fff !important;
-  border-color:#000;
-}
+    /* =========================
+       ✅ Loader（ランキング：反映まで表示）
+       ========================= */
+    .loader-wrap{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background:#fff;
+      z-index:99999;
+    }
+    .loader-breath{
+      font:700 14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.45;
+      animation:breath 1.4s ease-in-out infinite;
+      user-select:none;
+    }
+    @keyframes breath{
+      0%,100%{opacity:.35;transform:scale(.98)}
+      50%{opacity:.9;transform:scale(1.02)}
+    }
+    #loader{opacity:1;transition:opacity .35s ease}
+    #loader.is-hide{opacity:0;pointer-events:none}
+  </style>
 
-.period-btn.active:focus,
-.period-btn.active:active{
-  color:#fff !important;
-  -webkit-text-fill-color:#fff !important;
-}
-/* ===== Scroll Reveal 無効化（全ページ共通）===== */
-.reveal{
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
-}
-.reveal.active{
-  opacity: 1 !important;
-  transform: none !important;
-}
-</style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-9FCHPHJTVE');
-</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-9FCHPHJTVE');
+  </script>
 </head>
 
-<body data-page="ranking">
+<!-- ✅ index.js の initRankingPage と衝突させないため ranking2 にする -->
+<body data-page="ranking2">
+
+  <!-- ✅ Loading（ランキング反映まで表示） -->
+  <div class="loader-wrap" id="loader" aria-label="Loading">
+    <div class="loader-breath">SUBSCOPE</div>
+  </div>
+
   <!-- Header -->
   <div class="fixed-header">
     <div class="top-header">
@@ -323,28 +322,27 @@
       <p class="footer-copy">© 2025 SUBSCOPE. All rights reserved.</p>
     </div>
   </footer>
-<script>
-  function toggleMenu(force) {
-    const nav = document.getElementById("nav-overlay");
-    if (!nav) return;
 
-    if (force === true) nav.classList.add("open");
-    else if (force === false) nav.classList.remove("open");
-    else nav.classList.toggle("open");
-  }
+  <!-- 共通（メニュー/検索など） -->
+  <script src="./index.js?v=11"></script>
 
-  // メニュー外を押したら閉じる（便利）
-  document.addEventListener("click", (e) => {
-    const nav = document.getElementById("nav-overlay");
-    const btn = document.querySelector(".menu-btn");
-    if (!nav || !btn) return;
-    if (!nav.classList.contains("open")) return;
+  <!-- ✅ ローダー解除関数（ranking.js から呼ぶ） -->
+  <script>
+    window.hideLoader = function () {
+      const el = document.getElementById("loader");
+      if (!el) return;
+      el.classList.add("is-hide");
+      el.addEventListener("transitionend", () => el.remove(), { once: true });
+      setTimeout(() => el.remove(), 600);
+    };
 
-    if (!nav.contains(e.target) && !btn.contains(e.target)) {
-      nav.classList.remove("open");
-    }
-  });
-</script>
-<script src="./index.js?v=11"></script>
+    // ✅ 保険：何があっても永遠ローディングにならない
+    setTimeout(() => {
+      window.hideLoader?.();
+    }, 12000);
+  </script>
+
+  <!-- ✅ ランキング本体（反映完了でhideLoader） -->
+  <script src="./ranking.js?v=1"></script>
 </body>
 </html>
