@@ -327,25 +327,34 @@
   <!-- ✅ deferで読み込み順安定（ローダーが残りにくい） -->
   <script src="/index.js?v=11" defer></script>
 
-  <!-- ✅ all.html側で必ずローダーを消す保険 -->
-  <script>
-    function hideLoader() {
-      const el = document.getElementById("loader");
-      if (!el) return;
-      el.classList.add("is-hide");
-      el.addEventListener("transitionend", () => el.remove(), { once: true });
-      setTimeout(() => el.remove(), 600);
-    }
+ <script>
+  function hideLoader() {
+    const el = document.getElementById("loader");
+    if (!el) return;
+    el.classList.add("is-hide");
+    el.addEventListener("transitionend", () => el.remove(), { once: true });
+    setTimeout(() => el.remove(), 600);
+  }
 
-    // DOMが組めたら一旦消す（重い処理はページ側の描画が担保）
-    document.addEventListener("DOMContentLoaded", () => {
-      hideLoader();
-    });
+  // ✅ このページは「最低1秒ローディングを見せる」
+  document.addEventListener("DOMContentLoaded", () => {
+    const MIN_LOADING_TIME = 1000; // 1秒
+    const start = performance.now();
 
-    // さらに保険：window loadでも一回だけ
-    window.addEventListener("load", () => {
-      hideLoader();
-    }, { once: true });
-  </script>
+    const tryHide = () => {
+      const elapsed = performance.now() - start;
+      const wait = Math.max(0, MIN_LOADING_TIME - elapsed);
+      setTimeout(hideLoader, wait);
+    };
+
+    tryHide();
+  });
+
+  // ✅ 念のための保険（重い端末・回線）
+  window.addEventListener("load", () => {
+    setTimeout(hideLoader, 1000);
+  }, { once: true });
+</script>
+
 </body>
 </html>
