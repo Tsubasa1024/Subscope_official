@@ -440,7 +440,19 @@
   0%,100%{ opacity:.35; transform: scale(.98); }
   50%{ opacity:.9; transform: scale(1.02); }
 }
+#loader{
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 99999;
+  opacity: 1;
+  transition: opacity .35s ease;
+}
 
+#loader.is-hide{
+  opacity: 0;
+  pointer-events: none; /* ← スクロール復活の鍵 */
+}
 </style>
 
 <script src="/index.js?v=10" defer></script>
