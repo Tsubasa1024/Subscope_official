@@ -94,26 +94,31 @@
   };
 
   const buildArticleMap = (articles) => {
-    const m = new Map();
-    (articles || []).forEach((a) => {
-      if (!a?.id) return;
+  const m = new Map();
+  (articles || []).forEach((a) => {
+    if (!a?.id) return;
 
-      const img =
-        (a?.image?.url) ||
-        (typeof a?.image === "string" ? a.image : "") ||
-        (a?.thumbnail?.url) ||
-        (a?.eyecatch?.url) ||
-        (a?.heroImage?.url) ||
-        "";
+    // ✅ 公開中だけ（publishedAt があるやつだけ）
+    if (!a.publishedAt && !a.date) return; 
+    // ↑ あなたのmapCmsArticleは date を publishedAt から作ってるので date でも判定できる
 
-      const title = a?.title || "";
-      const service = a?.service || a?.serviceName || "";
-      const desc = (a?.description || "").trim();
+    const img =
+      (a?.image?.url) ||
+      (typeof a?.image === "string" ? a.image : "") ||
+      (a?.thumbnail?.url) ||
+      (a?.eyecatch?.url) ||
+      (a?.heroImage?.url) ||
+      "";
 
-      m.set(a.id, { id: a.id, title, image: img, service, description: desc });
-    });
-    return m;
-  };
+    const title = a?.title || "";
+    const service = a?.service || a?.serviceName || "";
+    const desc = (a?.description || "").trim();
+
+    m.set(a.id, { id: a.id, title, image: img, service, description: desc });
+  });
+  return m;
+};
+
 
   // API rows -> [{id, path, views}]
   const buildRowsFromApi = (data) => {
