@@ -1036,11 +1036,12 @@ function hideLoader() {
       initCarousel3D();
     }
     if (page === "all") initAllPage();
-    if (page === "ranking") initRankingPage();
+    if (page === "ranking" && !window.__USE_EXTERNAL_RANKING__) initRankingPage();
 
     initScrollReveal();
   });
 })();
+
 
 
 
