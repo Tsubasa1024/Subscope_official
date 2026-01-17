@@ -140,33 +140,31 @@
     return rows;
   };
 
-  const draw = (period, rows, articleMap) => {
-    const days = periodToDays(period);
+  const top = rows.slice(0, 3).map((r, i) => {
+  const rank = i + 1;
+  const a = articleMap.get(r.id) || null;
 
-    const top = rows.slice(0, 3).map((r, i) => {
-      const rank = i + 1;
-      const a = articleMap.get(r.id) || null;
+  const title = a?.title ? a.title : r.path;
+  const service = a?.service ? a.service : "PAGE VIEW";
+  const img = a?.image ? a.image : FALLBACK_IMG;
+  const lead = (a?.description || "").trim();
 
-      const title = a?.title ? a.title : r.path;
-      const service = a?.service ? a.service : "PAGE VIEW";
-      const img = a?.image ? a.image : FALLBACK_IMG;
+  return `
+    <div class="rank-hero" onclick="location.href='${r.path}'">
+      <div class="rank-badge rank-badge-large ${badgeClass(rank)}">${rank}</div>
 
-      return `
-        <div class="rank-hero" onclick="location.href='${r.path}'">
-          <div class="rank-badge rank-badge-large ${badgeClass(rank)}">${rank}</div>
+      <div class="rank-hero-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
 
-          <div class="rank-hero-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
+      <div class="rank-hero-content">
+        <div class="ranking-service">${escapeHtml(service)}</div>
+        <div class="rank-hero-title">${escapeHtml(title)}</div>
+        ${lead ? `<div class="rank-hero-desc">${escapeHtml(lead)}</div>` : ``}
+        <div class="rank-hero-meta"><span>${Number(r.views||0).toLocaleString()} views</span></div>
+      </div>
+    </div>
+  `;
+}).join("");
 
-          <div class="rank-hero-content">
-            <div class="ranking-service">${escapeHtml(service)}</div>
-            <div class="rank-hero-title">${escapeHtml(title)}</div>
-            const lead = (a?.description || "").trim();
-const descText = lead || ""; // 何もなければ空（表示しない）
-            <div class="rank-hero-meta"><span>${Number(r.views||0).toLocaleString()} views</span></div>
-          </div>
-        </div>
-      `;
-    }).join("");
 
     const others = rows.slice(3).map((r, i) => {
       const rank = i + 4;
