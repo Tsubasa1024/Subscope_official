@@ -1,7 +1,7 @@
 /* =========================
    ranking.js（完全版）
    - ランキングAPIのviewsを取得
-   - window.articles（microCMS一覧）とIDで紐づけて title/image/service を表示
+   - window.articles（microCMS一覧）とIDで紐づけて title/image/service/description を表示
    - 描画完了でローダーを消す
    ========================= */
 (() => {
@@ -41,12 +41,6 @@
     }
   };
 
-  const normalizeKeyToPath = (k) => {
-    const id = extractIdFromUrl(k);
-    if (!id) return "";
-    return `/article.html?id=${id}`;
-  };
-
   const fetchRank = async (days) => {
     const url = new URL(API_BASE);
     url.searchParams.set("mode", "page");
@@ -61,7 +55,7 @@
   const badgeClass = (rank) => (rank === 1 ? "rank-1" : rank === 2 ? "rank-2" : rank === 3 ? "rank-3" : "");
 
   // ====== ✅ キャッシュ（1時間） ======
-  const RANK_CACHE_KEY = "subscope_rank_page_cache_v2"; // v2（構造変えた）
+  const RANK_CACHE_KEY = "subscope_rank_page_cache_v2";
   const RANK_TTL = 60 * 60 * 1000;
 
   const readCache = (period) => {
@@ -104,7 +98,6 @@
     (articles || []).forEach((a) => {
       if (!a?.id) return;
 
-      // 画像フィールドは環境でブレるので候補を並べる（安全側）
       const img =
         (a?.image?.url) ||
         (typeof a?.image === "string" ? a.image : "") ||
@@ -133,64 +126,67 @@
       merged.set(id, (merged.get(id) || 0) + views);
     });
 
-    const rows = [...merged.entries()]
+    return [...merged.entries()]
       .map(([id, views]) => ({ id, path: `/article.html?id=${id}`, views }))
       .sort((a, b) => b.views - a.views);
-
-    return rows;
   };
 
-  const top = rows.slice(0, 3).map((r, i) => {
-  const rank = i + 1;
-  const a = articleMap.get(r.id) || null;
+  // ✅ここが描画本体（top/others は必ずこの中）
+  const draw = (period, rows, articleMap) => {
+    const top = rows
+      .slice(0, 3)
+      .map((r, i) => {
+        const rank = i + 1;
+        const a = articleMap.get(r.id) || null;
 
-  const title = a?.title ? a.title : r.path;
-  const service = a?.service ? a.service : "PAGE VIEW";
-  const img = a?.image ? a.image : FALLBACK_IMG;
-  const lead = (a?.description || "").trim();
+        const title = a?.title ? a.title : r.path;
+        const service = a?.service ? a.service : "PAGE VIEW";
+        const img = a?.image ? a.image : FALLBACK_IMG;
 
-  return `
-    <div class="rank-hero" onclick="location.href='${r.path}'">
-      <div class="rank-badge rank-badge-large ${badgeClass(rank)}">${rank}</div>
+        const lead = (a?.description || "").trim();
 
-      <div class="rank-hero-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
+        return `
+          <div class="rank-hero" onclick="location.href='${r.path}'">
+            <div class="rank-badge rank-badge-large ${badgeClass(rank)}">${rank}</div>
+            <div class="rank-hero-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
 
-      <div class="rank-hero-content">
-        <div class="ranking-service">${escapeHtml(service)}</div>
-        <div class="rank-hero-title">${escapeHtml(title)}</div>
-        ${lead ? `<div class="rank-hero-desc">${escapeHtml(lead)}</div>` : ``}
-        <div class="rank-hero-meta"><span>${Number(r.views||0).toLocaleString()} views</span></div>
-      </div>
-    </div>
-  `;
-}).join("");
-
-
-    const others = rows.slice(3).map((r, i) => {
-      const rank = i + 4;
-      const a = articleMap.get(r.id) || null;
-
-      const title = a?.title ? a.title : r.path;
-      const img = a?.image ? a.image : FALLBACK_IMG;
-
-      return `
-        <div class="ranking-row" onclick="location.href='${r.path}'">
-          <div class="ranking-row-rank">${rank}</div>
-
-          <div class="ranking-row-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
-
-          <div class="ranking-row-main">
-            <div class="ranking-row-title">${escapeHtml(title)}</div>
-            <div class="ranking-row-meta"><span>${Number(r.views||0).toLocaleString()} views</span></div>
+            <div class="rank-hero-content">
+              <div class="ranking-service">${escapeHtml(service)}</div>
+              <div class="rank-hero-title">${escapeHtml(title)}</div>
+              ${lead ? `<div class="rank-hero-desc">${escapeHtml(lead)}</div>` : ``}
+              <div class="rank-hero-meta"><span>${Number(r.views || 0).toLocaleString()} views</span></div>
+            </div>
           </div>
-        </div>
-      `;
-    }).join("");
+        `;
+      })
+      .join("");
+
+    const others = rows
+      .slice(3)
+      .map((r, i) => {
+        const rank = i + 4;
+        const a = articleMap.get(r.id) || null;
+
+        const title = a?.title ? a.title : r.path;
+        const img = a?.image ? a.image : FALLBACK_IMG;
+
+        return `
+          <div class="ranking-row" onclick="location.href='${r.path}'">
+            <div class="ranking-row-rank">${rank}</div>
+            <div class="ranking-row-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
+
+            <div class="ranking-row-main">
+              <div class="ranking-row-title">${escapeHtml(title)}</div>
+              <div class="ranking-row-meta"><span>${Number(r.views || 0).toLocaleString()} views</span></div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
 
     top3.innerHTML = top;
     rest.innerHTML = others;
 
-    // ローダー解除（初回だけ）
     if (!firstRenderDone) {
       firstRenderDone = true;
       window.hideLoader?.();
@@ -198,11 +194,9 @@
   };
 
   const render = async (period) => {
-    // まず記事一覧を用意（タイトル・画像のため）
     const articles = await ensureArticles();
     const articleMap = buildArticleMap(articles);
 
-    // ① キャッシュがあれば即表示
     const cachedRows = readCache(period);
     if (cachedRows && cachedRows.length) {
       draw(period, cachedRows, articleMap);
@@ -211,17 +205,18 @@
       rest.innerHTML = `<div style="padding:12px 0;color:#86868b;">読み込み中…</div>`;
     }
 
-    // ② 裏で最新取得して更新
     try {
       const days = periodToDays(period);
       const data = await fetchRank(days);
-
       const rows = buildRowsFromApi(data);
 
       if (!rows.length) {
         if (!cachedRows?.length) {
           rest.innerHTML = `<div style="padding:12px 0;color:#86868b;">データがありません</div>`;
-          if (!firstRenderDone) { firstRenderDone = true; window.hideLoader?.(); }
+          if (!firstRenderDone) {
+            firstRenderDone = true;
+            window.hideLoader?.();
+          }
         }
         return;
       }
@@ -233,7 +228,6 @@
       if (!cachedRows?.length) {
         rest.innerHTML = `<div style="padding:12px 0;color:#d00;">読み込み失敗：${escapeHtml(e.message)}</div>`;
       }
-      // エラーでもローダーは必ず消す
       if (!firstRenderDone) {
         firstRenderDone = true;
         window.hideLoader?.();
