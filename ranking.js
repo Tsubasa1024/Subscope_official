@@ -160,7 +160,8 @@
           <div class="rank-hero-content">
             <div class="ranking-service">${escapeHtml(service)}</div>
             <div class="rank-hero-title">${escapeHtml(title)}</div>
-            <div class="rank-hero-desc">直近 ${days} 日間で多く見られた記事</div>
+            const lead = (a?.description || "").trim();
+const descText = lead || ""; // 何もなければ空（表示しない）
             <div class="rank-hero-meta"><span>${Number(r.views||0).toLocaleString()} views</span></div>
           </div>
         </div>
