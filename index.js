@@ -13,14 +13,12 @@
   const SERVICE_ID = "subscope";
   const API_KEY = "cxfk9DoKLiD4YR3zIRDDk4iZyzNtBtaFEqzz";
 
-  // ✅ article.html から参照できるようにグローバル公開
   window.SERVICE_ID = SERVICE_ID;
   window.API_KEY = API_KEY;
 
   const ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/articles`;
   const ADS_ENDPOINT = `https://${SERVICE_ID}.microcms.io/api/v1/ads`;
 
-  // ✅ ここで広告ON/OFF
   const ADS_ENABLED = false;
 
   window.articles = window.articles || [];
@@ -52,21 +50,20 @@
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   }
-function hideLoader() {
-  const el = document.getElementById("loader");
-  if (!el) return;
 
-  el.classList.add("is-hide");
-  el.addEventListener("transitionend", () => el.remove(), { once: true });
-  setTimeout(() => el.remove(), 600);
-}
+  function hideLoader() {
+    const el = document.getElementById("loader");
+    if (!el) return;
+    el.classList.add("is-hide");
+    el.addEventListener("transitionend", () => el.remove(), { once: true });
+    setTimeout(() => el.remove(), 600);
+  }
 
   // ============
   // 2. Ads
   // ============
   async function fetchTopAd(position) {
     if (!ADS_ENABLED) return null;
-
     const url = `${ADS_ENDPOINT}?limit=50&orders=-priority&ts=${Date.now()}`;
     try {
       const data = await fetchJson(url);
@@ -88,7 +85,6 @@ function hideLoader() {
 
   function applyBannerAdToAnchor(anchorEl, ad) {
     if (!anchorEl || !ad) return;
-
     if (ad.url) anchorEl.href = ad.url;
     anchorEl.target = "_blank";
     anchorEl.rel = "noopener";
@@ -101,15 +97,8 @@ function hideLoader() {
       return;
     }
 
-    const titleNode =
-      anchorEl.querySelector(".ad-title") ||
-      anchorEl.querySelector(".between-ad-tag") ||
-      anchorEl.querySelector(".ad-tag");
-
-    const descNode =
-      anchorEl.querySelector(".ad-desc") ||
-      anchorEl.querySelector(".between-ad-text");
-
+    const titleNode = anchorEl.querySelector(".ad-title") || anchorEl.querySelector(".between-ad-tag") || anchorEl.querySelector(".ad-tag");
+    const descNode = anchorEl.querySelector(".ad-desc") || anchorEl.querySelector(".between-ad-text");
     if (titleNode && ad.title) titleNode.textContent = ad.title;
     if (descNode && ad.description) descNode.textContent = ad.description;
     if (descNode && !ad.description && ad.title) descNode.textContent = ad.title;
@@ -123,22 +112,13 @@ function hideLoader() {
     const rightAnchor = $('[data-slot-id="SIDE_RIGHT_1"]');
 
     const adHero = await fetchTopAd("home_hero_under");
-    if (adHero) {
-      applyBannerAdToAnchor(heroBottom, adHero);
-      window.__ADS__["home_hero_under"] = adHero;
-    }
+    if (adHero) { applyBannerAdToAnchor(heroBottom, adHero); window.__ADS__["home_hero_under"] = adHero; }
 
     const adLeft = await fetchTopAd("home_side_left");
-    if (adLeft) {
-      applyBannerAdToAnchor(leftAnchor, adLeft);
-      window.__ADS__["home_side_left"] = adLeft;
-    }
+    if (adLeft) { applyBannerAdToAnchor(leftAnchor, adLeft); window.__ADS__["home_side_left"] = adLeft; }
 
     const adRight = await fetchTopAd("home_side_right");
-    if (adRight) {
-      applyBannerAdToAnchor(rightAnchor, adRight);
-      window.__ADS__["home_side_right"] = adRight;
-    }
+    if (adRight) { applyBannerAdToAnchor(rightAnchor, adRight); window.__ADS__["home_side_right"] = adRight; }
 
     const adGrid = await fetchTopAd("home_grid_sponsor");
     if (adGrid) window.__ADS__["home_grid_sponsor"] = adGrid;
@@ -195,23 +175,18 @@ function hideLoader() {
       service: item.service || "",
       date: item.publishedAt ? item.publishedAt.slice(0, 10) : "",
       image: imageUrl,
-
-      // ranking用：なければ 0
       views: item.views ?? 0,
       views_day: item.views_day ?? undefined,
       views_week: item.views_week ?? undefined,
       views_month: item.views_month ?? undefined,
-
       contentHtml: rawContentHtml,
       bodyText,
       tags,
-
       priceSummary: item.priceSummary || "",
       author: item.author || null,
       authorName: item.author?.name || "",
       authorImage: item.author?.avatar?.url || "",
       authorId: item.author?.id || "",
-
       officialLinks: [
         { label: (item.officialLabel1 || "").trim(), url: (item.officialUrl1 || "").trim() },
         { label: (item.officialLabel2 || "").trim(), url: (item.officialUrl2 || "").trim() },
@@ -223,7 +198,6 @@ function hideLoader() {
 
   async function loadArticles() {
     if (window.articles && window.articles.length > 0) return window.articles;
-
     try {
       const data = await fetchJson(`${ENDPOINT}?limit=100&depth=2&ts=${Date.now()}`);
       const contents = data?.contents || [];
@@ -245,7 +219,6 @@ function hideLoader() {
   function searchArticlesList(query) {
     const q = (query || "").trim();
     if (!q) return [];
-
     const tokens = q.split(/\s+/).map(normalizeText).filter(Boolean);
     const list = getArticles();
     if (!list.length || !tokens.length) return [];
@@ -279,17 +252,14 @@ function hideLoader() {
     }
 
     const results = searchArticlesList(q).slice(0, 3);
-
     if (!results.length) {
-      resultsEl.innerHTML =
-        `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
+      resultsEl.innerHTML = `<p style="margin-top:8px;color:#86868B;font-size:0.9rem;">該当する記事は見つかりませんでした。</p>`;
       resultsEl.style.display = "block";
       return;
     }
 
     resultsEl.innerHTML = results
-      .map(
-        (a) => `
+      .map((a) => `
         <div class="search-item" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
           <img src="${a.image}" alt="">
           <div>
@@ -297,8 +267,7 @@ function hideLoader() {
             <p>${escapeHtml(a.description)}</p>
           </div>
         </div>
-      `
-      )
+      `)
       .join("");
 
     resultsEl.style.display = "block";
@@ -322,11 +291,8 @@ function hideLoader() {
       });
     }
 
-    // ×
     if (searchInput && clearBtn) {
-      const update = () => {
-        clearBtn.style.display = searchInput.value.trim() ? "block" : "none";
-      };
+      const update = () => { clearBtn.style.display = searchInput.value.trim() ? "block" : "none"; };
       searchInput.addEventListener("input", update);
       clearBtn.addEventListener("click", () => {
         searchInput.value = "";
@@ -337,7 +303,6 @@ function hideLoader() {
       update();
     }
 
-    // スマホ：検索ボタンの開閉
     if (fixedHeader && searchWrapper && searchInput) {
       let isOpen = false;
       const isMobile = () => window.innerWidth <= 767;
@@ -347,9 +312,7 @@ function hideLoader() {
           if (e.target !== searchInput) searchInput.focus();
           return;
         }
-
         if (isOpen && e.target === searchInput) return;
-
         if (!isOpen) {
           fixedHeader.classList.add("search-open");
           isOpen = true;
@@ -393,7 +356,6 @@ function hideLoader() {
       toggleMenu();
     };
 
-    // 二重登録防止
     if (!btn.dataset.menuBound) {
       btn.addEventListener("click", onClick);
       btn.addEventListener("touchstart", onClick, { passive: false });
@@ -450,7 +412,7 @@ function hideLoader() {
     heroContainer.innerHTML = `
       <article class="featured-card"
         onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
-        <img class="featured-media" src="${featured.image}" alt="">
+        <img class="featured-media" src="${featured.image}" alt="${escapeHtml(featured.title)}">
         <div class="featured-content">
           <div class="featured-meta">
             <span class="tag">${escapeHtml(featured.service || "SUBSCOPE")}</span>
@@ -463,7 +425,7 @@ function hideLoader() {
     `;
   }
 
-  function renderLatest(limit = 8) {
+  function renderLatest(limit = 9) {
     const latestGrid = $("#latest-grid");
     if (!latestGrid) return;
 
@@ -472,51 +434,84 @@ function hideLoader() {
     const target = sorted.slice(0, limit);
 
     const ad = window.__ADS__ && window.__ADS__["home_grid_sponsor"];
-
     const cards = [];
+
     target.forEach((a, index) => {
+      const dateStr = (a.date || "").replace(/-/g, ".");
+      const service = escapeHtml(a.service || "SUBSCOPE");
+      const category = escapeHtml(a.categoryName || a.category || "");
+      const title = escapeHtml(a.title);
+      const desc = escapeHtml(a.description);
+
       cards.push(`
-        <article class="article-card" onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'">
-          <div class="card-image" style="background-image:url('${a.image}')"></div>
+        <article
+          class="article-card"
+          onclick="location.href='article.html?id=${encodeURIComponent(a.id)}'"
+          data-card-index="${index}"
+        >
+          <div class="card-image-wrap">
+            <img
+              src="${a.image}"
+              alt="${title}"
+              loading="lazy"
+              decoding="async"
+            >
+            ${category ? `<span class="card-category-tag">${category}</span>` : ""}
+          </div>
           <div class="card-body">
-            <div class="card-service">${escapeHtml(a.service || "SUBSCOPE")}</div>
-            <h3 class="card-title">${escapeHtml(a.title)}</h3>
-            <p class="card-desc">${escapeHtml(a.description)}</p>
-            <div class="card-date">${escapeHtml((a.date || "").replace(/-/g, "."))}</div>
+            <div class="card-service">${service}</div>
+            <h3 class="card-title">${title}</h3>
+            <p class="card-desc">${desc}</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-date">${dateStr}</span>
+            <div class="card-arrow" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"
+                stroke="#1d1d1f" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 6h8M6 2l4 4-4 4"/>
+              </svg>
+            </div>
           </div>
         </article>
       `);
 
-      // 3枚目のあとにスポンサー（広告ON時のみ）
-      if (index === 2 && ADS_ENABLED) {
-        if (ad) {
-          const adInner =
-            ad.image?.url
-              ? `
-                <span class="ad-tag">スポンサー</span>
-                <div style="margin-top:10px;">
-                  <img src="${ad.image.url}" alt="${escapeHtml(ad.title || "ad")}"
-                    style="width:100%;border-radius:16px;display:block;">
-                </div>
-                <div class="ad-title" style="margin-top:12px;">${escapeHtml(ad.title || "スポンサー")}</div>
-                <div class="ad-desc">Sponsored</div>
-              `
-              : `
-                <span class="ad-tag">スポンサー</span>
-                <div class="ad-title">${escapeHtml(ad.title || "スポンサー")}</div>
-                <div class="ad-desc">Sponsored</div>
-              `;
+      /* 広告（3枚目のあとにON時のみ） */
+      if (index === 2 && ADS_ENABLED && ad) {
+        const adInner = ad.image?.url
+          ? `
+            <span class="ad-tag">スポンサー</span>
+            <div style="margin-top:10px;">
+              <img src="${ad.image.url}" alt="${escapeHtml(ad.title || "ad")}"
+                style="width:100%;border-radius:16px;display:block;">
+            </div>
+            <div class="ad-title" style="margin-top:12px;">${escapeHtml(ad.title || "スポンサー")}</div>
+            <div class="ad-desc">Sponsored</div>
+          `
+          : `
+            <span class="ad-tag">スポンサー</span>
+            <div class="ad-title">${escapeHtml(ad.title || "スポンサー")}</div>
+            <div class="ad-desc">Sponsored</div>
+          `;
 
-          cards.push(`
-            <a class="ad-card" href="${ad.url || "index.html"}" target="_blank" rel="noopener" data-slot-id="HOME_SPONSOR_1">
-              ${adInner}
-            </a>
-          `);
-        }
+        cards.push(`
+          <a class="ad-card" href="${ad.url || "index.html"}"
+            target="_blank" rel="noopener" data-slot-id="HOME_SPONSOR_1">
+            ${adInner}
+          </a>
+        `);
       }
     });
 
     latestGrid.innerHTML = cards.join("");
+
+    /* ── 出現アニメーション（stagger） ── */
+    const cardEls = latestGrid.querySelectorAll(".article-card");
+    cardEls.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add("is-visible");
+      }, i * 80);
+    });
   }
 
   function initCarousel3D() {
@@ -539,7 +534,7 @@ function hideLoader() {
       const a = recommend[i % recommend.length];
       item.innerHTML = `
         <div class="carousel3d-card">
-          <img src="${a.image}" alt="">
+          <img src="${a.image}" alt="${escapeHtml(a.title)}">
           <p>${escapeHtml(a.title)}</p>
         </div>
       `;
@@ -556,7 +551,6 @@ function hideLoader() {
       items.forEach((item, i) => {
         item.className = "carousel3d-item";
         const offset = (i - currentIndex + total) % total;
-
         if (offset === 0) item.classList.add("is-center");
         else if (offset === 1) item.classList.add("is-right");
         else if (offset === total - 1) item.classList.add("is-left");
@@ -564,14 +558,8 @@ function hideLoader() {
       });
     }
 
-    function goNext() {
-      currentIndex = (currentIndex + 1) % total;
-      updatePositions();
-    }
-    function goPrev() {
-      currentIndex = (currentIndex - 1 + total) % total;
-      updatePositions();
-    }
+    function goNext() { currentIndex = (currentIndex + 1) % total; updatePositions(); }
+    function goPrev() { currentIndex = (currentIndex - 1 + total) % total; updatePositions(); }
 
     let autoTimer = null;
     function startAutoScroll() {
@@ -583,7 +571,6 @@ function hideLoader() {
     nextBtn.addEventListener("click", () => { goNext(); startAutoScroll(); });
     prevBtn.addEventListener("click", () => { goPrev(); startAutoScroll(); });
 
-    // swipe
     let touchStartX = 0;
     let touchEndX = 0;
     const SWIPE_THRESHOLD = 40;
@@ -603,7 +590,7 @@ function hideLoader() {
   }
 
   // ============
-  // 7. all.html（すべての記事）
+  // 7. all.html
   // ============
   function initAllPage() {
     const tabsEl = $("#tabs");
@@ -611,7 +598,6 @@ function hideLoader() {
     if (!tabsEl || !gridEl) return;
 
     const all = getArticles();
-
     const allSearchForm = $("#allSearchForm");
     const allSearchInput = $("#allSearchInput");
     const allSearchInfo = $("#allSearchInfo");
@@ -622,15 +608,9 @@ function hideLoader() {
     const searchParam = params.get("search") || "";
 
     const categories = [
-      "すべて",
-      "音楽",
-      "映像",
-      "学習・資格",
-      "健康・フィットネス",
-      "ゲーム・エンタメ",
-      "生活・ライフスタイル",
-      "AI・ツール",
-      "その他",
+      "すべて", "音楽", "映像", "学習・資格",
+      "健康・フィットネス", "ゲーム・エンタメ",
+      "生活・ライフスタイル", "AI・ツール", "その他",
     ];
 
     function renderList(list) {
@@ -638,22 +618,37 @@ function hideLoader() {
         gridEl.innerHTML = `<div class="empty-message">該当する記事はありません。</div>`;
         return;
       }
-
       gridEl.innerHTML = list
-        .map(
-          (a) => `
+        .map((a) => `
           <div class="article-card" onclick="openArticle('${a.id}')">
-            <div class="card-image" style="background-image:url('${a.image}');"></div>
+            <div class="card-image-wrap">
+              <img src="${a.image}" alt="${escapeHtml(a.title)}" loading="lazy" decoding="async">
+              ${(a.categoryName || a.category) ? `<span class="card-category-tag">${escapeHtml(a.categoryName || a.category)}</span>` : ""}
+            </div>
             <div class="card-body">
               <div class="card-service">${escapeHtml(a.service || "SUBSCOPE")}</div>
               <h3 class="card-title">${escapeHtml(a.title || "")}</h3>
               <p class="card-desc">${escapeHtml(a.description || "")}</p>
-              <div class="card-date">${escapeHtml((a.date || "").replace(/-/g, "."))}</div>
+            </div>
+            <div class="card-footer">
+              <span class="card-date">${escapeHtml((a.date || "").replace(/-/g, "."))}</span>
+              <div class="card-arrow" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"
+                  stroke="#1d1d1f" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 6h8M6 2l4 4-4 4"/>
+                </svg>
+              </div>
             </div>
           </div>
-        `
-        )
+        `)
         .join("");
+
+      /* all.html のカードもstaggerアニメ */
+      const cardEls = gridEl.querySelectorAll(".article-card");
+      cardEls.forEach((el, i) => {
+        setTimeout(() => { el.classList.add("is-visible"); }, i * 60);
+      });
     }
 
     function filterByCategory(cat) {
@@ -667,18 +662,15 @@ function hideLoader() {
     }
 
     tabsEl.innerHTML = categories
-      .map(
-        (c) => `
+      .map((c) => `
         <button class="tab ${c === tabParam && !searchParam ? "active" : ""}" data-category-tab="${c}">
           ${escapeHtml(c)}
         </button>
-      `
-      )
+      `)
       .join("");
 
     const tabButtons = $$(".tab", tabsEl);
 
-    // 初期表示
     if (searchParam) {
       if (allSearchInput) allSearchInput.value = searchParam;
       const results = searchArticlesList(searchParam);
@@ -691,11 +683,9 @@ function hideLoader() {
 
     updateAllClearBtn();
 
-    // タブ切替（search解除）
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         const cat = btn.getAttribute("data-category-tab");
-
         const newParams = new URLSearchParams(location.search);
         newParams.set("tab", cat);
         newParams.delete("search");
@@ -706,7 +696,6 @@ function hideLoader() {
 
         if (allSearchInput) allSearchInput.value = "";
         if (allSearchInfo) allSearchInfo.textContent = "";
-
         renderList(filterByCategory(cat));
         updateAllClearBtn();
       });
@@ -720,7 +709,6 @@ function hideLoader() {
       allSearchForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const keyword = allSearchInput.value.trim();
-
         const newParams = new URLSearchParams(location.search);
         if (keyword) {
           newParams.set("search", keyword);
@@ -741,7 +729,6 @@ function hideLoader() {
         if (allSearchInfo) {
           allSearchInfo.textContent = keyword ? `「${keyword}」の検索結果：${results.length}件` : "";
         }
-
         updateAllClearBtn();
       });
     }
@@ -766,232 +753,193 @@ function hideLoader() {
     }
   }
 
-// ============
-// 8. ranking.html（Cloud Run / GA4 API）
-// ============
-function initRankingPage() {
-  const top3El = $("#ranking-top3");
-  const restEl = $("#ranking-rest");
-  const periodBtns = $$(".period-btn");
-  if (!top3El || !restEl || !periodBtns.length) return;
+  // ============
+  // 8. ranking.html
+  // ============
+  function initRankingPage() {
+    const top3El = $("#ranking-top3");
+    const restEl = $("#ranking-rest");
+    const periodBtns = $$(".period-btn");
+    if (!top3El || !restEl || !periodBtns.length) return;
 
-  // ✅ Cloud Run の固定URL（おすすめの方）
-  const RANK_API = "https://subscope-ranking-319660105312.asia-northeast1.run.app";
+    const RANK_API = "https://subscope-ranking-319660105312.asia-northeast1.run.app";
+    const DAYS_MAP = { day: 1, week: 7, month: 30, all: 365 };
+    const DEFAULT_THUMB = "https://www.subscope.jp/ogp-default-v3.png";
+    let currentPeriod = "all";
 
-  // period -> days
-  const DAYS_MAP = { day: 1, week: 7, month: 30, all: 365 };
+    function bindRankingGAOnce() {
+      if (document.body.dataset.rankGaBound) return;
+      document.body.dataset.rankGaBound = "1";
 
-  const DEFAULT_THUMB = "https://www.subscope.jp/ogp-default-v3.png";
-  let currentPeriod = "all";
-
-  function periodLabel(p) {
-    if (p === "day") return "DAY";
-    if (p === "week") return "WEEK";
-    if (p === "month") return "MONTH";
-    return "ALL";
-  }
-
-  // ✅ GA: クリック/期間イベント（1回だけ）
-  function bindRankingGAOnce() {
-    if (document.body.dataset.rankGaBound) return;
-    document.body.dataset.rankGaBound = "1";
-
-    // ランキングアイテムクリック
-    document.addEventListener("click", (e) => {
-      const card = e.target.closest?.("[data-rank-item]") || e.target.closest?.(".ranking-row");
-      if (!card) return;
-
-      const key = card.dataset.key || "";          // 例: "xxxxx"（記事ID）
-      const title = card.dataset.title || "";
-      const rank = Number(card.dataset.rank || 0);
-      const period = currentPeriod || "all";
-      const views = Number(card.dataset.views || 0);
-
-      window.gtag?.("event", "rank_item_click", {
-        item_key: key,
-        item_name: title,
-        rank,
-        period,
-        views,
-      });
-    });
-
-    // 期間切替
-    periodBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        window.gtag?.("event", "rank_period_change", {
-          period: btn.dataset.period || "all",
+      document.addEventListener("click", (e) => {
+        const card = e.target.closest?.("[data-rank-item]") || e.target.closest?.(".ranking-row");
+        if (!card) return;
+        window.gtag?.("event", "rank_item_click", {
+          item_key: card.dataset.key || "",
+          item_name: card.dataset.title || "",
+          rank: Number(card.dataset.rank || 0),
+          period: currentPeriod || "all",
+          views: Number(card.dataset.views || 0),
         });
       });
-    });
-  }
 
-  // ✅ rows: [{ key: "microcmsArticleId", views: number, article: {...} }]
-  function render(rows = []) {
-    const items = rows.slice(0, 20); // 上位20
-    top3El.innerHTML = "";
-    restEl.innerHTML = "";
-
-    const hero = items[0];
-    const mids = items.slice(1, 3);
-    const rest = items.slice(3);
-
-    const makeTitle = (item) => item?.article?.title || item?.key || "";
-    const makeDesc  = (item) => item?.article?.description || "";
-    const makeThumb = (item) => item?.article?.image || DEFAULT_THUMB;
-    const makeLink  = (item) => `article.html?id=${encodeURIComponent(item.key)}`;
-     const makeService = (item) => item?.article?.service || item?.article?.serviceName || "";
-const makeCategory = (item) => item?.article?.categoryName || item?.article?.category || "";
-const makeLabel = (item) => {
-  const s = (makeService(item) || "").trim();
-  const c = (makeCategory(item) || "").trim();
-  return [s, c].filter(Boolean).join(" / ") || "その他";
-};
-
-
-    // 1位
-    if (hero) {
-      const title = makeTitle(hero);
-      top3El.innerHTML += `
-        <a class="rank-hero"
-          href="${makeLink(hero)}"
-          data-rank-item="1"
-          data-key="${hero.key}"
-          data-title="${escapeHtml(title)}"
-          data-rank="1"
-          data-views="${hero.views}">
-          <div class="rank-badge rank-1 rank-badge-large">1</div>
-          <div class="rank-hero-thumb" style="background-image:url('${makeThumb(hero)}');"></div>
-          <div class="rank-hero-content">
-            <div class="ranking-service">${escapeHtml(makeLabel(hero))}</div>
-            <div class="rank-hero-title">${escapeHtml(title)}</div>
-            <div class="rank-hero-desc">${escapeHtml(makeDesc(hero))}</div>
-            <div class="rank-hero-meta"><span>Views: ${hero.views}</span></div>
-          </div>
-        </a>
-      `;
+      periodBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          window.gtag?.("event", "rank_period_change", { period: btn.dataset.period || "all" });
+        });
+      });
     }
 
-    // 2-3位
-    mids.forEach((item, idx) => {
-      const rank = idx + 2;
-      const title = makeTitle(item);
-      top3El.innerHTML += `
-        <a class="rank-mid"
-          href="${makeLink(item)}"
-          data-rank-item="1"
-          data-key="${item.key}"
-          data-title="${escapeHtml(title)}"
-          data-rank="${rank}"
-          data-views="${item.views}">
-          <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
-          <div class="rank-mid-thumb" style="background-image:url('${makeThumb(item)}');"></div>
-          <div class="ranking-content">
-            <div class="ranking-service">${escapeHtml(makeLabel(item))}</div>
-            <div class="rank-mid-title">${escapeHtml(title)}</div>
-            <div class="rank-mid-desc">${escapeHtml(makeDesc(item))}</div>
-            <div class="rank-mid-meta"><span>Views: ${item.views}</span></div>
-          </div>
-        </a>
-      `;
-    });
-
-    // 4位以降
-    rest.forEach((item, idx) => {
-      const rank = idx + 4;
-      const title = makeTitle(item);
-
-      const row = document.createElement("a");
-      row.className = "ranking-row";
-      row.href = makeLink(item);
-
-      row.dataset.rankItem = "1";
-      row.dataset.key = item.key;              // ✅ 記事ID
-      row.dataset.title = title;
-      row.dataset.rank = String(rank);
-      row.dataset.views = String(item.views);
-
-      row.innerHTML = `
-        <div class="ranking-row-rank">${rank}</div>
-        <div class="ranking-row-thumb" style="background-image:url('${makeThumb(item)}');"></div>
-        <div class="ranking-row-main">
-          <div class="ranking-row-title">${escapeHtml(title)}</div>
-          <div class="ranking-row-meta">
-  <span class="ranking-row-service">${escapeHtml(makeService(item) || "")}</span>
-  <span>${escapeHtml(makeCategory(item) || "")}</span>
-  <span>Views: ${item.views}</span>
-          </div>
-        </div>
-      `;
-      restEl.appendChild(row);
-    });
-
-    // アニメ付け直し
-    [top3El, restEl].forEach((el) => {
-      el.classList.remove("ranking-animate");
-      void el.offsetWidth;
-      el.classList.add("ranking-animate");
-    });
-  }
-
-  async function load(period) {
-    currentPeriod = period || "all";
-    const days = DAYS_MAP[currentPeriod] ?? 7;
-
-    // ✅ ここが本命：記事IDで取る
-    const url = `${RANK_API}/?days=${days}&limit=50&mode=article_id`;
-
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (!data.ok) {
-        top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得失敗: ${escapeHtml(data.message || "unknown")}</div>`;
-        restEl.innerHTML = "";
-        return;
-      }
-
-      // ✅ GA側 rows(key=記事ID) を microCMS記事と合体
-      const list = window.articles || [];
-      const merged = (data.rows || [])
-        .map((r) => {
-          const a = list.find((x) => x.id === r.key);
-          if (!a) return null; // microCMSに存在しないIDは除外
-          return { ...r, article: a };
-        })
-        .filter(Boolean)
-        .slice(0, 20); // 表示は上位20に絞る
-
-      if (!merged.length) {
-        top3El.innerHTML = `<div style="padding:16px;color:#666;">記事ランキングのデータがまだありません（article_view送信後に反映されます）</div>`;
-        restEl.innerHTML = "";
-        return;
-      }
-
-      render(merged);
-    } catch (e) {
-      console.error("[ranking] fetch failed:", e);
-      top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得に失敗しました</div>`;
+    function render(rows = []) {
+      const items = rows.slice(0, 20);
+      top3El.innerHTML = "";
       restEl.innerHTML = "";
+
+      const hero = items[0];
+      const mids = items.slice(1, 3);
+      const rest = items.slice(3);
+
+      const makeTitle = (item) => item?.article?.title || item?.key || "";
+      const makeDesc = (item) => item?.article?.description || "";
+      const makeThumb = (item) => item?.article?.image || DEFAULT_THUMB;
+      const makeLink = (item) => `article.html?id=${encodeURIComponent(item.key)}`;
+      const makeService = (item) => item?.article?.service || item?.article?.serviceName || "";
+      const makeCategory = (item) => item?.article?.categoryName || item?.article?.category || "";
+      const makeLabel = (item) => {
+        const s = (makeService(item) || "").trim();
+        const c = (makeCategory(item) || "").trim();
+        return [s, c].filter(Boolean).join(" / ") || "その他";
+      };
+
+      if (hero) {
+        const title = makeTitle(hero);
+        top3El.innerHTML += `
+          <a class="rank-hero"
+            href="${makeLink(hero)}"
+            data-rank-item="1"
+            data-key="${hero.key}"
+            data-title="${escapeHtml(title)}"
+            data-rank="1"
+            data-views="${hero.views}">
+            <div class="rank-badge rank-1 rank-badge-large">1</div>
+            <div class="rank-hero-thumb" style="background-image:url('${makeThumb(hero)}');"></div>
+            <div class="rank-hero-content">
+              <div class="ranking-service">${escapeHtml(makeLabel(hero))}</div>
+              <div class="rank-hero-title">${escapeHtml(title)}</div>
+              <div class="rank-hero-desc">${escapeHtml(makeDesc(hero))}</div>
+              <div class="rank-hero-meta"><span>Views: ${hero.views}</span></div>
+            </div>
+          </a>
+        `;
+      }
+
+      mids.forEach((item, idx) => {
+        const rank = idx + 2;
+        const title = makeTitle(item);
+        top3El.innerHTML += `
+          <a class="rank-mid"
+            href="${makeLink(item)}"
+            data-rank-item="1"
+            data-key="${item.key}"
+            data-title="${escapeHtml(title)}"
+            data-rank="${rank}"
+            data-views="${item.views}">
+            <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
+            <div class="rank-mid-thumb" style="background-image:url('${makeThumb(item)}');"></div>
+            <div class="ranking-content">
+              <div class="ranking-service">${escapeHtml(makeLabel(item))}</div>
+              <div class="rank-mid-title">${escapeHtml(title)}</div>
+              <div class="rank-mid-desc">${escapeHtml(makeDesc(item))}</div>
+              <div class="rank-mid-meta"><span>Views: ${item.views}</span></div>
+            </div>
+          </a>
+        `;
+      });
+
+      rest.forEach((item, idx) => {
+        const rank = idx + 4;
+        const title = makeTitle(item);
+        const row = document.createElement("a");
+        row.className = "ranking-row";
+        row.href = makeLink(item);
+        row.dataset.rankItem = "1";
+        row.dataset.key = item.key;
+        row.dataset.title = title;
+        row.dataset.rank = String(rank);
+        row.dataset.views = String(item.views);
+        row.innerHTML = `
+          <div class="ranking-row-rank">${rank}</div>
+          <div class="ranking-row-thumb" style="background-image:url('${makeThumb(item)}');"></div>
+          <div class="ranking-row-main">
+            <div class="ranking-row-title">${escapeHtml(title)}</div>
+            <div class="ranking-row-meta">
+              <span class="ranking-row-service">${escapeHtml(makeService(item) || "")}</span>
+              <span>${escapeHtml(makeCategory(item) || "")}</span>
+              <span>Views: ${item.views}</span>
+            </div>
+          </div>
+        `;
+        restEl.appendChild(row);
+      });
+
+      [top3El, restEl].forEach((el) => {
+        el.classList.remove("ranking-animate");
+        void el.offsetWidth;
+        el.classList.add("ranking-animate");
+      });
     }
-  }
 
-  // period切替
-  periodBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      periodBtns.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      load(btn.dataset.period || "all");
+    async function load(period) {
+      currentPeriod = period || "all";
+      const days = DAYS_MAP[currentPeriod] ?? 7;
+      const url = `${RANK_API}/?days=${days}&limit=50&mode=article_id`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.ok) {
+          top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得失敗: ${escapeHtml(data.message || "unknown")}</div>`;
+          restEl.innerHTML = "";
+          return;
+        }
+
+        const list = window.articles || [];
+        const merged = (data.rows || [])
+          .map((r) => {
+            const a = list.find((x) => x.id === r.key);
+            if (!a) return null;
+            return { ...r, article: a };
+          })
+          .filter(Boolean)
+          .slice(0, 20);
+
+        if (!merged.length) {
+          top3El.innerHTML = `<div style="padding:16px;color:#666;">記事ランキングのデータがまだありません。</div>`;
+          restEl.innerHTML = "";
+          return;
+        }
+
+        render(merged);
+      } catch (e) {
+        console.error("[ranking] fetch failed:", e);
+        top3El.innerHTML = `<div style="padding:16px;color:#666;">ランキング取得に失敗しました</div>`;
+        restEl.innerHTML = "";
+      }
+    }
+
+    periodBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        periodBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        load(btn.dataset.period || "all");
+      });
     });
-  });
 
-  bindRankingGAOnce();
-
-  // 初回（activeから）
-  const active = document.querySelector(".period-btn.active")?.dataset?.period || "all";
-  load(active);
-}
-
+    bindRankingGAOnce();
+    const active = document.querySelector(".period-btn.active")?.dataset?.period || "all";
+    load(active);
+  }
 
   // ============
   // 9. Global helpers
@@ -1015,18 +963,7 @@ const makeLabel = (item) => {
     await loadArticles();
     await loadAds();
 
-     hideLoader();
-     
-function hideLoader() {
-  const el = document.getElementById("loader");
-  if (!el) return;
-
-  el.classList.add("is-hide"); // CSSでフェードアウト
-  el.addEventListener("transitionend", () => el.remove(), { once: true });
-
-  // transitionend が来ない保険
-  setTimeout(() => el.remove(), 600);
-}
+    hideLoader();
 
     const page = document.body?.dataset?.page || "";
 
@@ -1041,7 +978,3 @@ function hideLoader() {
     initScrollReveal();
   });
 })();
-
-
-
-
