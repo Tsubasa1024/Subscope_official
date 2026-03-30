@@ -289,7 +289,7 @@
   }
 
   // ============
-  // Home
+  // Hero（PC）
   // ============
   function renderHero() {
     const heroContainer = document.querySelector("#heroMount");
@@ -312,6 +312,45 @@
     `;
   }
 
+  // ============
+  // Hero（スマホ：記事カード形式）
+  // ============
+  function renderHeroMobile() {
+    const mobileContainer = document.querySelector("#heroMountMobile");
+    const list = getArticles();
+    if (!mobileContainer || !list.length) return;
+    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const featured = sorted[0];
+    const dateStr = (featured.date || "").replace(/-/g, ".");
+    const category = escapeHtml(featured.categoryName || featured.category || "");
+    const title = escapeHtml(featured.title);
+
+    mobileContainer.innerHTML = `
+      <article class="hero-mobile-card" onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
+        <div class="card-image-wrap">
+          <img src="${featured.image}" alt="${title}" loading="eager" decoding="async">
+          ${category ? `<span class="card-category-tag">${category}</span>` : ""}
+        </div>
+        <div class="card-body">
+          <div class="card-service">${escapeHtml(featured.service || "SUBSCOPE")}</div>
+          <h2 class="card-title">${title}</h2>
+          <p class="card-desc">${escapeHtml(featured.description)}</p>
+        </div>
+        <div class="card-footer">
+          <span class="card-date">${dateStr}</span>
+          <div class="card-arrow" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 6h8M6 2l4 4-4 4"/>
+            </svg>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  // ============
+  // Latest
+  // ============
   function renderLatest(limit = 9) {
     const latestGrid = $("#latest-grid");
     if (!latestGrid) return;
@@ -396,7 +435,7 @@
     }
 
     let currentIndex = 0;
-    let isReturning = false; // 先頭に戻るアニメーション中フラグ
+    let isReturning = false;
 
     track.innerHTML = items.map((a) => {
       const dateStr = (a.date || "").replace(/-/g, ".");
@@ -453,11 +492,7 @@
     function slideTo(index, animate = true) {
       const max = getMaxIndex();
       currentIndex = Math.max(0, Math.min(index, max));
-      if (!animate) {
-        track.style.transition = "none";
-      } else {
-        track.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
-      }
+      track.style.transition = animate ? "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)" : "none";
       track.style.transform = `translateX(-${currentIndex * getSlideWidth()}px)`;
       updateDots();
       if (prevBtn) prevBtn.style.opacity = currentIndex === 0 ? "0.3" : "1";
@@ -469,13 +504,11 @@
 
     prevBtn?.addEventListener("click", () => { if (!isReturning) slideTo(currentIndex - 1); });
     nextBtn?.addEventListener("click", () => { if (!isReturning) slideTo(currentIndex + 1); });
-
     dotsEl?.addEventListener("click", (e) => {
       const dot = e.target.closest(".carousel-dot");
       if (dot && !isReturning) slideTo(Number(dot.dataset.index));
     });
 
-    // タッチスワイプ
     let touchStartX = 0;
     let touchStartY = 0;
     let isDragging = false;
@@ -503,20 +536,16 @@
       }
     }, { passive: true });
 
-    // 自動スクロール：最後まで行ったら3秒後に先頭へ
     let autoTimer = null;
 
     function scheduleNext() {
       clearTimeout(autoTimer);
       const max = getMaxIndex();
-
       if (currentIndex >= max) {
-        // 最後のスライドに到達 → 3秒待って先頭に戻る
         isReturning = true;
         autoTimer = setTimeout(() => {
           slideTo(0);
           isReturning = false;
-          // 先頭に戻ったら通常の自動スクロールを再開
           autoTimer = setTimeout(tick, 4000);
         }, 3000);
       } else {
@@ -529,16 +558,9 @@
       scheduleNext();
     }
 
-    // タッチしたら自動スクロール一時停止、離したら再開
-    viewport.addEventListener("touchstart", () => {
-      clearTimeout(autoTimer);
-    }, { passive: true });
+    viewport.addEventListener("touchstart", () => clearTimeout(autoTimer), { passive: true });
+    viewport.addEventListener("touchend", () => scheduleNext(), { passive: true });
 
-    viewport.addEventListener("touchend", () => {
-      scheduleNext();
-    }, { passive: true });
-
-    // リサイズ対応
     let resizeTimer;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
@@ -548,7 +570,6 @@
       }, 150);
     });
 
-    // 初回スタート
     scheduleNext();
   }
 
@@ -810,7 +831,8 @@
     const page = document.body?.dataset?.page || "";
 
     if (page === "home") {
-      renderHero();
+      renderHero();          // PC・タブレット用
+      renderHeroMobile();    // スマホ用カード
       renderLatest(9);
       initCarousel(6);
     }
