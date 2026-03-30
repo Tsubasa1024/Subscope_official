@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>記事詳細 | SUBSCOPE</title>
 
-  <!-- Canonical（JSで上書き） -->
   <link rel="canonical" href="https://www.subscope.jp/article.html">
 
-  <!-- OGP（ベース：JSで上書き） -->
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="SUBSCOPE">
   <meta property="og:title" content="記事 | SUBSCOPE">
@@ -19,7 +17,6 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
-  <!-- Twitter（JSで上書き） -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="記事 | SUBSCOPE">
   <meta name="twitter:description" content="SUBSCOPEの記事ページ">
@@ -160,7 +157,7 @@
     }
     .search-item img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
     .search-item h3 { font-size: 0.95rem; margin-bottom: 4px; }
-    .search-item p{
+    .search-item p {
       font-size: .8rem;
       color: #86868b;
       display: -webkit-box;
@@ -185,18 +182,13 @@
       gap: 8px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
-
-    /* iPad Safari対策：Menuが青くなるのを防ぐ */
     .menu-btn,
     .menu-btn * {
       color: var(--color-text-main) !important;
       -webkit-text-fill-color: var(--color-text-main) !important;
       text-decoration: none !important;
     }
-
-    /* iOSの青いタップ色を消す */
     button { -webkit-tap-highlight-color: transparent; }
-
     .menu-btn:hover { background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
     .menu-icon-lines { display: flex; flex-direction: column; gap: 4px; }
     .menu-line { width: 16px; height: 2px; border-radius: 999px; background-color: var(--color-text-main); }
@@ -230,7 +222,7 @@
     }
     .nav-link:hover { background: var(--color-bg-secondary); }
 
-    main { padding-top: 104px; padding-bottom: 64px; }
+    main { padding-top: 104px; padding-bottom: 80px; }
 
     .breadcrumb { font-size: 0.8rem; color: var(--color-text-gray); margin-bottom: 16px; }
     .breadcrumb a { color: var(--color-text-gray); }
@@ -247,7 +239,6 @@
       box-shadow: 0 18px 40px rgba(0,0,0,0.12);
     }
 
-    /* ✅ PCでは右上にシェアボタンを置くため右に余白を確保 */
     .article-header-block { margin-bottom: 0; position: relative; padding-right: 60px; }
 
     .article-meta-row {
@@ -270,7 +261,6 @@
     .article-content p { margin-bottom: 24px; }
     .article-content p.empty-space { height: 32px; margin: 0; }
 
-    /* 本文の箇条書き */
     .article-content ul { list-style: disc; list-style-position: outside; padding-left: 1.2em; margin: 8px 0 16px; }
     .article-content ol { list-style: decimal; list-style-position: outside; padding-left: 1.2em; margin: 8px 0 16px; }
     .article-content li { overflow-wrap: break-word; line-height: 1.7; margin-bottom: 6px; }
@@ -302,6 +292,126 @@
       white-space: pre-line;
     }
 
+    /* ===== Action Bar ===== */
+    .action-login-nudge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 16px;
+      background: #f5f5f7;
+      font-size: 0.85rem;
+      color: #86868b;
+      margin-bottom: 10px;
+    }
+    .action-login-nudge svg { flex-shrink: 0; }
+    .action-login-nudge-btn {
+      margin-left: auto;
+      padding: 7px 18px;
+      border-radius: 999px;
+      border: none;
+      background: #1d1d1f;
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-family);
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .action-login-nudge-btn:hover { opacity: 0.75; }
+
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin: 32px 0 48px;
+    }
+    .action-left { display: flex; gap: 8px; }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: #fff;
+      font-family: var(--font-family);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-text-main);
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .action-btn:hover {
+      background: #f5f5f7;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .action-btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+    .action-btn .btn-count {
+      font-size: 0.8rem;
+      color: #86868b;
+    }
+    .action-btn.is-liked {
+      background: #fff0f0;
+      border-color: rgba(220,60,60,0.2);
+      color: #c0392b;
+    }
+    .action-btn.is-liked .btn-count { color: #c0392b; opacity: 0.7; }
+    .action-btn.is-saved {
+      background: #f0faf5;
+      border-color: rgba(30,160,100,0.2);
+      color: #0f6e56;
+    }
+
+    /* フローティングバー（スマホ） */
+    .floating-action-bar {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 999px;
+      padding: 8px 16px;
+      gap: 4px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 100;
+      align-items: center;
+    }
+    .floating-action-bar .action-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      gap: 5px;
+      box-shadow: none;
+    }
+    .floating-action-bar .action-btn:hover { background: rgba(0,0,0,0.05); box-shadow: none; }
+    .floating-action-bar .action-btn.is-liked { background: #fff0f0; }
+    .floating-action-bar .action-btn.is-saved { background: #f0faf5; }
+    .fab-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(0,0,0,0.1);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
     .related-section { margin-top: 56px; padding-top: 28px; border-top: 1px solid rgba(0,0,0,0.06); }
     .related-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; }
     .related-grid { display: flex; flex-wrap: wrap; gap: 24px; }
@@ -318,12 +428,11 @@
     .related-body { padding: 10px 14px 14px; }
     .related-service { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-gray); margin-bottom: 4px; }
     .related-title-text { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
-    .related-desc{
+    .related-desc {
       font-size: .85rem;
       color: #555;
       line-height: 1.55;
       margin-top: 6px;
-
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
@@ -343,16 +452,14 @@
     .footer-links a { font-size: 15px; color: #1d1d1f; }
     .footer-copy { font-size: 13px; color: #86868b; }
 
-    /* =========================
-       ✅ スマホ調整（重要）
-       ========================= */
+    /* ===== スマホ調整 ===== */
     @media (max-width: 767px) {
       .top-header { padding: 10px 16px; }
       .menu-btn > span { display: none; }
       .menu-btn { width: 44px; height: 44px; padding: 0; border-radius: 999px; justify-content: center; }
       .menu-line { width: 18px; }
 
-      main { padding-top: 96px; }
+      main { padding-top: 96px; padding-bottom: 100px; }
 
       .container {
         max-width: 100%;
@@ -360,22 +467,20 @@
         padding-right: 16px;
       }
 
-      .article-header-block{
-        padding-right: 0 !important;
-      }
-
+      .article-header-block { padding-right: 0 !important; }
       .article-title { font-size: 1.7rem; line-height: 1.35; margin-bottom: 6px; }
       .article-lead { font-size: 0.98rem; line-height: 1.7; margin-bottom: 18px; }
-
-      .article-content{
-        font-size: 15.5px;
-        line-height: 1.9;
-      }
+      .article-content { font-size: 15.5px; line-height: 1.9; }
 
       .article-hero { margin: 0 0 20px; height: 220px; border-radius: 18px; overflow: hidden; }
       .article-kv { min-height: 100%; box-shadow: 0 12px 26px rgba(0,0,0,0.12); }
 
-      .share-circle-btn{ right: 0 !important; }
+      .share-circle-btn { right: 0 !important; }
+
+      /* スマホではインラインバー非表示・フローティング表示 */
+      .action-bar { display: none; }
+      .action-login-nudge { display: none; }
+      .floating-action-bar { display: flex; }
 
       .related-grid { flex-direction: column; gap: 16px; }
       .related-card { flex: 1 1 100%; max-width: 100%; }
@@ -462,7 +567,6 @@
     /* 広告非表示 */
     .side-sponsor, .between-sponsor, .ad-card { display: none !important; }
 
-    /* ✅ PC版：Menuが押せない対策 */
     .nav-center { pointer-events: none; }
     .nav-center a { pointer-events: auto; }
     .search-results-container { pointer-events: none; }
@@ -470,21 +574,17 @@
     .nav-right { position: relative; z-index: 999; }
     .menu-btn { position: relative; z-index: 1000; }
 
-    /* ===== Scroll Reveal 無効化（全ページ共通）===== */
-    .reveal{
+    .reveal {
       opacity: 1 !important;
       transform: none !important;
       transition: none !important;
     }
-    .reveal.active{
+    .reveal.active {
       opacity: 1 !important;
       transform: none !important;
     }
 
-    /* =========================
-       ✅ 本文内画像：原型を保って枠内に収める（灰色なし）
-       ========================= */
-    .article-content .image-wrap{
+    .article-content .image-wrap {
       width: 100%;
       overflow: hidden;
       border-radius: 18px;
@@ -495,8 +595,7 @@
       align-items: center;
       justify-content: center;
     }
-
-    .article-content .image-wrap img{
+    .article-content .image-wrap img {
       display: block;
       max-width: 100%;
       max-height: 420px;
@@ -504,35 +603,16 @@
       height: auto;
       object-fit: contain;
     }
-
-    @media (max-width: 767px){
-      .article-content .image-wrap{
-        max-height: none;
-        border-radius: 14px;
-      }
-      .article-content .image-wrap img{
-        max-height: none;
-      }
+    @media (max-width: 767px) {
+      .article-content .image-wrap { max-height: none; border-radius: 14px; }
+      .article-content .image-wrap img { max-height: none; }
     }
 
-    /* =========================
-       ✅ 本文内リンク：青 → 訪問後は紫
-       ========================= */
-    .article-content a{
-      color: #007aff;
-      text-decoration: underline;
-    }
-    .article-content a:visited{
-      color: #6e40c9;
-    }
-    .article-content a:hover{
-      opacity: 0.75;
-    }
+    .article-content a { color: #007aff; text-decoration: underline; }
+    .article-content a:visited { color: #6e40c9; }
+    .article-content a:hover { opacity: 0.75; }
 
-    /* =========================
-       ✅ Loading（CSSだけでおしゃれ）
-       ========================= */
-    .loader-wrap{
+    .loader-wrap {
       position: fixed;
       inset: 0;
       display: grid;
@@ -540,18 +620,18 @@
       background: #fff;
       z-index: 99999;
     }
-    .loader-breath{
+    .loader-breath {
       font: 700 14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       letter-spacing: .18em;
       text-transform: uppercase;
       opacity: .45;
       animation: breath 1.4s ease-in-out infinite;
     }
-    @keyframes breath{
+    @keyframes breath {
       0%,100%{ opacity:.35; transform: scale(.98); }
       50%{ opacity:.9; transform: scale(1.02); }
     }
-    #loader{
+    #loader {
       position: fixed;
       inset: 0;
       background: #fff;
@@ -559,13 +639,12 @@
       opacity: 1;
       transition: opacity .35s ease;
     }
-    #loader.is-hide{
+    #loader.is-hide {
       opacity: 0;
       pointer-events: none;
     }
   </style>
 
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -576,12 +655,10 @@
 </head>
 
 <body>
-  <!-- Loading -->
   <div class="loader-wrap" id="loader" aria-label="Loading">
     <div class="loader-breath">SUBSCOPE</div>
   </div>
 
-  <!-- 固定ヘッダー -->
   <div class="fixed-header">
     <div class="top-header">
       <div class="nav-left">
@@ -638,7 +715,6 @@
           <span class="article-date" id="meta-date"></span>
         </div>
 
-        <!-- 著者 -->
         <div class="article-author">
           <a href="#" class="author-link" id="author-link">
             <img id="author-avatar" class="author-avatar" alt="著者アイコン" />
@@ -664,12 +740,75 @@
         <div class="price-summary-box" id="price-summary-box"></div>
       </section>
 
+      <!-- ログイン誘導ナッジ（ログイン後はJSで非表示） -->
+      <div class="action-login-nudge" id="action-nudge" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        いいねや保存はログインが必要です
+        <button class="action-login-nudge-btn" onclick="openLoginModal()">ログイン</button>
+      </div>
+
+      <!-- PCインラインアクションバー -->
+      <div class="action-bar" id="action-bar">
+        <div class="action-left">
+          <button class="action-btn" id="like-btn" onclick="handleLike()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            いいね
+            <span class="btn-count" id="like-count">0</span>
+          </button>
+          <button class="action-btn" id="save-btn" onclick="handleSave()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span id="save-label">保存</span>
+          </button>
+        </div>
+        <div>
+          <button class="action-btn" onclick="handleShare()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            シェア
+          </button>
+        </div>
+      </div>
+
       <section class="related-section reveal" id="related-section">
         <h2 class="related-title">関連する記事</h2>
         <div class="related-grid" id="related-grid"></div>
       </section>
     </div>
   </main>
+
+  <!-- スマホ用フローティングバー -->
+  <div class="floating-action-bar" id="floating-bar">
+    <button class="action-btn" id="fab-like-btn" onclick="handleLike()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      <span id="fab-like-count">0</span>
+    </button>
+    <div class="fab-divider"></div>
+    <button class="action-btn" id="fab-save-btn" onclick="handleSave()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>
+    <div class="fab-divider"></div>
+    <button class="action-btn" onclick="handleShare()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+    </button>
+  </div>
 
   <footer class="footer">
     <div class="footer-container">
@@ -682,10 +821,84 @@
     </div>
   </footer>
 
-  <!-- 共通スクリプト（defer推奨：読み込み順安定） -->
   <script src="/index.js?v=11" defer></script>
 
   <script>
+    /* ===== Action Bar ===== */
+    // Supabase導入後: false → true に切り替えるだけ
+    const ACTION_IS_LOGGED_IN = false;
+
+    let _liked = false;
+    let _saved = false;
+    let _likeCount = 0;
+
+    function syncActionUI() {
+      // --- PC いいねボタン ---
+      const likeBtn = document.getElementById("like-btn");
+      const likeIcon = likeBtn?.querySelector("svg path");
+      if (likeBtn) likeBtn.classList.toggle("is-liked", _liked);
+      if (likeIcon) {
+        likeIcon.setAttribute("fill", _liked ? "#c0392b" : "none");
+        likeIcon.setAttribute("stroke", _liked ? "#c0392b" : "currentColor");
+      }
+      const likeCountEl = document.getElementById("like-count");
+      if (likeCountEl) likeCountEl.textContent = _likeCount;
+
+      // --- PC 保存ボタン ---
+      const saveBtn = document.getElementById("save-btn");
+      const saveIcon = saveBtn?.querySelector("svg path");
+      if (saveBtn) saveBtn.classList.toggle("is-saved", _saved);
+      if (saveIcon) {
+        saveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none");
+        saveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor");
+      }
+      const saveLabel = document.getElementById("save-label");
+      if (saveLabel) saveLabel.textContent = _saved ? "保存済み" : "保存";
+
+      // --- フローティング いいね ---
+      const fabLike = document.getElementById("fab-like-btn");
+      const fabLikeIcon = fabLike?.querySelector("svg path");
+      if (fabLike) fabLike.classList.toggle("is-liked", _liked);
+      if (fabLikeIcon) {
+        fabLikeIcon.setAttribute("fill", _liked ? "#c0392b" : "none");
+        fabLikeIcon.setAttribute("stroke", _liked ? "#c0392b" : "currentColor");
+      }
+      const fabCount = document.getElementById("fab-like-count");
+      if (fabCount) fabCount.textContent = _likeCount;
+
+      // --- フローティング 保存 ---
+      const fabSave = document.getElementById("fab-save-btn");
+      const fabSaveIcon = fabSave?.querySelector("svg path");
+      if (fabSave) fabSave.classList.toggle("is-saved", _saved);
+      if (fabSaveIcon) {
+        fabSaveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none");
+        fabSaveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor");
+      }
+
+      // --- ナッジ表示切り替え ---
+      const nudge = document.getElementById("action-nudge");
+      if (nudge) nudge.style.display = ACTION_IS_LOGGED_IN ? "none" : "flex";
+    }
+
+    function handleLike() {
+      if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
+      _liked = !_liked;
+      _likeCount += _liked ? 1 : -1;
+      syncActionUI();
+    }
+
+    function handleSave() {
+      if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
+      _saved = !_saved;
+      syncActionUI();
+    }
+
+    function openLoginModal() {
+      // Supabase導入後にモーダル or リダイレクトに差し替え
+      alert("ログインが必要です（実装予定）");
+    }
+
+    /* ===== OGP / Meta ===== */
     function setMeta(propertyOrName, content, isName=false) {
       if (!content) return;
       const selector = isName ? `meta[name="${propertyOrName}"]` : `meta[property="${propertyOrName}"]`;
@@ -709,7 +922,6 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        // 0) DOM参照
         const kv             = document.getElementById("article-kv");
         const titleEl        = document.getElementById("article-title");
         const leadEl         = document.getElementById("article-lead");
@@ -720,20 +932,16 @@
         const breadcrumbEl   = document.getElementById("breadcrumb");
         const relatedGrid    = document.getElementById("related-grid");
         const relatedSection = document.getElementById("related-section");
-
         const authorNameEl   = document.getElementById("author-name");
         const authorAvatarEl = document.getElementById("author-avatar");
         const authorLinkEl   = document.getElementById("author-link");
+        const priceSection   = document.getElementById("price-summary-section");
+        const priceBox       = document.getElementById("price-summary-box");
 
-        const priceSection = document.getElementById("price-summary-section");
-        const priceBox     = document.getElementById("price-summary-box");
-
-        // 1) URLパラメータ
         const params = new URLSearchParams(location.search);
         const contentId = params.get("id") || params.get("contentId");
         const draftKey  = params.get("draftKey");
 
-        // ✅ id が壊れてたら最初のIDだけ使ってURLも綺麗にする
         const cleanId = (contentId || "").split(/[?&]/)[0];
         if (cleanId && cleanId !== contentId) {
           const u = new URL(location.href);
@@ -742,16 +950,12 @@
           history.replaceState(null, "", u.pathname + "?" + u.searchParams.toString());
         }
 
-        // 2) 記事一覧ロード
         if ((!window.articles || window.articles.length === 0) && typeof loadArticles === "function") {
           await loadArticles();
         }
         const list = window.articles || [];
-
-        // ✅ ここ重要：cleanIdで探す（contentIdのままだと壊れたURLで死ぬ）
         const article = list.find((a) => a.id === cleanId) || null;
 
-        // 3) 見つからない場合
         if (!article) {
           if (contentEl) contentEl.innerHTML = "<p>記事が見つかりませんでした。</p>";
           if (relatedSection) relatedSection.style.display = "none";
@@ -760,28 +964,19 @@
           return;
         }
 
-        // 4) ✅ GA4：記事ID別閲覧数（ランキング用）※1記事1回
+        // GA4
         try {
           const sentKey = "ga_article_view_sent_" + article.id;
-
           const waitGtag = (max = 80) => new Promise((resolve) => {
             let n = 0;
             const t = setInterval(() => {
               n++;
-              if (typeof window.gtag === "function") {
-                clearInterval(t);
-                resolve(true);
-              }
-              if (n >= max) {
-                clearInterval(t);
-                resolve(false);
-              }
+              if (typeof window.gtag === "function") { clearInterval(t); resolve(true); }
+              if (n >= max) { clearInterval(t); resolve(false); }
             }, 100);
           });
-
           const send = () => {
             if (typeof gtag !== "function") return false;
-
             gtag("event", "page_view", {
               debug_mode: true,
               page_location: location.href,
@@ -789,7 +984,6 @@
               page_title: (article.title || document.title || ""),
               article_id: article.id,
             });
-
             gtag("event", "article_view", {
               debug_mode: true,
               article_id: article.id,
@@ -797,22 +991,15 @@
               page_location: location.href,
               page_path: location.pathname + location.search,
             });
-
-            console.log("✅ GA sent", article.id);
             return true;
           };
-
           if (!sessionStorage.getItem(sentKey)) {
             (async () => {
               const ok = await waitGtag();
-              if (!ok) {
-                console.warn("❌ gtag not ready (timeout). will retry on load");
-                return;
-              }
+              if (!ok) return;
               const sent = send();
               if (sent) sessionStorage.setItem(sentKey, "1");
             })();
-
             window.addEventListener("load", () => {
               if (!sessionStorage.getItem(sentKey)) {
                 const sent = send();
@@ -820,11 +1007,9 @@
               }
             }, { once: true });
           }
-        } catch (e) {
-          console.warn("GA error", e);
-        }
+        } catch (e) { console.warn("GA error", e); }
 
-        // 5) shareUrl / OGP
+        // OGP
         const currentUrl = new URL(window.location.href);
         const shareUrl =
           `${currentUrl.origin}/api/share?id=${encodeURIComponent(article.id)}` +
@@ -849,12 +1034,11 @@
         setMeta("og:url", shareUrl);
         setMeta("og:image", ogImg);
         setMeta("og:image:secure_url", ogImg);
-
         setMeta("twitter:title", ogTitle, true);
         setMeta("twitter:description", ogDesc, true);
         setMeta("twitter:image", ogImg, true);
 
-        // 6) 描画
+        // 描画
         const categoryLabel = article.categoryName || article.category || "その他";
 
         if (breadcrumbEl) {
@@ -887,16 +1071,13 @@
           const authorObj   = article.author || null;
           const authorName  = (authorObj && authorObj.name) || article.authorName || "";
           const authorImage = (authorObj && authorObj.avatar && authorObj.avatar.url) || article.authorImage || "";
-
           if (authorName) authorNameEl.textContent = authorName;
           else {
             const block = authorNameEl.closest(".article-author");
             if (block) block.style.display = "none";
           }
-
           if (authorImage) authorAvatarEl.src = authorImage;
           else authorAvatarEl.style.display = "none";
-
           authorLinkEl.href = "javascript:void(0)";
           authorLinkEl.style.cursor = "default";
           authorLinkEl.style.pointerEvents = "none";
@@ -920,21 +1101,16 @@
           const bodyHtml = article.contentHtml || article.content || "";
           contentEl.innerHTML = bodyHtml || `<p>この記事の詳細コンテンツは現在準備中です。</p>`;
 
-          // ✅ 本文内のimgを自動で枠（image-wrap）に入れて、はみ出しを防ぐ
           const imgs = contentEl.querySelectorAll("img");
           imgs.forEach((img) => {
             if (img.closest(".image-wrap")) return;
-
             const wrap = document.createElement("div");
             wrap.className = "image-wrap";
-
             img.removeAttribute("width");
             img.removeAttribute("height");
-
             img.style.maxWidth = "100%";
             img.style.height = "auto";
             img.style.display = "block";
-
             img.parentNode.insertBefore(wrap, img);
             wrap.appendChild(img);
           });
@@ -948,7 +1124,7 @@
           });
         }
 
-        // シェア
+        // シェアボタン（右上の丸いやつ）
         const shareButton = document.getElementById("share-button");
         if (shareButton) {
           shareButton.addEventListener("click", async () => {
@@ -959,12 +1135,23 @@
               try {
                 await navigator.clipboard.writeText(shareUrl);
                 alert("記事のURLをコピーしました");
-              } catch (e) {
-                alert("コピーに失敗しました…");
-              }
+              } catch (e) { alert("コピーに失敗しました…"); }
             }
           });
         }
+
+        // アクションバーのシェアも同じ処理
+        window.handleShare = async function() {
+          const shareText = (article.title || "SUBSCOPEの記事") + " | SUBSCOPE";
+          if (navigator.share) {
+            try { await navigator.share({ title: shareText, text: shareText, url: shareUrl }); } catch (e) {}
+          } else {
+            try {
+              await navigator.clipboard.writeText(shareUrl);
+              alert("記事のURLをコピーしました");
+            } catch (e) { alert("コピーに失敗しました…"); }
+          }
+        };
 
         // 価格まとめ
         if (priceSection && priceBox) {
@@ -989,17 +1176,14 @@
             d.innerHTML = html || "";
             return (d.textContent || "").replace(/\s+/g, " ").trim();
           };
-
           const pickDesc = (a) => {
             const d = (a.description || "").trim();
             if (d) return d;
             return getPlainText(a.contentHtml || a.content || "");
           };
-
           relatedGrid.innerHTML = related.map((a) => {
             const desc = pickDesc(a);
             const safeDesc = (desc || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
             return `
               <div class="related-card" onclick="openArticle('${a.id}')">
                 <div class="related-thumb" style="background-image:url('${a.image || "images/sample1.jpg"}');"></div>
@@ -1014,20 +1198,19 @@
           }).join("");
         }
 
-        // reveal（必要なら）
+        // アクションバー初期化
+        syncActionUI();
+
+        // reveal
         const reveals = document.querySelectorAll(".reveal");
         const io = new IntersectionObserver((entries) => {
           entries.forEach((e) => {
-            if (e.isIntersecting) {
-              e.target.classList.add("active");
-              io.unobserve(e.target);
-            }
+            if (e.isIntersecting) { e.target.classList.add("active"); io.unobserve(e.target); }
           });
         }, { threshold: 0.1 });
         reveals.forEach((el) => io.observe(el));
 
       } finally {
-        // ✅ どんなエラーでもスクロール不能を防ぐ
         hideLoader();
       }
     });
