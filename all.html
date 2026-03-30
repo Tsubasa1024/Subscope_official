@@ -5,230 +5,199 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>すべての記事 | SUBSCOPE</title>
 
-  <!-- Canonical -->
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="canonical" href="https://www.subscope.jp/all.html">
 
-  <!-- OGP -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SUBSCOPE">
   <meta property="og:title" content="すべての記事 | SUBSCOPE">
   <meta property="og:description" content="SUBSCOPEが発信するすべての記事一覧。サブスクリプション選びに役立つ情報をまとめてチェック。">
   <meta property="og:url" content="https://www.subscope.jp/all.html">
-
   <meta property="og:image" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:secure_url" content="https://www.subscope.jp/ogp-default-v3.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="すべての記事 | SUBSCOPE">
   <meta name="twitter:description" content="SUBSCOPEが発信するすべての記事一覧。サブスクリプション選びに役立つ情報をまとめてチェック。">
   <meta name="twitter:image" content="https://www.subscope.jp/ogp-default-v3.png">
 
   <style>
-    :root{
-      --color-bg:#fff;--color-bg-secondary:#f5f5f7;--color-text-main:#1d1d1f;
-      --color-text-gray:#86868b;--color-border:#d2d2d7;--color-accent:#000;
-      --font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      --transition-hover:.4s cubic-bezier(.25,.8,.25,1);
-      --transition-fade:.8s cubic-bezier(.2,.8,.2,1);
-      --container-width:1080px;--spacing-section:80px;
-    }
-    *{margin:0;padding:0;box-sizing:border-box}
-    html,body{width:100%;overflow-x:hidden}
-    body{font-family:var(--font-family);background:var(--color-bg);color:var(--color-text-main);-webkit-font-smoothing:antialiased;line-height:1.5}
-    a{text-decoration:none;color:inherit}
-    ul{list-style:none}
-    .container{max-width:var(--container-width);margin:0 auto;padding:0 24px;width:100%}
-
-    .reveal{opacity:0;transform:translateY(40px);transition:opacity var(--transition-fade),transform var(--transition-fade)}
-    .reveal.active{opacity:1;transform:translateY(0)}
-
-    .fixed-header{position:fixed;top:0;left:0;width:100%;z-index:150;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06)}
-    .top-header{max-width:var(--container-width);margin:0 auto;padding:12px 24px 16px;display:flex;justify-content:space-between;align-items:center;position:relative}
-    .nav-center{position:absolute;left:50%;transform:translateX(-50%)}
-    .header-logo{font-size:1.6rem;font-weight:700;letter-spacing:-.03em}
-
-    .search-wrapper{width:280px;position:relative}
-    .search-input{width:100%;padding:10px 40px 10px 44px;border-radius:999px;border:1px solid rgba(0,0,0,.1);
-      background:rgba(255,255,255,.8);backdrop-filter:blur(20px);font-size:.9rem;outline:none;box-shadow:0 4px 20px rgba(0,0,0,.05)}
-    .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--color-text-gray);pointer-events:none;z-index:2}
-    .clear-btn{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:18px;color:#999;cursor:pointer;display:none;user-select:none}
-
-    .search-results-container{position:fixed;top:72px;left:0;right:0;max-width:var(--container-width);margin:0 auto;padding:0 24px 16px;z-index:130}
-    #searchResults{margin-top:8px;max-height:380px;overflow-y:auto;display:none}
-    .search-item{display:flex;gap:12px;padding:10px 12px;border-radius:16px;background:#fff;margin-bottom:8px;cursor:pointer;
-      box-shadow:0 4px 10px rgba(0,0,0,.03);transition:.2s}
-    .search-item:hover{background:#f5f5f7;transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.06)}
-    .search-item img{width:64px;height:64px;border-radius:12px;object-fit:cover;flex-shrink:0}
-    .search-item h3{font-size:.95rem;margin-bottom:4px}
-    .search-item p{
-      font-size: .8rem;
-      color: #86868b;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    :root {
+      --color-bg: #fff;
+      --color-bg-secondary: #f5f5f7;
+      --color-text-main: #1d1d1f;
+      --color-text-gray: #86868b;
+      --color-border: #d2d2d7;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+      --transition-fade: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      --container-width: 1080px;
+      --spacing-section: 80px;
+      --header-h: 72px;
     }
 
-    .menu-btn{background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.1);
-      padding:12px 24px;border-radius:999px;font-size:.9rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-      box-shadow:0 4px 20px rgba(0,0,0,.05)}
-    .menu-icon-lines{display:flex;flex-direction:column;gap:4px}
-    .menu-line{width:16px;height:2px;border-radius:999px;background:var(--color-text-main)}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body { font-family: var(--font-family); background: var(--color-bg); color: var(--color-text-main); -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    .container { max-width: var(--container-width); margin: 0 auto; padding: 0 24px; width: 100%; }
 
-    /* ✅ iPad Safari の青文字化を防止（Menuボタン） */
-    .menu-btn{
+    /* ===== Loading ===== */
+    #loader { position: fixed; inset: 0; background: #fff; z-index: 99999; opacity: 1; transition: opacity 0.35s ease; display: grid; place-items: center; }
+    #loader.is-hide { opacity: 0; pointer-events: none; }
+    .loader-breath { font: 700 14px/1.2 var(--font-family); letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.45; animation: breath 1.4s ease-in-out infinite; }
+    @keyframes breath { 0%, 100% { opacity: 0.35; transform: scale(0.98); } 50% { opacity: 0.9; transform: scale(1.02); } }
+
+    /* ===== Header ===== */
+    .fixed-header { position: fixed; top: 0; left: 0; width: 100%; z-index: 150; background: rgba(255,255,255,0.9); border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .top-header { max-width: var(--container-width); margin: 0 auto; padding: 12px 24px 16px; display: flex; justify-content: space-between; align-items: center; position: relative; }
+    .nav-center { position: absolute; left: 50%; transform: translateX(-50%); }
+    .header-logo { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; user-select: none; }
+
+    .search-wrapper { width: 280px; position: relative; }
+    .search-input { width: 100%; padding: 10px 40px 10px 44px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.8); font-size: 0.9rem; outline: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); transition: box-shadow 0.25s ease, background 0.25s ease; }
+    .search-input:focus { background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--color-text-gray); pointer-events: none; z-index: 2; }
+    .clear-btn { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #999; cursor: pointer; user-select: none; display: none; }
+
+    .search-results-container { position: fixed; top: var(--header-h); left: 0; right: 0; max-width: var(--container-width); margin: 0 auto; padding: 0 24px 16px; z-index: 130; pointer-events: none; }
+    #searchResults { margin-top: 8px; max-height: 380px; overflow-y: auto; pointer-events: auto; }
+    .search-item { display: flex; gap: 12px; padding: 10px 12px; border-radius: 16px; background: #fff; margin-bottom: 8px; cursor: pointer; transition: transform 0.15s, box-shadow 0.2s, background 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+    .search-item:hover { background: #f5f5f7; transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.06); }
+    .search-item img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+    .search-item h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .search-item p { font-size: 0.8rem; color: var(--color-text-gray); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-overflow: ellipsis; }
+
+    .menu-btn { background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1); padding: 12px 24px; border-radius: 999px; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); transition: box-shadow 0.25s ease, background 0.25s ease; color: var(--color-text-main); -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent; }
+    .menu-btn:hover { background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .menu-btn, .menu-btn * { color: var(--color-text-main) !important; }
+    .menu-icon-lines { display: flex; flex-direction: column; gap: 4px; }
+    .menu-line { width: 16px; height: 2px; border-radius: 999px; background: var(--color-text-main); }
+
+    .nav-overlay { position: fixed; top: var(--header-h); right: 40px; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05); transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.2,0.8,0.2,1); z-index: 140; min-width: 200px; }
+    .nav-overlay.open { transform: translateY(0); opacity: 1; visibility: visible; }
+    .nav-link { display: block; padding: 10px 16px; border-radius: 12px; font-size: 0.95rem; font-weight: 500; transition: background 0.2s; }
+    .nav-link:hover { background: var(--color-bg-secondary); }
+
+    /* ===== Hero section ===== */
+    .all-hero-section { padding-top: 104px; padding-bottom: 28px; }
+    .all-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    /* ===== 検索フォーム ===== */
+    .all-search-section { margin-bottom: 16px; }
+    .all-search-form { display: flex; gap: 8px; align-items: center; max-width: 520px; }
+    .all-search-input-wrapper { position: relative; flex: 1; }
+    .all-search-input { width: 100%; padding: 10px 40px 10px 16px; border-radius: 999px; border: 1px solid var(--color-border); font-size: 0.9rem; outline: none; transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+    .all-search-input:focus { border-color: rgba(0,0,0,0.3); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .all-clear-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; font-size: 16px; color: #999; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; }
+    .all-search-button { padding: 10px 22px; border-radius: 999px; border: none; background: #000; color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; white-space: nowrap; }
+    .all-search-button:hover { background: #333; transform: translateY(-1px); }
+    .all-search-info { margin-top: 8px; font-size: 0.85rem; color: var(--color-text-gray); }
+
+    /* ===== タブ ===== */
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .tab {
+      padding: 7px 16px; border-radius: 999px;
+      background: #ebebef; font-size: 0.82rem;
+      cursor: pointer; border: none;
+      transition: background 0.18s, transform 0.18s;
       color: var(--color-text-main);
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    .menu-btn,
-    .menu-btn *{
-      color: var(--color-text-main) !important;
+      -webkit-appearance: none; appearance: none;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    .nav-overlay{position:fixed;top:72px;right:40px;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);
-      padding:20px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.05);
-      transform:translateY(-20px);opacity:0;visibility:hidden;transition:.3s cubic-bezier(.2,.8,.2,1);z-index:140;min-width:200px}
-    .nav-overlay.open{transform:translateY(0);opacity:1;visibility:visible}
-    .nav-link{display:block;padding:10px 16px;border-radius:12px;font-size:.95rem;font-weight:500}
-    .nav-link:hover{background:var(--color-bg-secondary)}
-
-    /* cards */
-    .grid-layout{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
-    .article-card{display:flex;flex-direction:column;border-radius:24px;background:#fff;cursor:pointer;overflow:hidden;transition:all var(--transition-hover)}
-    .article-card:hover{transform:translateY(-6px);box-shadow:0 15px 30px rgba(0,0,0,.08)}
-    .card-image{width:100%;height:200px;background-size:cover;background-position:center;background-color:#f0f0f0;border-radius:24px;margin-bottom:16px}
-    .card-body{padding:0 16px 16px}
-    .card-service{font-size:.7rem;font-weight:700;color:var(--color-text-gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
-    .card-title{font-size:1.3rem;font-weight:700;line-height:1.25;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .card-desc{font-size:.95rem;color:#555;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-    .card-date{font-size:.75rem;color:var(--color-text-gray);margin-top:8px}
-
-    /* all page */
-    .all-hero-section{padding-top:96px;padding-bottom:32px}
-    .all-title{font-size:2.4rem;font-weight:700;letter-spacing:-.03em;margin:10px 0 16px}
-    .tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-    .tab{padding:7px 16px;border-radius:999px;background:#e9e9ee;font-size:.85rem;cursor:pointer;border:none;transition:.18s}
-    .tab:hover{transform:translateY(-1px)}
-    .tab.active{background:#000;color:#fff;font-weight:600}
-    .empty-message{font-size:.9rem;color:var(--color-text-gray);padding:24px 0}
-
-    .all-search-section{margin-bottom:16px}
-    .all-search-form{display:flex;gap:8px;align-items:center;max-width:520px}
-    .all-search-input-wrapper{position:relative;flex:1}
-    .all-search-input{width:100%;padding:10px 36px 10px 14px;border-radius:999px;border:1px solid var(--color-border);font-size:.95rem;outline:none}
-    .all-clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:32px;height:32px;font-size:18px;line-height:1;color:#999;border-radius:50%;
-      display:none;align-items:center;justify-content:center;cursor:pointer}
-    .all-search-button{padding:9px 20px;border-radius:999px;border:none;background:#000;color:#fff;font-size:.9rem;font-weight:600;cursor:pointer}
-    .all-search-info{margin-top:6px;font-size:.85rem;color:var(--color-text-gray)}
-
-    .footer{background:#f5f5f7;padding:40px 0;border-top:1px solid #d2d2d7;margin-top:80px}
-    .footer-container{max-width:1080px;margin:0 auto;text-align:center}
-    .footer-links{display:flex;justify-content:center;gap:40px;margin-bottom:20px}
-    .footer-links a{font-size:15px;transition:opacity .3s}
-    .footer-links a:hover{opacity:.6}
-    .footer-copy{color:#86868b;font-size:13px}
-
-    @media (max-width:767px){
-      :root{--spacing-section:60px}
-      .top-header{padding:10px 16px}
-      .search-wrapper{width:44px;height:44px;border-radius:999px;border:2px solid #e5e5e7;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:.35s}
-      .search-input{border:none;box-shadow:none;padding:0;background:transparent;opacity:0;pointer-events:none;transition:.25s}
-      .search-icon{left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;color:#a7a7aa}
-      .fixed-header.search-open .nav-center{display:none}
-      .fixed-header.search-open .nav-left{flex:1 1 auto}
-      .fixed-header.search-open .search-wrapper{width:100%;border:none;box-shadow:none;justify-content:flex-start;background:transparent}
-      .fixed-header.search-open .search-input{opacity:1;pointer-events:auto;padding:10px 40px 10px 44px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:#fff;box-shadow:0 8px 25px rgba(0,0,0,.15)}
-      .fixed-header.search-open .search-icon{left:16px;top:50%;transform:translateY(-50%)}
-      .menu-btn>span{display:none}
-      .menu-btn{width:44px;height:44px;padding:0;border-radius:999px;justify-content:center}
-      .grid-layout{grid-template-columns:1fr}
-      .footer-links{gap:24px;flex-wrap:wrap}
-
-      .all-title{font-size:2rem}
-      .all-search-form{max-width:100%}
-      .all-search-button{flex:0 0 96px;height:40px;padding:0 16px;white-space:nowrap}
-      .all-clear-btn{right:6px;width:36px;height:36px;font-size:22px}
-    }
-
-    /* ✅ スマホ：タブの青文字化防止 + 選択中は白固定 */
-    .tabs, .tab, .tab *{ -webkit-tap-highlight-color: transparent; }
-    .tab{
-      color: var(--color-text-main);
-      -webkit-text-fill-color: var(--color-text-main);
-      text-decoration: none;
-      outline: none;
-    }
-    .tab:not(.active):focus,
-    .tab:not(.active):active{
-      color: var(--color-text-main);
       -webkit-text-fill-color: var(--color-text-main);
     }
-    .tab.active{
-      background:#000;
-      color:#fff !important;
-      -webkit-text-fill-color:#fff !important;
-      font-weight:600;
-    }
-    .tab.active:focus,
-    .tab.active:active{
-      color:#fff !important;
-      -webkit-text-fill-color:#fff !important;
+    .tab:hover { transform: translateY(-1px); background: #dddde2; }
+    .tab.active { background: #000; color: #fff !important; -webkit-text-fill-color: #fff !important; font-weight: 600; }
+
+    /* ===== グリッド ===== */
+    .section { padding: 0 0 var(--spacing-section); }
+    .grid-layout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    .empty-message { font-size: 0.9rem; color: var(--color-text-gray); padding: 24px 0; }
+
+    /* ===== 記事カード（トップページと同じ） ===== */
+    .article-card { display: flex; flex-direction: column; border-radius: 20px; background: #fff; border: 1px solid rgba(0,0,0,0.06); overflow: hidden; cursor: pointer; transition: box-shadow 0.4s var(--ease-out-expo); }
+    .article-card:hover { box-shadow: 0 20px 48px rgba(0,0,0,0.10); transform: translateY(-6px); }
+
+    .card-image-wrap { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; position: relative; background: #f0f0f0; flex-shrink: 0; }
+    .card-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.65s var(--ease-out-expo); }
+    .article-card:hover .card-image-wrap img { transform: scale(1.05); }
+
+    .card-category-tag { position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: rgba(0,0,0,0.52); color: #fff; pointer-events: none; }
+
+    .card-body { padding: 14px 16px 0; display: flex; flex-direction: column; flex-grow: 1; }
+    .card-service { font-size: 10px; font-weight: 700; color: var(--color-text-gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em; }
+    .card-title { font-size: 14px; font-weight: 700; line-height: 1.45; margin-bottom: 7px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--color-text-main); }
+    .card-desc { font-size: 12px; color: #666; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
+
+    .card-footer { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 14px; margin-top: 10px; border-top: 1px solid rgba(0,0,0,0.05); }
+    .card-date { font-size: 10px; color: var(--color-text-gray); }
+    .card-arrow { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease; }
+    .article-card:hover .card-arrow { background: #000; border-color: #000; transform: translateX(2px); }
+    .article-card:hover .card-arrow svg { stroke: #fff; }
+
+    /* ===== Footer ===== */
+    .footer { background: #f5f5f7; padding: 40px 0; border-top: 1px solid var(--color-border); margin-top: 40px; }
+    .footer-container { max-width: 1080px; margin: 0 auto; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; flex-wrap: wrap; }
+    .footer-links a { font-size: 15px; transition: opacity 0.2s; }
+    .footer-links a:hover { opacity: 0.6; }
+    .footer-copy { color: var(--color-text-gray); font-size: 13px; }
+
+    /* ===== Desktop blur ===== */
+    @media (min-width: 1025px) {
+      .fixed-header { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      .nav-overlay { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      .menu-btn { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      .search-input { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      .card-category-tag { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
     }
 
-    /* ===== Scroll Reveal 無効化 ===== */
-    .reveal{
-      opacity: 1 !important;
-      transform: none !important;
-      transition: none !important;
-    }
-    .reveal.active{
-      opacity: 1 !important;
-      transform: none !important;
+    /* ===== タブレット ===== */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .grid-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     }
 
-    /* =========================
-       ✅ Loading（CSSだけでおしゃれ）
-       ========================= */
-    .loader-wrap{
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      background: #fff;
-      z-index: 99999;
-    }
-    .loader-breath{
-      font: 700 14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      opacity: .45;
-      animation: breath 1.4s ease-in-out infinite;
-    }
-    @keyframes breath{
-      0%,100%{ opacity:.35; transform: scale(.98); }
-      50%{ opacity:.9; transform: scale(1.02); }
-    }
-    #loader{
-      position: fixed;
-      inset: 0;
-      background: #fff;
-      z-index: 99999;
-      opacity: 1;
-      transition: opacity .35s ease;
-    }
-    #loader.is-hide{
-      opacity: 0;
-      pointer-events: none;
+    /* ===== Mobile ===== */
+    @media (max-width: 767px) {
+      :root { --spacing-section: 60px; }
+      .top-header { padding: 10px 16px; }
+      .search-results-container { padding: 0 16px 12px; }
+
+      .search-wrapper { width: 44px; height: 44px; border-radius: 999px; border: 2px solid #e5e5e7; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: width 0.35s ease, box-shadow 0.3s ease, border 0.3s ease, background 0.3s ease; }
+      .search-input { border: none; box-shadow: none; background: transparent; padding: 0; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+      .search-icon { left: 50%; top: 50%; transform: translate(-50%,-50%); width: 22px; height: 22px; color: #a7a7aa; }
+      .clear-btn { display: none; }
+      .fixed-header.search-open .nav-center { display: none; }
+      .fixed-header.search-open .nav-left { flex: 1 1 auto; }
+      .fixed-header.search-open .search-wrapper { width: 100%; border: none; box-shadow: none; justify-content: flex-start; background: transparent; }
+      .fixed-header.search-open .search-input { opacity: 1; pointer-events: auto; padding: 10px 40px 10px 44px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.1); background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+      .fixed-header.search-open .search-icon { left: 16px; top: 50%; transform: translateY(-50%); }
+
+      .menu-btn > span { display: none; }
+      .menu-btn { width: 44px; height: 44px; padding: 0; justify-content: center; }
+      .menu-line { width: 18px; }
+      .nav-overlay { right: 16px; }
+
+      .all-hero-section { padding-top: 88px; padding-bottom: 20px; }
+      .all-title { font-size: 1.3rem; margin-bottom: 14px; }
+      .all-search-form { max-width: 100%; }
+      .all-search-button { flex: 0 0 72px; padding: 0 14px; height: 40px; }
+      .all-clear-btn { right: 6px; }
+
+      .grid-layout { grid-template-columns: 1fr; gap: 14px; }
+      .footer-links { gap: 24px; }
     }
   </style>
 
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -239,77 +208,73 @@
 </head>
 
 <body data-page="all">
-  <!-- Loading -->
-  <div class="loader-wrap" id="loader" aria-label="Loading">
+
+  <div id="loader" aria-label="Loading">
     <div class="loader-breath">SUBSCOPE</div>
   </div>
 
-  <!-- Header -->
-  <div class="fixed-header">
+  <div class="fixed-header" id="fixedHeader">
     <div class="top-header">
       <div class="nav-left">
-        <div class="search-wrapper">
-          <input type="text" class="search-input" id="searchInput" placeholder="">
-          <span class="clear-btn" id="clear-btn">×</span>
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="search-wrapper" id="searchWrapper" aria-label="検索">
+          <input type="text" class="search-input" id="searchInput" placeholder="" autocomplete="off" />
+          <span class="clear-btn" id="clearBtn" aria-label="クリア">×</span>
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
       </div>
-
       <div class="nav-center">
-        <a href="index.html" class="header-logo-link"><h1 class="header-logo">SUBSCOPE</h1></a>
+        <a href="index.html" class="header-logo-link">
+          <h1 class="header-logo">SUBSCOPE</h1>
+        </a>
       </div>
-
       <div class="nav-right">
         <button class="menu-btn" id="menuBtn" type="button" aria-label="メニュー">
-          <div class="menu-icon-lines"><span class="menu-line"></span><span class="menu-line"></span></div>
+          <div class="menu-icon-lines" aria-hidden="true">
+            <span class="menu-line"></span>
+            <span class="menu-line"></span>
+          </div>
           <span>Menu</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Menu -->
   <div class="nav-overlay" id="nav-overlay">
     <ul class="nav-list">
-      <li><a href="index.html" class="nav-link" onclick="toggleMenu(false)">トップ</a></li>
-      <li><a href="all.html" class="nav-link" onclick="toggleMenu(false)">すべての記事</a></li>
-      <li><a href="ranking.html" class="nav-link" onclick="toggleMenu(false)">ランキング</a></li>
-      <li><a href="sns.html" class="nav-link" onclick="toggleMenu(false)">SNS</a></li>
+      <li><a href="index.html" class="nav-link">トップ</a></li>
+      <li><a href="all.html" class="nav-link">すべての記事</a></li>
+      <li><a href="ranking.html" class="nav-link">ランキング</a></li>
+      <li><a href="sns.html" class="nav-link">SNS</a></li>
     </ul>
   </div>
 
-  <!-- Search results -->
-  <div class="search-results-container"><div id="searchResults"></div></div>
+  <div class="search-results-container">
+    <div id="searchResults"></div>
+  </div>
 
-  <!-- Hero -->
   <section class="all-hero-section">
     <div class="container">
-      <div class="reveal active">
-        <h1 class="all-title">すべての記事</h1>
-
-        <section class="all-search-section">
-          <form id="allSearchForm" class="all-search-form">
-            <div class="all-search-input-wrapper">
-              <input type="text" id="allSearchInput" class="all-search-input" placeholder="キーワードで記事を検索" autocomplete="off" />
-              <span id="allClearBtn" class="all-clear-btn">×</span>
-            </div>
-            <button type="submit" class="all-search-button">検索</button>
-          </form>
-          <p id="allSearchInfo" class="all-search-info"></p>
-        </section>
-
-        <div class="tabs" id="tabs"></div>
-      </div>
+      <h1 class="all-title">すべての記事</h1>
+      <section class="all-search-section">
+        <form id="allSearchForm" class="all-search-form">
+          <div class="all-search-input-wrapper">
+            <input type="text" id="allSearchInput" class="all-search-input" placeholder="キーワードで記事を検索" autocomplete="off" />
+            <span id="allClearBtn" class="all-clear-btn">×</span>
+          </div>
+          <button type="submit" class="all-search-button">検索</button>
+        </form>
+        <p id="allSearchInfo" class="all-search-info"></p>
+      </section>
+      <div class="tabs" id="tabs"></div>
     </div>
   </section>
 
-  <!-- List -->
   <section class="section">
     <div class="container">
-      <div class="grid-layout reveal" id="all-grid">読み込み中…</div>
+      <div class="grid-layout" id="all-grid">読み込み中…</div>
     </div>
   </section>
 
@@ -324,37 +289,27 @@
     </div>
   </footer>
 
-  <!-- ✅ deferで読み込み順安定（ローダーが残りにくい） -->
-  <script src="/index.js?v=11" defer></script>
+  <script src="/index.js?v=14" defer></script>
 
- <script>
-  function hideLoader() {
-    const el = document.getElementById("loader");
-    if (!el) return;
-    el.classList.add("is-hide");
-    el.addEventListener("transitionend", () => el.remove(), { once: true });
-    setTimeout(() => el.remove(), 600);
-  }
-
-  // ✅ このページは「最低1秒ローディングを見せる」
-  document.addEventListener("DOMContentLoaded", () => {
-    const MIN_LOADING_TIME = 500; // 1秒
-    const start = performance.now();
-
-    const tryHide = () => {
-      const elapsed = performance.now() - start;
-      const wait = Math.max(0, MIN_LOADING_TIME - elapsed);
-      setTimeout(hideLoader, wait);
-    };
-
-    tryHide();
-  });
-
-  // ✅ 念のための保険（重い端末・回線）
-  window.addEventListener("load", () => {
-    setTimeout(hideLoader, 1000);
-  }, { once: true });
-</script>
+  <script>
+    function hideLoader() {
+      const el = document.getElementById("loader");
+      if (!el) return;
+      el.classList.add("is-hide");
+      el.addEventListener("transitionend", () => el.remove(), { once: true });
+      setTimeout(() => el.remove(), 600);
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const start = performance.now();
+      const tryHide = () => {
+        const elapsed = performance.now() - start;
+        const wait = Math.max(0, 500 - elapsed);
+        setTimeout(hideLoader, wait);
+      };
+      tryHide();
+    });
+    window.addEventListener("load", () => { setTimeout(hideLoader, 1000); }, { once: true });
+  </script>
 
 </body>
 </html>
