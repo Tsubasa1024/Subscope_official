@@ -373,7 +373,7 @@
   }
 
   // ============
-  // カルーセル（フラット新デザイン）
+  // カルーセル
   // ============
   function initCarousel(articlesToShow = 6) {
     const track = document.getElementById("carouselTrack");
@@ -396,8 +396,8 @@
     }
 
     let currentIndex = 0;
+    let isReturning = false; // 先頭に戻るアニメーション中フラグ
 
-    // スライド生成
     track.innerHTML = items.map((a) => {
       const dateStr = (a.date || "").replace(/-/g, ".");
       const category = escapeHtml(a.categoryName || a.category || "");
@@ -430,7 +430,6 @@
       return Math.max(0, items.length - getVisibleCount());
     }
 
-    // ドット生成
     function renderDots() {
       if (!dotsEl) return;
       const max = getMaxIndex();
@@ -446,16 +445,20 @@
       });
     }
 
-    function slideTo(index) {
+    function getSlideWidth() {
+      const slideEl = track.children[0];
+      return slideEl ? slideEl.offsetWidth + 20 : 0;
+    }
+
+    function slideTo(index, animate = true) {
       const max = getMaxIndex();
       currentIndex = Math.max(0, Math.min(index, max));
-
-      // スライド幅 + gap(20px) で移動量を計算
-      const slideEl = track.children[0];
-      const gap = 20;
-      const slideWidth = slideEl ? slideEl.offsetWidth + gap : 0;
-      track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
-
+      if (!animate) {
+        track.style.transition = "none";
+      } else {
+        track.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+      }
+      track.style.transform = `translateX(-${currentIndex * getSlideWidth()}px)`;
       updateDots();
       if (prevBtn) prevBtn.style.opacity = currentIndex === 0 ? "0.3" : "1";
       if (nextBtn) nextBtn.style.opacity = currentIndex >= max ? "0.3" : "1";
@@ -464,15 +467,15 @@
     renderDots();
     slideTo(0);
 
-    prevBtn?.addEventListener("click", () => slideTo(currentIndex - 1));
-    nextBtn?.addEventListener("click", () => slideTo(currentIndex + 1));
+    prevBtn?.addEventListener("click", () => { if (!isReturning) slideTo(currentIndex - 1); });
+    nextBtn?.addEventListener("click", () => { if (!isReturning) slideTo(currentIndex + 1); });
 
     dotsEl?.addEventListener("click", (e) => {
       const dot = e.target.closest(".carousel-dot");
-      if (dot) slideTo(Number(dot.dataset.index));
+      if (dot && !isReturning) slideTo(Number(dot.dataset.index));
     });
 
-    // タッチスワイプ（感度改善版）
+    // タッチスワイプ
     let touchStartX = 0;
     let touchStartY = 0;
     let isDragging = false;
@@ -487,23 +490,53 @@
       if (!isDragging) return;
       const dx = Math.abs(e.touches[0].clientX - touchStartX);
       const dy = Math.abs(e.touches[0].clientY - touchStartY);
-      if (dx > dy) e.preventDefault(); // 横スワイプ時はページスクロールをブロック
+      if (dx > dy) e.preventDefault();
     }, { passive: false });
 
     viewport.addEventListener("touchend", (e) => {
       if (!isDragging) return;
       isDragging = false;
+      if (isReturning) return;
       const dx = e.changedTouches[0].clientX - touchStartX;
       if (Math.abs(dx) > 30) {
         dx < 0 ? slideTo(currentIndex + 1) : slideTo(currentIndex - 1);
       }
     }, { passive: true });
 
-    // 自動スクロール（タッチしたら停止）
-    let autoTimer = setInterval(() => {
-      slideTo(currentIndex >= getMaxIndex() ? 0 : currentIndex + 1);
-    }, 4000);
-    viewport.addEventListener("touchstart", () => clearInterval(autoTimer), { passive: true });
+    // 自動スクロール：最後まで行ったら3秒後に先頭へ
+    let autoTimer = null;
+
+    function scheduleNext() {
+      clearTimeout(autoTimer);
+      const max = getMaxIndex();
+
+      if (currentIndex >= max) {
+        // 最後のスライドに到達 → 3秒待って先頭に戻る
+        isReturning = true;
+        autoTimer = setTimeout(() => {
+          slideTo(0);
+          isReturning = false;
+          // 先頭に戻ったら通常の自動スクロールを再開
+          autoTimer = setTimeout(tick, 4000);
+        }, 3000);
+      } else {
+        autoTimer = setTimeout(tick, 4000);
+      }
+    }
+
+    function tick() {
+      slideTo(currentIndex + 1);
+      scheduleNext();
+    }
+
+    // タッチしたら自動スクロール一時停止、離したら再開
+    viewport.addEventListener("touchstart", () => {
+      clearTimeout(autoTimer);
+    }, { passive: true });
+
+    viewport.addEventListener("touchend", () => {
+      scheduleNext();
+    }, { passive: true });
 
     // リサイズ対応
     let resizeTimer;
@@ -514,6 +547,9 @@
         slideTo(Math.min(currentIndex, getMaxIndex()));
       }, 150);
     });
+
+    // 初回スタート
+    scheduleNext();
   }
 
   // ============
@@ -686,11 +722,9 @@
       const items = rows.slice(0, 20);
       top3El.innerHTML = "";
       restEl.innerHTML = "";
-
       const hero = items[0];
       const mids = items.slice(1, 3);
       const rest = items.slice(3);
-
       const makeTitle = (item) => item?.article?.title || item?.key || "";
       const makeDesc = (item) => item?.article?.description || "";
       const makeThumb = (item) => item?.article?.image || DEFAULT_THUMB;
@@ -701,37 +735,13 @@
 
       if (hero) {
         const title = makeTitle(hero);
-        top3El.innerHTML += `
-          <a class="rank-hero" href="${makeLink(hero)}" data-rank-item="1" data-key="${hero.key}" data-title="${escapeHtml(title)}" data-rank="1" data-views="${hero.views}">
-            <div class="rank-badge rank-1 rank-badge-large">1</div>
-            <div class="rank-hero-thumb" style="background-image:url('${makeThumb(hero)}');"></div>
-            <div class="rank-hero-content">
-              <div class="ranking-service">${escapeHtml(makeLabel(hero))}</div>
-              <div class="rank-hero-title">${escapeHtml(title)}</div>
-              <div class="rank-hero-desc">${escapeHtml(makeDesc(hero))}</div>
-              <div class="rank-hero-meta"><span>Views: ${hero.views}</span></div>
-            </div>
-          </a>
-        `;
+        top3El.innerHTML += `<a class="rank-hero" href="${makeLink(hero)}" data-rank-item="1" data-key="${hero.key}" data-title="${escapeHtml(title)}" data-rank="1" data-views="${hero.views}"><div class="rank-badge rank-1 rank-badge-large">1</div><div class="rank-hero-thumb" style="background-image:url('${makeThumb(hero)}');"></div><div class="rank-hero-content"><div class="ranking-service">${escapeHtml(makeLabel(hero))}</div><div class="rank-hero-title">${escapeHtml(title)}</div><div class="rank-hero-desc">${escapeHtml(makeDesc(hero))}</div><div class="rank-hero-meta"><span>Views: ${hero.views}</span></div></div></a>`;
       }
-
       mids.forEach((item, idx) => {
         const rank = idx + 2;
         const title = makeTitle(item);
-        top3El.innerHTML += `
-          <a class="rank-mid" href="${makeLink(item)}" data-rank-item="1" data-key="${item.key}" data-title="${escapeHtml(title)}" data-rank="${rank}" data-views="${item.views}">
-            <div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div>
-            <div class="rank-mid-thumb" style="background-image:url('${makeThumb(item)}');"></div>
-            <div class="ranking-content">
-              <div class="ranking-service">${escapeHtml(makeLabel(item))}</div>
-              <div class="rank-mid-title">${escapeHtml(title)}</div>
-              <div class="rank-mid-desc">${escapeHtml(makeDesc(item))}</div>
-              <div class="rank-mid-meta"><span>Views: ${item.views}</span></div>
-            </div>
-          </a>
-        `;
+        top3El.innerHTML += `<a class="rank-mid" href="${makeLink(item)}" data-rank-item="1" data-key="${item.key}" data-title="${escapeHtml(title)}" data-rank="${rank}" data-views="${item.views}"><div class="rank-badge rank-${rank} rank-badge-medium">${rank}</div><div class="rank-mid-thumb" style="background-image:url('${makeThumb(item)}');"></div><div class="ranking-content"><div class="ranking-service">${escapeHtml(makeLabel(item))}</div><div class="rank-mid-title">${escapeHtml(title)}</div><div class="rank-mid-desc">${escapeHtml(makeDesc(item))}</div><div class="rank-mid-meta"><span>Views: ${item.views}</span></div></div></a>`;
       });
-
       rest.forEach((item, idx) => {
         const rank = idx + 4;
         const title = makeTitle(item);
@@ -743,21 +753,9 @@
         row.dataset.title = title;
         row.dataset.rank = String(rank);
         row.dataset.views = String(item.views);
-        row.innerHTML = `
-          <div class="ranking-row-rank">${rank}</div>
-          <div class="ranking-row-thumb" style="background-image:url('${makeThumb(item)}');"></div>
-          <div class="ranking-row-main">
-            <div class="ranking-row-title">${escapeHtml(title)}</div>
-            <div class="ranking-row-meta">
-              <span class="ranking-row-service">${escapeHtml(makeService(item) || "")}</span>
-              <span>${escapeHtml(makeCategory(item) || "")}</span>
-              <span>Views: ${item.views}</span>
-            </div>
-          </div>
-        `;
+        row.innerHTML = `<div class="ranking-row-rank">${rank}</div><div class="ranking-row-thumb" style="background-image:url('${makeThumb(item)}');"></div><div class="ranking-row-main"><div class="ranking-row-title">${escapeHtml(title)}</div><div class="ranking-row-meta"><span class="ranking-row-service">${escapeHtml(makeService(item) || "")}</span><span>${escapeHtml(makeCategory(item) || "")}</span><span>Views: ${item.views}</span></div></div>`;
         restEl.appendChild(row);
       });
-
       [top3El, restEl].forEach((el) => { el.classList.remove("ranking-animate"); void el.offsetWidth; el.classList.add("ranking-animate"); });
     }
 
@@ -783,7 +781,6 @@
     periodBtns.forEach((btn) => {
       btn.addEventListener("click", () => { periodBtns.forEach((b) => b.classList.remove("active")); btn.classList.add("active"); load(btn.dataset.period || "all"); });
     });
-
     bindRankingGAOnce();
     const active = document.querySelector(".period-btn.active")?.dataset?.period || "all";
     load(active);
@@ -815,7 +812,7 @@
     if (page === "home") {
       renderHero();
       renderLatest(9);
-      initCarousel(6);  // 記事6本をカルーセルに表示
+      initCarousel(6);
     }
     if (page === "all") initAllPage();
     if (page === "ranking" && !window.__USE_EXTERNAL_RANKING__) initRankingPage();
