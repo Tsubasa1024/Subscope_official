@@ -827,11 +827,15 @@
           try {
             const u = Auth.getCurrentUser();
             if (window.FirebaseComments) {
-              await window.FirebaseComments.addComment(articleId, {
+              const newComment = await window.FirebaseComments.addComment(articleId, {
                 userId: u.id, userName: u.name,
                 text: text, createdAt: new Date().toISOString()
               });
-              // Firebase リスナーが自動的に renderComments を呼ぶ
+              // リスナーが反映される前に楽観的追加（ルール設定ミスでリスナーが無音失敗しても表示される）
+              if (!_allComments.find(function(c) { return c.id === newComment.id; })) {
+                _allComments.push(newComment);
+                renderComments();
+              }
             } else {
               if (typeof UserFeatures !== "undefined") UserFeatures.addComment(articleId, text);
               _allComments = typeof UserFeatures !== "undefined" ? UserFeatures.getComments(articleId) : [];
