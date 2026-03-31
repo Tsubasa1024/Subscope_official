@@ -162,18 +162,6 @@
     .price-summary-box { background: #f5f5f7; border-radius: 24px; padding: 24px 28px; font-size: 0.95rem; line-height: 1.8; color: #1d1d1f; white-space: pre-line; }
 
     /* ===== Action Bar ===== */
-    .action-login-nudge {
-      display: flex; align-items: center; gap: 10px; padding: 12px 18px;
-      border-radius: 16px; background: #f5f5f7; font-size: 0.85rem; color: #86868b; margin-bottom: 10px;
-    }
-    .action-login-nudge svg { flex-shrink: 0; }
-    .action-login-nudge-btn {
-      margin-left: auto; padding: 7px 18px; border-radius: 999px; border: none;
-      background: #1d1d1f; color: #fff; font-size: 0.82rem; font-weight: 600;
-      cursor: pointer; font-family: var(--font-family); white-space: nowrap; transition: opacity 0.2s;
-    }
-    .action-login-nudge-btn:hover { opacity: 0.75; }
-
     .action-bar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 0; border-top: 1px solid rgba(0,0,0,0.06);
@@ -573,15 +561,6 @@
         <div class="price-summary-box" id="price-summary-box"></div>
       </section>
 
-      <div class="action-login-nudge" id="action-nudge" style="display:none;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-        いいねや保存はログインが必要です
-        <button class="action-login-nudge-btn" onclick="openLoginModal()">ログイン</button>
-      </div>
-
       <div class="action-bar" id="action-bar">
         <div class="action-left">
           <button class="action-btn" id="like-btn" onclick="handleLike()">
@@ -721,8 +700,6 @@
         if (animSave) _animateCount(fabSaveCount);
       }
 
-      const nudge = document.getElementById("action-nudge");
-      if (nudge) nudge.style.display = ACTION_IS_LOGGED_IN ? "none" : "flex";
     }
 
     function _getArticleId() {
@@ -874,24 +851,43 @@
       window.handleCommentLike = async function (el, aId, cId) {
         if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
         if (!window.FirebaseComments) return;
-        // アニメーション
-        el.classList.remove("like-animate");
-        void el.offsetWidth;
-        el.classList.add("like-animate");
-        setTimeout(function() { el.classList.remove("like-animate"); }, 400);
 
-        const map    = getCommentLikesMap();
-        const key    = aId + "::" + cId;
+        const map      = getCommentLikesMap();
+        const key      = aId + "::" + cId;
         const wasLiked = !!map[key];
-        if (wasLiked) {
-          delete map[key];
-          await window.FirebaseComments.unlikeComment(aId, cId);
-        } else {
-          map[key] = true;
-          await window.FirebaseComments.likeComment(aId, cId);
+
+        // 楽観的更新：_allComments を即座に書き換えてから再描画
+        const target = _allComments.find(function(c) { return c.id === cId; });
+        if (target) {
+          target.likes = Math.max(0, (target.likes || 0) + (wasLiked ? -1 : 1));
         }
+        if (wasLiked) { delete map[key]; } else { map[key] = true; }
         saveCommentLikesMap(map);
-        // Firebase リスナーが自動的に renderComments を呼ぶ
+        renderComments();
+
+        // 再描画後の新しいボタンにアニメーションを適用
+        const newBtn = listEl.querySelector('.comment-item[data-cid="' + cId + '"] .comment-like-btn');
+        if (newBtn) {
+          newBtn.classList.remove("like-animate");
+          void newBtn.offsetWidth;
+          newBtn.classList.add("like-animate");
+          setTimeout(function() { newBtn.classList.remove("like-animate"); }, 400);
+        }
+
+        // Firebase に反映（バックグラウンド）
+        try {
+          if (wasLiked) {
+            await window.FirebaseComments.unlikeComment(aId, cId);
+          } else {
+            await window.FirebaseComments.likeComment(aId, cId);
+          }
+        } catch(e) {
+          // 失敗時はロールバック
+          if (target) target.likes = Math.max(0, (target.likes || 0) + (wasLiked ? 1 : -1));
+          if (wasLiked) { map[key] = true; } else { delete map[key]; }
+          saveCommentLikesMap(map);
+          renderComments();
+        }
       };
 
       // 削除ハンドラ（グローバル）
@@ -959,10 +955,14 @@
           }
         });
       } else {
+        // 未ログイン：フォームは見せてクリックでログインへ（YouTube方式）
         formArea.innerHTML = `
-          <div class="comment-login-prompt">
-            <p>コメントするにはログインが必要です</p>
-            <a class="comment-login-link" href="/login.html?next=${encodeURIComponent(location.href)}">ログインしてコメントする</a>
+          <div class="comment-form-wrap">
+            <div class="comment-avatar" style="background:#e5e5e7;color:#86868b;">?</div>
+            <div class="comment-input-area">
+              <textarea class="comment-textarea" placeholder="コメントを追加..." readonly
+                onclick="openLoginModal()" style="cursor:pointer;"></textarea>
+            </div>
           </div>`;
       }
 
