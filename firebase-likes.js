@@ -25,13 +25,13 @@
 
   // ▼ Firebase Console > プロジェクト設定 > マイアプリ からコピーして書き換えてください
   var firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL:       "https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId:         "YOUR_PROJECT_ID",
-    storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
+    apiKey:            "AIzaSyC1lUuoJbdmS7mOR5HJXtwHDvc2H2d_CQI",
+    authDomain:        "subscope-official.firebaseapp.com",
+    databaseURL:       "https://subscope-official-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:         "subscope-official",
+    storageBucket:     "subscope-official.firebasestorage.app",
+    messagingSenderId: "23013449946",
+    appId:             "1:23013449946:web:61638133bee9a203cac5e3"
   };
 
   // Firebase がロードされているか確認
