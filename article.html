@@ -187,6 +187,7 @@
       color: var(--color-text-main); cursor: pointer;
       transition: background 0.2s ease, box-shadow 0.2s ease;
       -webkit-tap-highlight-color: transparent; user-select: none;
+      position: relative; overflow: visible;
     }
     .action-btn:hover { background: #f5f5f7; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .action-btn svg { width: 15px; height: 15px; flex-shrink: 0; pointer-events: none; }
@@ -194,6 +195,72 @@
     .action-btn.is-liked { background: #fff0f0; border-color: rgba(220,60,60,0.2); color: #c0392b; }
     .action-btn.is-liked .btn-count { color: #c0392b; opacity: 0.7; }
     .action-btn.is-saved { background: #f0faf5; border-color: rgba(30,160,100,0.2); color: #0f6e56; }
+
+    /* ===== ボタンアニメーション ===== */
+    @keyframes heart-pop {
+      0%   { transform: scale(1); }
+      20%  { transform: scale(1.45) rotate(-8deg); }
+      45%  { transform: scale(0.82); }
+      70%  { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
+    @keyframes bookmark-pop {
+      0%   { transform: scale(1) translateY(0); }
+      25%  { transform: scale(0.78) translateY(3px); }
+      55%  { transform: scale(1.25) translateY(-5px); }
+      80%  { transform: scale(0.96) translateY(0); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    @keyframes burst-ring {
+      0%   { transform: translate(-50%,-50%) scale(0.2); opacity: 0.8; }
+      100% { transform: translate(-50%,-50%) scale(2.8); opacity: 0; }
+    }
+    @keyframes burst-ring-green {
+      0%   { transform: translate(-50%,-50%) scale(0.2); opacity: 0.8; }
+      100% { transform: translate(-50%,-50%) scale(2.8); opacity: 0; }
+    }
+    @keyframes count-pop {
+      0%   { opacity: 0; transform: translateY(5px) scale(0.6); }
+      60%  { opacity: 1; transform: translateY(-2px) scale(1.15); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes comment-heart-pop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.7) rotate(-6deg); }
+      65%  { transform: scale(0.82); }
+      100% { transform: scale(1); }
+    }
+
+    /* いいね – SVGポップ */
+    .action-btn.like-animate svg {
+      animation: heart-pop 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    /* いいね – バーストリング */
+    .action-btn.like-animate::after {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid rgba(192,57,43,0.45);
+      animation: burst-ring 0.45s ease-out forwards;
+      pointer-events: none; z-index: 0;
+    }
+    /* 保存 – SVGポップ */
+    .action-btn.save-animate svg {
+      animation: bookmark-pop 0.4s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+    }
+    /* 保存 – バーストリング（緑） */
+    .action-btn.save-animate::after {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid rgba(15,110,86,0.4);
+      animation: burst-ring-green 0.45s ease-out forwards;
+      pointer-events: none; z-index: 0;
+    }
+    /* カウント数字 */
+    .count-anim { display: inline-block; animation: count-pop 0.28s cubic-bezier(0.34,1.56,0.64,1) both; }
+    /* コメントいいね */
+    .comment-like-btn.like-animate svg {
+      animation: comment-heart-pop 0.32s cubic-bezier(0.36,0.07,0.19,0.97) both;
+    }
 
     .floating-action-bar {
       display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -611,13 +678,16 @@
 
     let _liked = false, _saved = false, _likeCount = 0, _saveCount = 0;
 
-    function syncActionUI() {
+    function syncActionUI(animLike, animSave) {
       const likeBtn = document.getElementById("like-btn");
       const likeIcon = likeBtn?.querySelector("svg path");
       if (likeBtn) likeBtn.classList.toggle("is-liked", _liked);
       if (likeIcon) { likeIcon.setAttribute("fill", _liked ? "#c0392b" : "none"); likeIcon.setAttribute("stroke", _liked ? "#c0392b" : "currentColor"); }
       const likeCountEl = document.getElementById("like-count");
-      if (likeCountEl) likeCountEl.textContent = _likeCount > 0 ? _likeCount : "";
+      if (likeCountEl) {
+        likeCountEl.textContent = _likeCount > 0 ? _likeCount : "";
+        if (animLike) _animateCount(likeCountEl);
+      }
 
       const saveBtn = document.getElementById("save-btn");
       const saveIcon = saveBtn?.querySelector("svg path");
@@ -626,21 +696,30 @@
       const saveLabel = document.getElementById("save-label");
       if (saveLabel) saveLabel.textContent = _saved ? "保存済み" : "保存";
       const saveCountEl = document.getElementById("save-count");
-      if (saveCountEl) saveCountEl.textContent = _saveCount > 0 ? _saveCount : "";
+      if (saveCountEl) {
+        saveCountEl.textContent = _saveCount > 0 ? _saveCount : "";
+        if (animSave) _animateCount(saveCountEl);
+      }
 
       const fabLike = document.getElementById("fab-like-btn");
       const fabLikeIcon = fabLike?.querySelector("svg path");
       if (fabLike) fabLike.classList.toggle("is-liked", _liked);
       if (fabLikeIcon) { fabLikeIcon.setAttribute("fill", _liked ? "#c0392b" : "none"); fabLikeIcon.setAttribute("stroke", _liked ? "#c0392b" : "currentColor"); }
       const fabCount = document.getElementById("fab-like-count");
-      if (fabCount) fabCount.textContent = _likeCount > 0 ? _likeCount : "";
+      if (fabCount) {
+        fabCount.textContent = _likeCount > 0 ? _likeCount : "";
+        if (animLike) _animateCount(fabCount);
+      }
 
       const fabSave = document.getElementById("fab-save-btn");
       const fabSaveIcon = fabSave?.querySelector("svg path");
       if (fabSave) fabSave.classList.toggle("is-saved", _saved);
       if (fabSaveIcon) { fabSaveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none"); fabSaveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor"); }
       const fabSaveCount = document.getElementById("fab-save-count");
-      if (fabSaveCount) fabSaveCount.textContent = _saveCount > 0 ? _saveCount : "";
+      if (fabSaveCount) {
+        fabSaveCount.textContent = _saveCount > 0 ? _saveCount : "";
+        if (animSave) _animateCount(fabSaveCount);
+      }
 
       const nudge = document.getElementById("action-nudge");
       if (nudge) nudge.style.display = ACTION_IS_LOGGED_IN ? "none" : "flex";
@@ -650,15 +729,34 @@
       return (new URLSearchParams(location.search).get("id") || "").split(/[?&]/)[0];
     }
 
+    function _triggerBtnAnim(ids, cls) {
+      ids.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove(cls);
+        void el.offsetWidth; // reflow でアニメーション再起動
+        el.classList.add(cls);
+        setTimeout(function() { el.classList.remove(cls); }, 500);
+      });
+    }
+
+    function _animateCount(el) {
+      if (!el) return;
+      el.classList.remove("count-anim");
+      void el.offsetWidth;
+      el.classList.add("count-anim");
+    }
+
     async function handleLike() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
       const id = _getArticleId();
       if (!id || typeof UserFeatures === "undefined") return;
+      _triggerBtnAnim(["like-btn", "fab-like-btn"], "like-animate");
       try {
         const result = await UserFeatures.toggleLike(id);
         _liked = result.liked;
         _likeCount = result.count;
-        syncActionUI();
+        syncActionUI(true);
       } catch(e) { console.warn(e); }
     }
 
@@ -671,11 +769,12 @@
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
       const id = _getArticleId();
       if (!id || typeof UserFeatures === "undefined") return;
+      _triggerBtnAnim(["save-btn", "fab-save-btn"], "save-animate");
       try {
         const snapshot = window._currentArticleSnapshot || { id };
         const result = await UserFeatures.toggleSave(id, snapshot);
         _saved = result.saved;
-        syncActionUI();
+        syncActionUI(false, true);
       } catch(e) { console.warn(e); }
     }
 
@@ -747,7 +846,7 @@
                 </div>
                 <p class="comment-text">${escH(c.text)}</p>
                 <div class="comment-actions">
-                  <button class="comment-like-btn ${liked ? "is-liked" : ""}" onclick="handleCommentLike('${escH(articleId)}','${escH(c.id)}')">
+                  <button class="comment-like-btn ${liked ? "is-liked" : ""}" onclick="handleCommentLike(this,'${escH(articleId)}','${escH(c.id)}')">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="${liked ? "#c0392b" : "none"}" stroke="${liked ? "#c0392b" : "currentColor"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                     </svg>
@@ -772,9 +871,15 @@
       }
 
       // コメントいいねハンドラ（グローバル）
-      window.handleCommentLike = async function (aId, cId) {
+      window.handleCommentLike = async function (el, aId, cId) {
         if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
         if (!window.FirebaseComments) return;
+        // アニメーション
+        el.classList.remove("like-animate");
+        void el.offsetWidth;
+        el.classList.add("like-animate");
+        setTimeout(function() { el.classList.remove("like-animate"); }, 400);
+
         const map    = getCommentLikesMap();
         const key    = aId + "::" + cId;
         const wasLiked = !!map[key];
