@@ -400,6 +400,22 @@
     .comment-text {
       font-size: 0.9rem; line-height: 1.7; color: #1d1d1f; word-break: break-word;
     }
+    .comment-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .comment-like-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: none; border: none; cursor: pointer; padding: 3px 8px;
+      border-radius: 20px; font-size: 0.8rem; color: #86868b;
+      transition: background 0.15s, color 0.15s; font-family: var(--font-family);
+    }
+    .comment-like-btn:hover { background: #fff0f0; color: #c0392b; }
+    .comment-like-btn.is-liked { color: #c0392b; }
+    .comments-show-more-btn {
+      display: block; width: 100%; margin-top: 12px; padding: 12px;
+      background: none; border: 1px solid var(--color-border); border-radius: 12px;
+      font-size: 0.9rem; color: #86868b; cursor: pointer; font-family: var(--font-family);
+      transition: background 0.2s, color 0.2s;
+    }
+    .comments-show-more-btn:hover { background: #f5f5f7; color: #1d1d1f; }
   </style>
 </head>
 
@@ -513,6 +529,7 @@
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
             <span id="save-label">保存</span>
+            <span class="btn-count" id="save-count"></span>
           </button>
         </div>
         <div>
@@ -556,6 +573,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
       </svg>
+      <span id="fab-save-count"></span>
     </button>
     <div class="fab-divider"></div>
     <button class="action-btn" onclick="handleShare()">
@@ -591,7 +609,7 @@
     // auth.js は defer で読み込まれるため、DOMContentLoaded 内で参照する
     let ACTION_IS_LOGGED_IN = false;
 
-    let _liked = false, _saved = false, _likeCount = 0;
+    let _liked = false, _saved = false, _likeCount = 0, _saveCount = 0;
 
     function syncActionUI() {
       const likeBtn = document.getElementById("like-btn");
@@ -607,6 +625,8 @@
       if (saveIcon) { saveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none"); saveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor"); }
       const saveLabel = document.getElementById("save-label");
       if (saveLabel) saveLabel.textContent = _saved ? "保存済み" : "保存";
+      const saveCountEl = document.getElementById("save-count");
+      if (saveCountEl) saveCountEl.textContent = _saveCount > 0 ? _saveCount : "";
 
       const fabLike = document.getElementById("fab-like-btn");
       const fabLikeIcon = fabLike?.querySelector("svg path");
@@ -619,6 +639,8 @@
       const fabSaveIcon = fabSave?.querySelector("svg path");
       if (fabSave) fabSave.classList.toggle("is-saved", _saved);
       if (fabSaveIcon) { fabSaveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none"); fabSaveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor"); }
+      const fabSaveCount = document.getElementById("fab-save-count");
+      if (fabSaveCount) fabSaveCount.textContent = _saveCount > 0 ? _saveCount : "";
 
       const nudge = document.getElementById("action-nudge");
       if (nudge) nudge.style.display = ACTION_IS_LOGGED_IN ? "none" : "flex";
@@ -642,14 +664,16 @@
 
     // リアルタイムリスナーの解除関数
     let _unsubscribeLikeCount = null;
+    let _unsubscribeSaveCount = null;
+    let _unsubscribeComments = null;
 
-    function handleSave() {
+    async function handleSave() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
       const id = _getArticleId();
       if (!id || typeof UserFeatures === "undefined") return;
       try {
         const snapshot = window._currentArticleSnapshot || { id };
-        const result = UserFeatures.toggleSave(id, snapshot);
+        const result = await UserFeatures.toggleSave(id, snapshot);
         _saved = result.saved;
         syncActionUI();
       } catch(e) { console.warn(e); }
@@ -665,51 +689,123 @@
     }
 
     function initCommentSection(articleId) {
-      const formArea   = document.getElementById("comment-form-area");
-      const listEl     = document.getElementById("comments-list");
-      const badgeEl    = document.getElementById("comment-count-badge");
+      const formArea = document.getElementById("comment-form-area");
+      const listEl   = document.getElementById("comments-list");
+      const badgeEl  = document.getElementById("comment-count-badge");
       if (!formArea || !listEl) return;
 
-      function renderComments() {
-        const comments = typeof UserFeatures !== "undefined" ? UserFeatures.getComments(articleId) : [];
-        if (badgeEl) badgeEl.textContent = comments.length;
+      const COMMENTS_PER_PAGE = 5;
+      let _allComments = [];
+      let _shownCount  = COMMENTS_PER_PAGE;
 
-        if (comments.length === 0) {
+      // コメントいいね：ユーザーごとの状態を localStorage で管理
+      function getCommentLikesKey() {
+        const u = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
+        return u ? "ss_clikes_" + u.id : null;
+      }
+      function getCommentLikesMap() {
+        const k = getCommentLikesKey();
+        if (!k) return {};
+        try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch { return {}; }
+      }
+      function saveCommentLikesMap(d) {
+        const k = getCommentLikesKey();
+        if (k) localStorage.setItem(k, JSON.stringify(d));
+      }
+      function isCommentLiked(cId) {
+        return !!getCommentLikesMap()[articleId + "::" + cId];
+      }
+
+      function renderComments() {
+        // いいね数の多い順にソート
+        const sorted = [..._allComments].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        const shown  = sorted.slice(0, _shownCount);
+        if (badgeEl) badgeEl.textContent = sorted.length;
+
+        if (sorted.length === 0) {
           listEl.innerHTML = `<p class="comment-empty">まだコメントはありません。最初のコメントを投稿しましょう！</p>`;
+          const btn = document.getElementById("comments-show-more");
+          if (btn) btn.remove();
           return;
         }
 
         const currentUser = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
-        listEl.innerHTML = comments.map(c => {
+        listEl.innerHTML = shown.map(c => {
           const initial  = (c.userName || "?")[0].toUpperCase();
-          const dateStr  = new Date(c.createdAt).toLocaleDateString("ja-JP", { year:"numeric", month:"short", day:"numeric" });
+          const dateStr  = new Date(c.createdAt).toLocaleDateString("ja-JP", { year: "numeric", month: "short", day: "numeric" });
           const isOwn    = currentUser && currentUser.id === c.userId;
+          const liked    = isCommentLiked(c.id);
+          const likeCnt  = c.likes || 0;
           return `
-            <div class="comment-item">
+            <div class="comment-item" data-cid="${escH(c.id)}">
               <div class="comment-avatar">${escH(initial)}</div>
               <div class="comment-body">
                 <div class="comment-meta">
                   <span class="comment-author">${escH(c.userName)}</span>
                   <span class="comment-date">${dateStr}</span>
-                  ${isOwn ? `<button class="comment-delete-btn" data-cid="${escH(c.id)}" onclick="handleDeleteComment(this,'${escH(articleId)}','${escH(c.id)}')">削除</button>` : ""}
+                  ${isOwn ? `<button class="comment-delete-btn" onclick="handleDeleteComment('${escH(articleId)}','${escH(c.id)}')">削除</button>` : ""}
                 </div>
                 <p class="comment-text">${escH(c.text)}</p>
+                <div class="comment-actions">
+                  <button class="comment-like-btn ${liked ? "is-liked" : ""}" onclick="handleCommentLike('${escH(articleId)}','${escH(c.id)}')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="${liked ? "#c0392b" : "none"}" stroke="${liked ? "#c0392b" : "currentColor"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    ${likeCnt > 0 ? `<span>${likeCnt}</span>` : ""}
+                  </button>
+                </div>
               </div>
             </div>`;
         }).join("");
+
+        // 「さらに表示」ボタン
+        const existing = document.getElementById("comments-show-more");
+        if (existing) existing.remove();
+        if (sorted.length > _shownCount) {
+          const moreBtn = document.createElement("button");
+          moreBtn.id = "comments-show-more";
+          moreBtn.className = "comments-show-more-btn";
+          moreBtn.textContent = "さらに表示（残り" + (sorted.length - _shownCount) + "件）";
+          moreBtn.onclick = function () { _shownCount += COMMENTS_PER_PAGE; renderComments(); };
+          listEl.after(moreBtn);
+        }
       }
 
-      window.handleDeleteComment = function(btn, aId, cId) {
+      // コメントいいねハンドラ（グローバル）
+      window.handleCommentLike = async function (aId, cId) {
+        if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
+        if (!window.FirebaseComments) return;
+        const map    = getCommentLikesMap();
+        const key    = aId + "::" + cId;
+        const wasLiked = !!map[key];
+        if (wasLiked) {
+          delete map[key];
+          await window.FirebaseComments.unlikeComment(aId, cId);
+        } else {
+          map[key] = true;
+          await window.FirebaseComments.likeComment(aId, cId);
+        }
+        saveCommentLikesMap(map);
+        // Firebase リスナーが自動的に renderComments を呼ぶ
+      };
+
+      // 削除ハンドラ（グローバル）
+      window.handleDeleteComment = async function (aId, cId) {
         if (!confirm("コメントを削除しますか？")) return;
         try {
-          UserFeatures.deleteComment(aId, cId);
-          renderComments();
+          if (window.FirebaseComments) {
+            await window.FirebaseComments.deleteComment(aId, cId);
+          } else {
+            if (typeof UserFeatures !== "undefined") UserFeatures.deleteComment(aId, cId);
+            _allComments = typeof UserFeatures !== "undefined" ? UserFeatures.getComments(aId) : [];
+            renderComments();
+          }
         } catch(e) { alert(e.message); }
       };
 
       // フォームの描画
       if (ACTION_IS_LOGGED_IN && typeof Auth !== "undefined") {
-        const user = Auth.getCurrentUser();
+        const user    = Auth.getCurrentUser();
         const initial = user ? user.name[0].toUpperCase() : "?";
         formArea.innerHTML = `
           <div class="comment-form-wrap">
@@ -722,15 +818,26 @@
             </div>
           </div>`;
 
-        document.getElementById("comment-submit-btn").addEventListener("click", () => {
+        document.getElementById("comment-submit-btn").addEventListener("click", async () => {
           const input = document.getElementById("comment-input");
-          const text  = input ? input.value : "";
+          const text  = (input ? input.value : "").trim();
           const btn   = document.getElementById("comment-submit-btn");
+          if (!text) return;
           if (btn) btn.disabled = true;
           try {
-            UserFeatures.addComment(articleId, text);
+            const u = Auth.getCurrentUser();
+            if (window.FirebaseComments) {
+              await window.FirebaseComments.addComment(articleId, {
+                userId: u.id, userName: u.name,
+                text: text, createdAt: new Date().toISOString()
+              });
+              // Firebase リスナーが自動的に renderComments を呼ぶ
+            } else {
+              if (typeof UserFeatures !== "undefined") UserFeatures.addComment(articleId, text);
+              _allComments = typeof UserFeatures !== "undefined" ? UserFeatures.getComments(articleId) : [];
+              renderComments();
+            }
             if (input) input.value = "";
-            renderComments();
           } catch(e) {
             alert(e.message);
           } finally {
@@ -745,7 +852,18 @@
           </div>`;
       }
 
-      renderComments();
+      // Firebase リアルタイムリスナーでコメント取得
+      if (window.FirebaseComments) {
+        if (_unsubscribeComments) _unsubscribeComments();
+        _unsubscribeComments = window.FirebaseComments.onComments(articleId, function (comments) {
+          _allComments = comments;
+          renderComments();
+        });
+      } else {
+        // localStorage フォールバック
+        _allComments = typeof UserFeatures !== "undefined" ? UserFeatures.getComments(articleId) : [];
+        renderComments();
+      }
     }
 
     function setMeta(p, content, isName=false) {
@@ -945,11 +1063,19 @@
             date: article.date || "", savedAt: new Date().toISOString()
           };
 
-          // Firebase リアルタイムリスナー：他のユーザーのいいねを即時反映
+          // いいね数リアルタイムリスナー
           if (window.FirebaseLikes) {
             if (_unsubscribeLikeCount) _unsubscribeLikeCount();
             _unsubscribeLikeCount = window.FirebaseLikes.onCount(article.id, function (count) {
               _likeCount = count;
+              syncActionUI();
+            });
+          }
+          // 保存数リアルタイムリスナー
+          if (window.FirebaseSaves) {
+            if (_unsubscribeSaveCount) _unsubscribeSaveCount();
+            _unsubscribeSaveCount = window.FirebaseSaves.onCount(article.id, function (count) {
+              _saveCount = count;
               syncActionUI();
             });
           }

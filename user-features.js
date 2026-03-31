@@ -109,9 +109,17 @@
         // 記事の基本情報をスナップショットとして保存
         saves[articleId] = articleSnapshot || { id: articleId, savedAt: new Date().toISOString() };
       }
-
       saveSavesMap(saves);
-      return { saved: !wasSaved };
+
+      // Firebase が使える場合は保存数をアトミック更新
+      if (window.FirebaseSaves) {
+        const op = wasSaved
+          ? window.FirebaseSaves.decrement(articleId)
+          : window.FirebaseSaves.increment(articleId);
+        return op.then(() => ({ saved: !wasSaved }));
+      }
+
+      return Promise.resolve({ saved: !wasSaved });
     },
 
     getSavedArticles() {

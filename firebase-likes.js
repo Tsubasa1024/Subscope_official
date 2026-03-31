@@ -58,48 +58,88 @@
 
   var db = firebase.database(app);
 
+  // ── 共通ユーティリティ ────────────────────────────────────────────
+  function makeCountRef(path) { return db.ref(path + '/count'); }
+
+  function onCount(path, callback) {
+    var ref = makeCountRef(path);
+    var handler = function (snap) { callback(snap.exists() ? (snap.val() || 0) : 0); };
+    ref.on('value', handler);
+    return function () { ref.off('value', handler); };
+  }
+
+  function atomicIncrement(path) {
+    var ref = makeCountRef(path);
+    return ref.transaction(function (c) { return (c || 0) + 1; }).then(function (r) { return r.snapshot.val() || 0; });
+  }
+
+  function atomicDecrement(path) {
+    var ref = makeCountRef(path);
+    return ref.transaction(function (c) { return Math.max(0, (c || 0) - 1); }).then(function (r) { return r.snapshot.val() || 0; });
+  }
+
+  function genId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+  }
+
   window.FirebaseLikes = {
+    onCount:   function (articleId, cb) { return onCount('likes/' + articleId, cb); },
+    increment: function (articleId) { return atomicIncrement('likes/' + articleId); },
+    decrement: function (articleId) { return atomicDecrement('likes/' + articleId); }
+  };
+
+  // ── 保存数 ────────────────────────────────────────────────────────
+  window.FirebaseSaves = {
+    onCount:   function (articleId, cb) { return onCount('saves/' + articleId, cb); },
+    increment: function (articleId) { return atomicIncrement('saves/' + articleId); },
+    decrement: function (articleId) { return atomicDecrement('saves/' + articleId); }
+  };
+
+  // ── コメント ──────────────────────────────────────────────────────
+  window.FirebaseComments = {
     /**
-     * いいね数をリアルタイムで購読する
+     * コメント一覧をリアルタイムで購読する
      * @param {string} articleId
-     * @param {function(number): void} callback - 最新カウントを受け取るコールバック
+     * @param {function(Array): void} callback
      * @returns {function} 購読解除関数
      */
-    onCount: function (articleId, callback) {
-      var ref = db.ref('likes/' + articleId + '/count');
+    onComments: function (articleId, callback) {
+      var ref = db.ref('comments/' + articleId);
       var handler = function (snap) {
-        callback(snap.exists() ? (snap.val() || 0) : 0);
+        var list = [];
+        snap.forEach(function (child) { list.push(child.val()); });
+        callback(list);
       };
       ref.on('value', handler);
       return function () { ref.off('value', handler); };
     },
 
-    /**
-     * いいね数を1増やす（アトミックトランザクション）
-     * @param {string} articleId
-     * @returns {Promise<number>} 更新後のカウント
-     */
-    increment: function (articleId) {
-      var ref = db.ref('likes/' + articleId + '/count');
-      return ref.transaction(function (current) {
-        return (current || 0) + 1;
-      }).then(function (result) {
-        return result.snapshot.val() || 0;
-      });
+    /** コメントを追加する */
+    addComment: function (articleId, comment) {
+      var id   = genId();
+      var data = { id: id, userId: comment.userId, userName: comment.userName,
+                   text: comment.text, createdAt: comment.createdAt, likes: 0 };
+      return db.ref('comments/' + articleId + '/' + id).set(data).then(function () { return data; });
     },
 
-    /**
-     * いいね数を1減らす（アトミックトランザクション・0未満にはならない）
-     * @param {string} articleId
-     * @returns {Promise<number>} 更新後のカウント
-     */
-    decrement: function (articleId) {
-      var ref = db.ref('likes/' + articleId + '/count');
-      return ref.transaction(function (current) {
-        return Math.max(0, (current || 0) - 1);
-      }).then(function (result) {
-        return result.snapshot.val() || 0;
-      });
+    /** コメントを削除する */
+    deleteComment: function (articleId, commentId) {
+      return db.ref('comments/' + articleId + '/' + commentId).remove();
+    },
+
+    /** コメントのいいねを +1（アトミック） */
+    likeComment: function (articleId, commentId) {
+      return db.ref('comments/' + articleId + '/' + commentId + '/likes')
+        .transaction(function (c) { return (c || 0) + 1; })
+        .then(function (r) { return r.snapshot.val() || 0; });
+    },
+
+    /** コメントのいいねを -1（アトミック・0未満にならない） */
+    unlikeComment: function (articleId, commentId) {
+      return db.ref('comments/' + articleId + '/' + commentId + '/likes')
+        .transaction(function (c) { return Math.max(0, (c || 0) - 1); })
+        .then(function (r) { return r.snapshot.val() || 0; });
     }
   };
 
