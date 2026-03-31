@@ -164,7 +164,7 @@
     /* ===== Action Bar ===== */
     .action-bar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 0; margin: 32px 0 48px;
+      padding: 16px 0; margin: 32px 0 24px;
     }
     .action-left { display: flex; gap: 8px; }
     .action-btn {
@@ -375,7 +375,7 @@
   <!-- ===== コメントセクション CSS ===== -->
   <style>
     .comment-section {
-      margin: 48px 0 0;
+      margin: 24px 0 0;
       padding-top: 0;
     }
     .comment-section-title {
@@ -452,7 +452,18 @@
     .comment-delete-btn:hover { background: #fff0f0; color: #c0392b; }
     .comment-text {
       font-size: 0.9rem; line-height: 1.7; color: #1d1d1f; word-break: break-word;
+      white-space: pre-wrap;
     }
+    .comment-text.is-clamped {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4;
+      overflow: hidden; white-space: normal;
+    }
+    .comment-expand-btn {
+      background: none; border: none; padding: 0; margin-top: 4px;
+      font-size: 0.85rem; color: #86868b; cursor: pointer;
+      font-family: var(--font-family); display: block;
+    }
+    .comment-expand-btn:hover { color: #1d1d1f; }
     .comment-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
     .comment-like-btn {
       display: inline-flex; align-items: center; gap: 4px;
@@ -753,6 +764,14 @@
       } catch(e) { console.warn(e); }
     }
 
+    function expandComment(cId) {
+      const textEl = document.getElementById("ct-" + cId);
+      const btnEl  = document.getElementById("ce-" + cId);
+      if (!textEl || !btnEl) return;
+      textEl.classList.remove("is-clamped");
+      btnEl.style.display = "none";
+    }
+
     function openLoginModal() {
       window.location.href = "/login.html?next=" + encodeURIComponent(location.href);
     }
@@ -819,7 +838,8 @@
                   <span class="comment-date">${dateStr}</span>
                   ${isOwn ? `<button class="comment-delete-btn" onclick="handleDeleteComment('${escH(articleId)}','${escH(c.id)}')">削除</button>` : ""}
                 </div>
-                <p class="comment-text">${escH(c.text)}</p>
+                <p class="comment-text is-clamped" id="ct-${escH(c.id)}">${escH(c.text)}</p>
+                <button class="comment-expand-btn" id="ce-${escH(c.id)}" onclick="expandComment('${escH(c.id)}')">続きを読む</button>
                 <div class="comment-actions">
                   <button class="comment-like-btn ${liked ? "is-liked" : ""}" onclick="handleCommentLike(this,'${escH(articleId)}','${escH(c.id)}')">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="${liked ? "#c0392b" : "none"}" stroke="${liked ? "#c0392b" : "currentColor"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -833,6 +853,7 @@
         }).join("");
 
         // 「さらに表示」ボタン
+        // 「さらに表示」ボタン（コメント件数）
         const existing = document.getElementById("comments-show-more");
         if (existing) existing.remove();
         if (sorted.length > _shownCount) {
@@ -843,6 +864,16 @@
           moreBtn.onclick = function () { _shownCount += COMMENTS_PER_PAGE; renderComments(); };
           listEl.after(moreBtn);
         }
+
+        // 4行以下のコメントは「続きを読む」ボタンを非表示
+        shown.forEach(function(c) {
+          const textEl = document.getElementById("ct-" + c.id);
+          const btnEl  = document.getElementById("ce-" + c.id);
+          if (!textEl || !btnEl) return;
+          // クランプ後の高さと実高さを比較
+          const clamped = textEl.scrollHeight > textEl.clientHeight + 2;
+          btnEl.style.display = clamped ? "block" : "none";
+        });
       }
 
       // コメントいいねハンドラ（グローバル）
