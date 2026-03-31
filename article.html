@@ -578,6 +578,11 @@
     </div>
   </footer>
 
+  <!-- Firebase SDK (Realtime Database) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="/firebase-likes.js"></script>
+
   <script src="/auth.js" defer></script>
   <script src="/user-features.js" defer></script>
   <script src="/index.js?v=11" defer></script>
@@ -623,17 +628,20 @@
       return (new URLSearchParams(location.search).get("id") || "").split(/[?&]/)[0];
     }
 
-    function handleLike() {
+    async function handleLike() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
       const id = _getArticleId();
       if (!id || typeof UserFeatures === "undefined") return;
       try {
-        const result = UserFeatures.toggleLike(id);
+        const result = await UserFeatures.toggleLike(id);
         _liked = result.liked;
         _likeCount = result.count;
         syncActionUI();
       } catch(e) { console.warn(e); }
     }
+
+    // リアルタイムリスナーの解除関数
+    let _unsubscribeLikeCount = null;
 
     function handleSave() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
@@ -927,8 +935,8 @@
 
         // いいね・保存の状態を UserFeatures から取得
         if (typeof UserFeatures !== "undefined" && article) {
-          _liked     = UserFeatures.isLiked(article.id);
-          _saved     = UserFeatures.isSaved(article.id);
+          _liked = UserFeatures.isLiked(article.id);
+          _saved = UserFeatures.isSaved(article.id);
           _likeCount = UserFeatures.getLikeCount(article.id);
           // 保存時のスナップショット
           window._currentArticleSnapshot = {
@@ -936,6 +944,15 @@
             image: article.image || "", description: article.description || "",
             date: article.date || "", savedAt: new Date().toISOString()
           };
+
+          // Firebase リアルタイムリスナー：他のユーザーのいいねを即時反映
+          if (window.FirebaseLikes) {
+            if (_unsubscribeLikeCount) _unsubscribeLikeCount();
+            _unsubscribeLikeCount = window.FirebaseLikes.onCount(article.id, function (count) {
+              _likeCount = count;
+              syncActionUI();
+            });
+          }
         }
 
         syncActionUI();

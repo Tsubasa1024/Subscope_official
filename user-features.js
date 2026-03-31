@@ -63,17 +63,34 @@
       const counts = getCountsMap();
       const wasLiked = !!likes[articleId];
 
+      // ユーザーごとのいいね状態を先にlocalStorageへ保存
       if (wasLiked) {
         delete likes[articleId];
-        counts[articleId] = Math.max(0, (counts[articleId] || 1) - 1);
       } else {
         likes[articleId] = true;
-        counts[articleId] = (counts[articleId] || 0) + 1;
+      }
+      saveLikesMap(likes);
+
+      // Firebase が使える場合はサーバー側カウントをアトミック更新（Promise を返す）
+      if (window.FirebaseLikes) {
+        const op = wasLiked
+          ? window.FirebaseLikes.decrement(articleId)
+          : window.FirebaseLikes.increment(articleId);
+        return op.then(function (newCount) {
+          counts[articleId] = newCount;
+          saveCountsMap(counts);
+          return { liked: !wasLiked, count: newCount };
+        });
       }
 
-      saveLikesMap(likes);
+      // Firebase が未設定の場合は従来のlocalStorageのみで動作
+      if (wasLiked) {
+        counts[articleId] = Math.max(0, (counts[articleId] || 1) - 1);
+      } else {
+        counts[articleId] = (counts[articleId] || 0) + 1;
+      }
       saveCountsMap(counts);
-      return { liked: !wasLiked, count: counts[articleId] };
+      return Promise.resolve({ liked: !wasLiked, count: counts[articleId] });
     },
 
     // --- 保存 ---
