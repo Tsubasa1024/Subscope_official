@@ -394,9 +394,9 @@
       color: #fff; display: flex; align-items: center; justify-content: center;
       font-size: 0.85rem; font-weight: 700; flex-shrink: 0; user-select: none;
     }
-    .comment-input-area { flex: 1; }
+    .comment-input-area { flex: 1; position: relative; }
     .comment-textarea {
-      width: 100%; padding: 12px 16px; border: 1px solid rgba(0,0,0,0.12);
+      width: 100%; padding: 12px 52px 12px 16px; border: 1px solid rgba(0,0,0,0.12);
       border-radius: 16px; font-size: 0.9rem; font-family: var(--font-family);
       line-height: 1.6; resize: vertical; min-height: 80px; outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
@@ -406,15 +406,17 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
     .comment-textarea::placeholder { color: #c0c0c5; }
-    .comment-submit-row { margin-top: 8px; text-align: right; }
-    .comment-submit-btn {
-      background: #1d1d1f; color: #fff; border: none;
-      padding: 9px 22px; border-radius: 999px; font-size: 0.875rem;
-      font-weight: 600; cursor: pointer; font-family: var(--font-family);
-      transition: opacity 0.2s; -webkit-tap-highlight-color: transparent;
+    .comment-send-btn {
+      position: absolute; right: 10px; bottom: 10px;
+      width: 32px; height: 32px; border-radius: 50%; border: none; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: none; color: #d0d0d5; cursor: not-allowed;
+      transition: background 0.2s, color 0.2s; -webkit-tap-highlight-color: transparent;
     }
-    .comment-submit-btn:hover { opacity: 0.75; }
-    .comment-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .comment-send-btn:not(:disabled) {
+      color: #1d1d1f; background: #ebebeb; cursor: pointer;
+    }
+    .comment-send-btn:not(:disabled):hover { background: #ddd; }
 
     /* ログインプロンプト */
     .comment-login-prompt {
@@ -452,11 +454,10 @@
     .comment-delete-btn:hover { background: #fff0f0; color: #c0392b; }
     .comment-text {
       font-size: 0.9rem; line-height: 1.7; color: #1d1d1f; word-break: break-word;
-      white-space: pre-wrap;
     }
     .comment-text.is-clamped {
       display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4;
-      overflow: hidden; white-space: normal;
+      overflow: hidden;
     }
     .comment-expand-btn {
       background: none; border: none; padding: 0; margin-top: 4px;
@@ -838,7 +839,7 @@
                   <span class="comment-date">${dateStr}</span>
                   ${isOwn ? `<button class="comment-delete-btn" onclick="handleDeleteComment('${escH(articleId)}','${escH(c.id)}')">削除</button>` : ""}
                 </div>
-                <p class="comment-text is-clamped" id="ct-${escH(c.id)}">${escH(c.text)}</p>
+                <p class="comment-text is-clamped" id="ct-${escH(c.id)}">${escH(c.text).replace(/\n/g,"<br>")}</p>
                 <button class="comment-expand-btn" id="ce-${escH(c.id)}" onclick="expandComment('${escH(c.id)}')">続きを読む</button>
                 <div class="comment-actions">
                   <button class="comment-like-btn ${liked ? "is-liked" : ""}" onclick="handleCommentLike(this,'${escH(articleId)}','${escH(c.id)}')">
@@ -941,12 +942,18 @@
           <div class="comment-form-wrap">
             <div class="comment-avatar">${escH(initial)}</div>
             <div class="comment-input-area">
-              <textarea class="comment-textarea" id="comment-input" placeholder="コメントを入力..." maxlength="1000"></textarea>
-              <div class="comment-submit-row">
-                <button class="comment-submit-btn" id="comment-submit-btn" type="button">投稿する</button>
-              </div>
+              <textarea class="comment-textarea" id="comment-input" placeholder="コメントを追加..." maxlength="1000"></textarea>
+              <button class="comment-send-btn" id="comment-submit-btn" type="button" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              </button>
             </div>
           </div>`;
+
+        document.getElementById("comment-input").addEventListener("input", function() {
+          document.getElementById("comment-submit-btn").disabled = !this.value.trim();
+        });
 
         document.getElementById("comment-submit-btn").addEventListener("click", async () => {
           const input = document.getElementById("comment-input");
@@ -991,6 +998,11 @@
             <div class="comment-input-area">
               <textarea class="comment-textarea" placeholder="コメントを追加..." readonly
                 onclick="openLoginModal()" style="cursor:pointer;"></textarea>
+              <button class="comment-send-btn" type="button" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              </button>
             </div>
           </div>`;
       }
