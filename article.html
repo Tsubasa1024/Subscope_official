@@ -317,6 +317,90 @@
     gtag('js', new Date());
     gtag('config', 'G-9FCHPHJTVE', { send_page_view: false, debug_mode: true });
   </script>
+
+  <!-- ===== コメントセクション CSS ===== -->
+  <style>
+    .comment-section {
+      margin: 48px 0 0;
+      padding-top: 32px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    .comment-section-title {
+      font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+    .comment-count-badge {
+      font-size: 0.8rem; font-weight: 600; background: #f5f5f7;
+      color: #86868b; padding: 2px 10px; border-radius: 999px;
+    }
+
+    /* コメント入力フォーム */
+    .comment-form-wrap { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
+    .comment-avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: #1d1d1f;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; flex-shrink: 0; user-select: none;
+    }
+    .comment-input-area { flex: 1; }
+    .comment-textarea {
+      width: 100%; padding: 12px 16px; border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 16px; font-size: 0.9rem; font-family: var(--font-family);
+      line-height: 1.6; resize: vertical; min-height: 80px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .comment-textarea:focus {
+      border-color: rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .comment-textarea::placeholder { color: #c0c0c5; }
+    .comment-submit-row { margin-top: 8px; text-align: right; }
+    .comment-submit-btn {
+      background: #1d1d1f; color: #fff; border: none;
+      padding: 9px 22px; border-radius: 999px; font-size: 0.875rem;
+      font-weight: 600; cursor: pointer; font-family: var(--font-family);
+      transition: opacity 0.2s; -webkit-tap-highlight-color: transparent;
+    }
+    .comment-submit-btn:hover { opacity: 0.75; }
+    .comment-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ログインプロンプト */
+    .comment-login-prompt {
+      padding: 20px 24px; background: #f5f5f7; border-radius: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .comment-login-prompt p { font-size: 0.9rem; color: #86868b; margin: 0; }
+    .comment-login-link {
+      background: #1d1d1f; color: #fff !important; padding: 9px 20px;
+      border-radius: 999px; font-size: 0.875rem; font-weight: 600;
+      white-space: nowrap; text-decoration: none;
+    }
+    .comment-login-link:hover { opacity: 0.75; }
+
+    /* コメント一覧 */
+    .comments-list { margin-top: 20px; }
+    .comment-empty { font-size: 0.9rem; color: #86868b; padding: 16px 0; }
+    .comment-item {
+      display: flex; gap: 12px; padding: 16px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .comment-item:last-child { border-bottom: none; }
+    .comment-body { flex: 1; min-width: 0; }
+    .comment-meta {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .comment-author { font-size: 0.875rem; font-weight: 600; }
+    .comment-date { font-size: 0.78rem; color: #86868b; }
+    .comment-delete-btn {
+      margin-left: auto; background: none; border: none;
+      color: #86868b; font-size: 0.78rem; cursor: pointer; padding: 2px 8px;
+      border-radius: 6px; transition: background 0.15s, color 0.15s; font-family: var(--font-family);
+    }
+    .comment-delete-btn:hover { background: #fff0f0; color: #c0392b; }
+    .comment-text {
+      font-size: 0.9rem; line-height: 1.7; color: #1d1d1f; word-break: break-word;
+    }
+  </style>
 </head>
 
 <body>
@@ -443,6 +527,16 @@
         </div>
       </div>
 
+      <!-- ===== コメントセクション ===== -->
+      <section class="comment-section" id="comment-section">
+        <h2 class="comment-section-title">
+          コメント
+          <span class="comment-count-badge" id="comment-count-badge">0</span>
+        </h2>
+        <div id="comment-form-area"></div>
+        <div class="comments-list" id="comments-list"></div>
+      </section>
+
       <section class="related-section reveal" id="related-section">
         <h2 class="related-heading">関連する記事</h2>
         <div class="related-grid" id="related-grid"></div>
@@ -484,10 +578,13 @@
     </div>
   </footer>
 
+  <script src="/auth.js" defer></script>
+  <script src="/user-features.js" defer></script>
   <script src="/index.js?v=11" defer></script>
 
   <script>
-    const ACTION_IS_LOGGED_IN = false; // Supabase導入後: true に切り替え
+    // auth.js は defer で読み込まれるため、DOMContentLoaded 内で参照する
+    let ACTION_IS_LOGGED_IN = false;
 
     let _liked = false, _saved = false, _likeCount = 0;
 
@@ -497,7 +594,7 @@
       if (likeBtn) likeBtn.classList.toggle("is-liked", _liked);
       if (likeIcon) { likeIcon.setAttribute("fill", _liked ? "#c0392b" : "none"); likeIcon.setAttribute("stroke", _liked ? "#c0392b" : "currentColor"); }
       const likeCountEl = document.getElementById("like-count");
-      if (likeCountEl) likeCountEl.textContent = _likeCount;
+      if (likeCountEl) likeCountEl.textContent = _likeCount > 0 ? _likeCount : "";
 
       const saveBtn = document.getElementById("save-btn");
       const saveIcon = saveBtn?.querySelector("svg path");
@@ -511,7 +608,7 @@
       if (fabLike) fabLike.classList.toggle("is-liked", _liked);
       if (fabLikeIcon) { fabLikeIcon.setAttribute("fill", _liked ? "#c0392b" : "none"); fabLikeIcon.setAttribute("stroke", _liked ? "#c0392b" : "currentColor"); }
       const fabCount = document.getElementById("fab-like-count");
-      if (fabCount) fabCount.textContent = _likeCount;
+      if (fabCount) fabCount.textContent = _likeCount > 0 ? _likeCount : "";
 
       const fabSave = document.getElementById("fab-save-btn");
       const fabSaveIcon = fabSave?.querySelector("svg path");
@@ -522,15 +619,126 @@
       if (nudge) nudge.style.display = ACTION_IS_LOGGED_IN ? "none" : "flex";
     }
 
+    function _getArticleId() {
+      return (new URLSearchParams(location.search).get("id") || "").split(/[?&]/)[0];
+    }
+
     function handleLike() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
-      _liked = !_liked; _likeCount += _liked ? 1 : -1; syncActionUI();
+      const id = _getArticleId();
+      if (!id || typeof UserFeatures === "undefined") return;
+      try {
+        const result = UserFeatures.toggleLike(id);
+        _liked = result.liked;
+        _likeCount = result.count;
+        syncActionUI();
+      } catch(e) { console.warn(e); }
     }
+
     function handleSave() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
-      _saved = !_saved; syncActionUI();
+      const id = _getArticleId();
+      if (!id || typeof UserFeatures === "undefined") return;
+      try {
+        const snapshot = window._currentArticleSnapshot || { id };
+        const result = UserFeatures.toggleSave(id, snapshot);
+        _saved = result.saved;
+        syncActionUI();
+      } catch(e) { console.warn(e); }
     }
-    function openLoginModal() { alert("ログインが必要です（実装予定）"); }
+
+    function openLoginModal() {
+      window.location.href = "/login.html?next=" + encodeURIComponent(location.href);
+    }
+
+    // ── コメントセクション ────────────────────────────────────────────
+    function escH(s) {
+      return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function initCommentSection(articleId) {
+      const formArea   = document.getElementById("comment-form-area");
+      const listEl     = document.getElementById("comments-list");
+      const badgeEl    = document.getElementById("comment-count-badge");
+      if (!formArea || !listEl) return;
+
+      function renderComments() {
+        const comments = typeof UserFeatures !== "undefined" ? UserFeatures.getComments(articleId) : [];
+        if (badgeEl) badgeEl.textContent = comments.length;
+
+        if (comments.length === 0) {
+          listEl.innerHTML = `<p class="comment-empty">まだコメントはありません。最初のコメントを投稿しましょう！</p>`;
+          return;
+        }
+
+        const currentUser = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
+        listEl.innerHTML = comments.map(c => {
+          const initial  = (c.userName || "?")[0].toUpperCase();
+          const dateStr  = new Date(c.createdAt).toLocaleDateString("ja-JP", { year:"numeric", month:"short", day:"numeric" });
+          const isOwn    = currentUser && currentUser.id === c.userId;
+          return `
+            <div class="comment-item">
+              <div class="comment-avatar">${escH(initial)}</div>
+              <div class="comment-body">
+                <div class="comment-meta">
+                  <span class="comment-author">${escH(c.userName)}</span>
+                  <span class="comment-date">${dateStr}</span>
+                  ${isOwn ? `<button class="comment-delete-btn" data-cid="${escH(c.id)}" onclick="handleDeleteComment(this,'${escH(articleId)}','${escH(c.id)}')">削除</button>` : ""}
+                </div>
+                <p class="comment-text">${escH(c.text)}</p>
+              </div>
+            </div>`;
+        }).join("");
+      }
+
+      window.handleDeleteComment = function(btn, aId, cId) {
+        if (!confirm("コメントを削除しますか？")) return;
+        try {
+          UserFeatures.deleteComment(aId, cId);
+          renderComments();
+        } catch(e) { alert(e.message); }
+      };
+
+      // フォームの描画
+      if (ACTION_IS_LOGGED_IN && typeof Auth !== "undefined") {
+        const user = Auth.getCurrentUser();
+        const initial = user ? user.name[0].toUpperCase() : "?";
+        formArea.innerHTML = `
+          <div class="comment-form-wrap">
+            <div class="comment-avatar">${escH(initial)}</div>
+            <div class="comment-input-area">
+              <textarea class="comment-textarea" id="comment-input" placeholder="コメントを入力..." maxlength="1000"></textarea>
+              <div class="comment-submit-row">
+                <button class="comment-submit-btn" id="comment-submit-btn" type="button">投稿する</button>
+              </div>
+            </div>
+          </div>`;
+
+        document.getElementById("comment-submit-btn").addEventListener("click", () => {
+          const input = document.getElementById("comment-input");
+          const text  = input ? input.value : "";
+          const btn   = document.getElementById("comment-submit-btn");
+          if (btn) btn.disabled = true;
+          try {
+            UserFeatures.addComment(articleId, text);
+            if (input) input.value = "";
+            renderComments();
+          } catch(e) {
+            alert(e.message);
+          } finally {
+            if (btn) btn.disabled = false;
+          }
+        });
+      } else {
+        formArea.innerHTML = `
+          <div class="comment-login-prompt">
+            <p>コメントするにはログインが必要です</p>
+            <a class="comment-login-link" href="/login.html?next=${encodeURIComponent(location.href)}">ログインしてコメントする</a>
+          </div>`;
+      }
+
+      renderComments();
+    }
 
     function setMeta(p, content, isName=false) {
       if (!content) return;
@@ -549,6 +757,9 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
+      // defer スクリプト（auth.js, user-features.js）はここで参照可能
+      ACTION_IS_LOGGED_IN = (typeof Auth !== "undefined") && Auth.isLoggedIn();
+
       try {
         const kv             = document.getElementById("article-kv");
         const titleEl        = document.getElementById("article-title");
@@ -714,7 +925,23 @@
           }).join("");
         }
 
+        // いいね・保存の状態を UserFeatures から取得
+        if (typeof UserFeatures !== "undefined" && article) {
+          _liked     = UserFeatures.isLiked(article.id);
+          _saved     = UserFeatures.isSaved(article.id);
+          _likeCount = UserFeatures.getLikeCount(article.id);
+          // 保存時のスナップショット
+          window._currentArticleSnapshot = {
+            id: article.id, title: article.title || "",
+            image: article.image || "", description: article.description || "",
+            date: article.date || "", savedAt: new Date().toISOString()
+          };
+        }
+
         syncActionUI();
+
+        // コメントセクション初期化
+        if (article) { initCommentSection(article.id); }
 
         const io = new IntersectionObserver((entries) => {
           entries.forEach((e) => { if(e.isIntersecting){e.target.classList.add("active");io.unobserve(e.target);} });

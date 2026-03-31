@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ログイン | SUBSCOPE</title>
+  <meta name="description" content="SUBSCOPEにログインして、記事へのいいね・保存・コメントをお楽しみください。">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+
+  <style>
+    :root {
+      --color-bg: #fff;
+      --color-bg-secondary: #f5f5f7;
+      --color-text-main: #1d1d1f;
+      --color-text-gray: #86868b;
+      --color-border: #d2d2d7;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100vh; }
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg-secondary);
+      color: var(--color-text-main);
+      -webkit-font-smoothing: antialiased;
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== ヘッダー ===== */
+    .site-header {
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 16px 24px; text-align: center;
+    }
+    .site-header a { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; }
+
+    /* ===== メインコンテンツ ===== */
+    .page-main {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .auth-card {
+      width: 100%; max-width: 420px;
+      background: #fff; border-radius: 28px;
+      padding: 40px 36px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.05);
+      animation: cardIn 0.4s var(--ease-out-expo) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-card-logo {
+      text-align: center; margin-bottom: 28px;
+    }
+    .auth-card-logo span {
+      font-size: 1.3rem; font-weight: 700; letter-spacing: -0.03em; color: var(--color-text-main);
+    }
+
+    .auth-card-title {
+      font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em;
+      margin-bottom: 6px; text-align: center;
+    }
+    .auth-card-sub {
+      font-size: 0.875rem; color: var(--color-text-gray);
+      text-align: center; margin-bottom: 28px;
+    }
+
+    /* ===== フォーム ===== */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 0.82rem; font-weight: 600;
+      color: var(--color-text-main); margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; padding: 12px 16px; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 0.95rem;
+      font-family: var(--font-family); outline: none; background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .form-input:focus {
+      border-color: #1d1d1f;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+    }
+    .form-input::placeholder { color: #c0c0c5; }
+
+    .submit-btn {
+      width: 100%; padding: 14px; border-radius: 12px;
+      background: #1d1d1f; color: #fff; border: none;
+      font-size: 0.95rem; font-weight: 600; font-family: var(--font-family);
+      cursor: pointer; margin-top: 8px;
+      transition: opacity 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ===== エラー / 成功 ===== */
+    .alert {
+      padding: 12px 16px; border-radius: 12px; font-size: 0.875rem;
+      margin-bottom: 16px; display: none;
+    }
+    .alert-error { background: #fff0f0; color: #c0392b; border: 1px solid rgba(192,57,43,0.15); }
+    .alert-success { background: #f0faf5; color: #0f6e56; border: 1px solid rgba(15,110,86,0.15); }
+    .alert.show { display: block; }
+
+    /* ===== リンク ===== */
+    .auth-links { margin-top: 24px; text-align: center; }
+    .auth-links p { font-size: 0.875rem; color: var(--color-text-gray); }
+    .auth-links a {
+      color: var(--color-text-main); font-weight: 600;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .auth-links a:hover { opacity: 0.7; }
+
+    /* ===== フッター ===== */
+    .site-footer {
+      padding: 24px; text-align: center;
+      font-size: 0.8rem; color: var(--color-text-gray);
+    }
+
+    /* ===== モバイル ===== */
+    @media (max-width: 480px) {
+      .auth-card { padding: 32px 24px; border-radius: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/index.html">SUBSCOPE</a>
+  </header>
+
+  <main class="page-main">
+    <div class="auth-card">
+      <div class="auth-card-logo">
+        <span>SUBSCOPE</span>
+      </div>
+
+      <h1 class="auth-card-title">ログイン</h1>
+      <p class="auth-card-sub">アカウントにログインしてください</p>
+
+      <div class="alert alert-error" id="errorAlert"></div>
+      <div class="alert alert-success" id="successAlert"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="emailInput">メールアドレス</label>
+          <input
+            class="form-input"
+            type="email"
+            id="emailInput"
+            name="email"
+            placeholder="example@mail.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="passwordInput">パスワード</label>
+          <input
+            class="form-input"
+            type="password"
+            id="passwordInput"
+            name="password"
+            placeholder="パスワードを入力"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button class="submit-btn" type="submit" id="submitBtn">ログイン</button>
+      </form>
+
+      <div class="auth-links">
+        <p>アカウントをお持ちでない方は <a href="/register.html">会員登録</a></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a href="/privacy.html">プライバシーポリシー</a> &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+  </footer>
+
+  <script src="/auth.js"></script>
+  <script>
+    // ログイン済みならリダイレクト
+    (function () {
+      if (Auth.isLoggedIn()) {
+        const next = new URLSearchParams(location.search).get('next');
+        window.location.replace(next || '/index.html');
+      }
+    })();
+
+    const form        = document.getElementById('loginForm');
+    const emailInput  = document.getElementById('emailInput');
+    const passInput   = document.getElementById('passwordInput');
+    const submitBtn   = document.getElementById('submitBtn');
+    const errorAlert  = document.getElementById('errorAlert');
+    const successAlert = document.getElementById('successAlert');
+
+    function showError(msg) {
+      errorAlert.textContent = msg;
+      errorAlert.classList.add('show');
+      successAlert.classList.remove('show');
+    }
+    function clearAlerts() {
+      errorAlert.classList.remove('show');
+      successAlert.classList.remove('show');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAlerts();
+
+      const email    = emailInput.value.trim();
+      const password = passInput.value;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'ログイン中...';
+
+      try {
+        await Auth.login(email, password);
+        successAlert.textContent = 'ログインしました。リダイレクトします...';
+        successAlert.classList.add('show');
+
+        setTimeout(() => {
+          const next = new URLSearchParams(location.search).get('next');
+          window.location.replace(next || '/index.html');
+        }, 600);
+      } catch (err) {
+        showError(err.message || 'ログインに失敗しました');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'ログイン';
+      }
+    });
+  </script>
+
+</body>
+</html>
