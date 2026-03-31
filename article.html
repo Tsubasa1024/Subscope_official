@@ -839,7 +839,12 @@
             }
             if (input) input.value = "";
           } catch(e) {
-            alert(e.message);
+            const msg = (e && e.message) || "";
+            if (msg.includes("PERMISSION_DENIED")) {
+              alert("Firebase のセキュリティルールでコメントの書き込みが拒否されました。\nFirebase Console でルールを更新してください。");
+            } else {
+              alert(msg || "投稿に失敗しました");
+            }
           } finally {
             if (btn) btn.disabled = false;
           }

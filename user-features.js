@@ -80,6 +80,8 @@
           counts[articleId] = newCount;
           saveCountsMap(counts);
           return { liked: !wasLiked, count: newCount };
+        }).catch(function () {
+          return { liked: !wasLiked, count: counts[articleId] };
         });
       }
 
@@ -111,12 +113,12 @@
       }
       saveSavesMap(saves);
 
-      // Firebase が使える場合は保存数をアトミック更新
+      // Firebase が使える場合は保存数をアトミック更新（失敗してもローカル状態は返す）
       if (window.FirebaseSaves) {
         const op = wasSaved
           ? window.FirebaseSaves.decrement(articleId)
           : window.FirebaseSaves.increment(articleId);
-        return op.then(() => ({ saved: !wasSaved }));
+        return op.then(() => ({ saved: !wasSaved })).catch(() => ({ saved: !wasSaved }));
       }
 
       return Promise.resolve({ saved: !wasSaved });
