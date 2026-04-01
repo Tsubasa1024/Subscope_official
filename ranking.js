@@ -45,7 +45,7 @@
     const url = new URL(API_BASE);
     url.searchParams.set("mode", "page");
     url.searchParams.set("days", String(days));
-    url.searchParams.set("limit", "30");
+    url.searchParams.set("limit", "10");
 
     const res = await fetch(url.toString(), { cache: "no-store" });
     if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -147,6 +147,7 @@
         const title = a?.title ? a.title : r.path;
         const service = a?.service ? a.service : "PAGE VIEW";
         const img = a?.image ? a.image : FALLBACK_IMG;
+        const desc = (a?.description || "").trim();
 
         return `
           <article class="ranking-card" onclick="location.href='${r.path}'">
@@ -157,6 +158,7 @@
             <div class="card-body">
               <div class="card-service">${escapeHtml(service)}</div>
               <div class="card-title">${escapeHtml(title)}</div>
+              ${desc ? `<p class="card-desc">${escapeHtml(desc)}</p>` : ""}
             </div>
             <div class="card-footer">
               <span class="card-date">${Number(r.views || 0).toLocaleString()} views</span>
@@ -170,7 +172,7 @@
       .join("");
 
     const others = rows
-      .slice(3)
+      .slice(3, 10)
       .map((r, i) => {
         const rank = i + 4;
         const a = articleMap.get(r.id) || null;
