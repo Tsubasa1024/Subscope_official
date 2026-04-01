@@ -79,6 +79,16 @@
     } catch (e) { /* database SDK 未ロードの場合はスキップ */ }
   }
 
+  // name が未設定の場合のみ書き込む（Google ログイン初回用）
+  function _writeUserToDbIfMissing(uid, data) {
+    try {
+      var database = firebase.database(app);
+      database.ref('users/' + uid + '/name').once('value').then(function(snap) {
+        if (!snap.exists()) database.ref('users/' + uid).update(data);
+      });
+    } catch (e) { /* database SDK 未ロードの場合はスキップ */ }
+  }
+
   // ── 公開 API ─────────────────────────────────────────────────────
   var Auth = {
     /** メール + パスワード 新規登録 */
@@ -111,6 +121,8 @@
       var provider = new firebase.auth.GoogleAuthProvider();
       var cred = await fbAuth.signInWithPopup(provider);
       _currentUser = _makeSession(cred.user);
+      // 初回ログイン時に RTDB へ名前を書き込む（既存エントリは上書きしない）
+      _writeUserToDbIfMissing(cred.user.uid, { name: _currentUser.name });
       return _currentUser;
     },
 
