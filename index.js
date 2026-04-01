@@ -33,6 +33,40 @@
     return await res.json();
   }
 
+  // ============
+  // ランキングAPI helper
+  // ============
+  const RANK_API_BASE = "https://subscope-ranking-319660105312.asia-northeast1.run.app";
+
+  function extractRankId(key) {
+    if (!key) return "";
+    const s = String(key).trim();
+    try {
+      const u = new URL(s.startsWith("http") ? s : location.origin + s);
+      let id = u.searchParams.get("id");
+      if (!id) return "";
+      return String(id).split(/[?&]/)[0];
+    } catch { return ""; }
+  }
+
+  async function fetchRankIds(days, limit) {
+    const url = new URL(RANK_API_BASE);
+    url.searchParams.set("mode", "page");
+    url.searchParams.set("days", String(days));
+    url.searchParams.set("limit", String(limit));
+    const res = await fetch(url.toString(), { cache: "no-store" });
+    if (!res.ok) throw new Error(`rank API ${res.status}`);
+    const data = await res.json();
+    const merged = new Map();
+    (data?.rows || []).forEach((r) => {
+      const id = extractRankId(r?.key);
+      if (!id) return;
+      const v = Number(r?.views || 0);
+      if (v > 0) merged.set(id, (merged.get(id) || 0) + v);
+    });
+    return [...merged.entries()].sort((a, b) => b[1] - a[1]).map(([id]) => id);
+  }
+
   function hideLoader() {
     const el = document.getElementById("loader");
     if (!el) return;
@@ -291,12 +325,15 @@
   // ============
   // Hero（PC）
   // ============
-  function renderHero() {
+  function renderHero(featured) {
     const heroContainer = document.querySelector("#heroMount");
-    const list = getArticles();
-    if (!heroContainer || !list.length) return;
-    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const featured = sorted[0];
+    if (!heroContainer) return;
+    if (!featured) {
+      const list = getArticles();
+      if (!list.length) return;
+      featured = [...list].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    }
+    if (!featured) return;
     heroContainer.innerHTML = `
       <article class="featured-card" onclick="location.href='article.html?id=${encodeURIComponent(featured.id)}'">
         <img class="featured-media" src="${featured.image}" alt="${escapeHtml(featured.title)}">
@@ -315,12 +352,15 @@
   // ============
   // Hero（スマホ：記事カード形式）
   // ============
-  function renderHeroMobile() {
+  function renderHeroMobile(featured) {
     const mobileContainer = document.querySelector("#heroMountMobile");
-    const list = getArticles();
-    if (!mobileContainer || !list.length) return;
-    const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const featured = sorted[0];
+    if (!mobileContainer) return;
+    if (!featured) {
+      const list = getArticles();
+      if (!list.length) return;
+      featured = [...list].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    }
+    if (!featured) return;
     const dateStr = (featured.date || "").replace(/-/g, ".");
     const category = escapeHtml(featured.categoryName || featured.category || "");
     const title = escapeHtml(featured.title);
@@ -429,10 +469,10 @@
 
     if (!track || !viewport) return;
 
-    const list = getArticles();
-    if (!list.length) return;
-
-    const items = list.slice(0, articlesToShow);
+    const items = Array.isArray(articlesToShow)
+      ? articlesToShow
+      : getArticles().slice(0, typeof articlesToShow === "number" ? articlesToShow : 6);
+    if (!items.length) return;
 
     function getVisibleCount() {
       if (window.innerWidth <= 767) return 1;
@@ -865,10 +905,30 @@
     const page = document.body?.dataset?.page || "";
 
     if (page === "home") {
-      renderHero();          // PC・タブレット用
-      renderHeroMobile();    // スマホ用カード
+      let heroArticle = null;
+      let recommendArticles = [];
+
+      try {
+        const articleMap = new Map(getArticles().map((a) => [a.id, a]));
+        const [weekIds, monthIds] = await Promise.all([
+          fetchRankIds(7, 1),
+          fetchRankIds(30, 5),
+        ]);
+        heroArticle = articleMap.get(weekIds[0]) || null;
+        const heroId = heroArticle?.id || null;
+        recommendArticles = monthIds
+          .filter((id) => id !== heroId)
+          .slice(0, 4)
+          .map((id) => articleMap.get(id))
+          .filter(Boolean);
+      } catch (e) {
+        console.warn("[home] ranking API unavailable, using fallback", e);
+      }
+
+      renderHero(heroArticle);
+      renderHeroMobile(heroArticle);
       renderLatest(9);
-      initCarousel(6);
+      initCarousel(recommendArticles.length ? recommendArticles : 6);
       attachLikeCounts();
     }
     if (page === "all") initAllPage();
