@@ -215,8 +215,29 @@
     if (cachedRows && cachedRows.length) {
       draw(period, cachedRows, articleMap);
     } else {
-      top3.innerHTML = "";
-      rest.innerHTML = `<div style="padding:12px 0;color:#86868b;">読み込み中…</div>`;
+      const skCard = () => `
+        <div class="sk-card">
+          <div class="sk-img"></div>
+          <div class="sk-body">
+            <div class="sk sk-l" style="width:38%"></div>
+            <div class="sk sk-l" style="width:92%"></div>
+            <div class="sk sk-l" style="width:72%"></div>
+          </div>
+          <div class="sk-footer"><div class="sk sk-l" style="width:30%"></div></div>
+        </div>`;
+      const skRow = () => `
+        <div class="sk-row">
+          <div class="sk sk-num"></div>
+          <div class="sk-thumb"></div>
+          <div class="sk-info">
+            <div class="sk sk-l" style="width:82%"></div>
+            <div class="sk sk-l" style="width:42%"></div>
+          </div>
+        </div>`;
+      top3.innerHTML = skCard() + skCard() + skCard();
+      rest.innerHTML = `<div style="display:flex;flex-direction:column;gap:1px;background:rgba(0,0,0,0.05);border-radius:20px;overflow:hidden">${skRow()+skRow()+skRow()+skRow()+skRow()+skRow()+skRow()}</div>`;
+      top3.classList.remove("is-switching");
+      rest.classList.remove("is-switching");
     }
 
     try {
