@@ -337,7 +337,10 @@
           <p class="card-desc">${escapeHtml(featured.description)}</p>
         </div>
         <div class="card-footer">
-          <span class="card-date">${dateStr}</span>
+          <div class="card-meta">
+            <span class="card-date">${dateStr}</span>
+            <span class="card-like-count" data-like-id="${featured.id}"></span>
+          </div>
           <div class="card-arrow" aria-hidden="true">
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M2 6h8M6 2l4 4-4 4"/>
@@ -377,7 +380,10 @@
             <p class="card-desc">${escapeHtml(a.description)}</p>
           </div>
           <div class="card-footer">
-            <span class="card-date">${dateStr}</span>
+            <div class="card-meta">
+              <span class="card-date">${dateStr}</span>
+              <span class="card-like-count" data-like-id="${a.id}"></span>
+            </div>
             <div class="card-arrow" aria-hidden="true">
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 6h8M6 2l4 4-4 4"/>
@@ -453,7 +459,10 @@
               <h3 class="card-title">${title}</h3>
             </div>
             <div class="card-footer">
-              <span class="card-date">${dateStr}</span>
+              <div class="card-meta">
+                <span class="card-date">${dateStr}</span>
+                <span class="card-like-count" data-like-id="${a.id}"></span>
+              </div>
               <div class="card-arrow" aria-hidden="true">
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M2 6h8M6 2l4 4-4 4"/>
@@ -610,7 +619,10 @@
               <p class="card-desc">${escapeHtml(a.description || "")}</p>
             </div>
             <div class="card-footer">
-              <span class="card-date">${escapeHtml((a.date || "").replace(/-/g, "."))}</span>
+              <div class="card-meta">
+                <span class="card-date">${escapeHtml((a.date || "").replace(/-/g, "."))}</span>
+                <span class="card-like-count" data-like-id="${a.id}"></span>
+              </div>
               <div class="card-arrow" aria-hidden="true">
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M2 6h8M6 2l4 4-4 4"/>
@@ -633,6 +645,7 @@
           }, i * 60);
         });
       });
+      attachLikeCounts();
     }
 
     function filterByCategory(cat) {
@@ -818,6 +831,27 @@
   // ============
   // Boot
   // ============
+  // いいね数を各カードに反映
+  // ============
+  function attachLikeCounts() {
+    if (typeof firebase === 'undefined') return;
+    try {
+      const db = firebase.database();
+      document.querySelectorAll('.card-like-count[data-like-id]').forEach(function(el) {
+        const id = el.dataset.likeId;
+        if (!id) return;
+        db.ref('likes/' + id + '/count').once('value').then(function(snap) {
+          const count = snap.val() || 0;
+          if (count > 0) {
+            el.textContent = count;
+            el.style.display = 'flex';
+          }
+        }).catch(function() {});
+      });
+    } catch(e) {}
+  }
+
+  // ============
   document.addEventListener("DOMContentLoaded", async () => {
     initMenuCloseBehaviors();
     initMenuOpen();
@@ -835,6 +869,7 @@
       renderHeroMobile();    // スマホ用カード
       renderLatest(9);
       initCarousel(6);
+      attachLikeCounts();
     }
     if (page === "all") initAllPage();
     if (page === "ranking" && !window.__USE_EXTERNAL_RANKING__) initRankingPage();

@@ -736,7 +736,7 @@
     // auth.js は defer で読み込まれるため、DOMContentLoaded 内で参照する
     let ACTION_IS_LOGGED_IN = false;
 
-    let _liked = false, _saved = false, _likeCount = 0, _saveCount = 0;
+    let _liked = false, _saved = false, _likeCount = 0;
 
     function syncActionUI(animLike, animSave) {
       const likeBtn = document.getElementById("like-btn");
@@ -755,12 +755,6 @@
       if (saveIcon) { saveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none"); saveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor"); }
       const saveLabel = document.getElementById("save-label");
       if (saveLabel) saveLabel.textContent = _saved ? "保存済み" : "保存";
-      const saveCountEl = document.getElementById("save-count");
-      if (saveCountEl) {
-        saveCountEl.textContent = _saveCount > 0 ? _saveCount : "";
-        if (animSave) _animateCount(saveCountEl);
-      }
-
       const fabLike = document.getElementById("fab-like-btn");
       const fabLikeIcon = fabLike?.querySelector("svg path");
       if (fabLike) fabLike.classList.toggle("is-liked", _liked);
@@ -775,12 +769,6 @@
       const fabSaveIcon = fabSave?.querySelector("svg path");
       if (fabSave) fabSave.classList.toggle("is-saved", _saved);
       if (fabSaveIcon) { fabSaveIcon.setAttribute("fill", _saved ? "#0f6e56" : "none"); fabSaveIcon.setAttribute("stroke", _saved ? "#0f6e56" : "currentColor"); }
-      const fabSaveCount = document.getElementById("fab-save-count");
-      if (fabSaveCount) {
-        fabSaveCount.textContent = _saveCount > 0 ? _saveCount : "";
-        if (animSave) _animateCount(fabSaveCount);
-      }
-
     }
 
     function _getArticleId() {
@@ -842,7 +830,6 @@
 
     // リアルタイムリスナーの解除関数
     let _unsubscribeLikeCount = null;
-    let _unsubscribeSaveCount = null;
     let _unsubscribeComments = null;
     let _unsubscribeSaveState = null;
     let _unsubscribeLikeState = null;
@@ -1365,14 +1352,6 @@
             if (_unsubscribeLikeCount) _unsubscribeLikeCount();
             _unsubscribeLikeCount = window.FirebaseLikes.onCount(article.id, function (count) {
               _likeCount = count;
-              syncActionUI();
-            });
-          }
-          // 保存数リアルタイムリスナー
-          if (window.FirebaseSaves) {
-            if (_unsubscribeSaveCount) _unsubscribeSaveCount();
-            _unsubscribeSaveCount = window.FirebaseSaves.onCount(article.id, function (count) {
-              _saveCount = count;
               syncActionUI();
             });
           }

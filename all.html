@@ -196,6 +196,9 @@
       .grid-layout { grid-template-columns: 1fr; gap: 14px; }
       .footer-links { gap: 24px; }
     }
+    .card-meta { display: flex; align-items: center; gap: 8px; }
+    .card-like-count { display: none; align-items: center; gap: 3px; font-size: 10px; color: var(--color-text-gray); }
+    .card-like-count::before { content: '♡'; }
   </style>
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-9FCHPHJTVE"></script>
@@ -291,8 +294,10 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="/firebase-likes.js"></script>
   <script src="/auth.js" defer></script>
-  <script src="/index.js?v=14" defer></script>
+  <script src="/index.js?v=15" defer></script>
 
   <script>
     function hideLoader() {
