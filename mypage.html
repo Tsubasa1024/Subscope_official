@@ -602,12 +602,14 @@
           btn.disabled = true;
           try {
             await window.FirebaseUserSaves.unsave(user.id, articleId);
-            if (window.FirebaseSaves) window.FirebaseSaves.decrement(articleId);
-            if (window.UserFeatures) {
-              var saves = JSON.parse(localStorage.getItem('ss_saves_' + user.id) || '{}');
-              delete saves[articleId];
-              localStorage.setItem('ss_saves_' + user.id, JSON.stringify(saves));
-            }
+            // 保存数カウントを直接デクリメント
+            firebase.database().ref('saves/' + articleId + '/count')
+              .transaction(function(c) { return Math.max(0, (c || 0) - 1); });
+            // localStorageからも削除
+            var lsKey = 'ss_saves_' + user.id;
+            var lsSaves = JSON.parse(localStorage.getItem(lsKey) || '{}');
+            delete lsSaves[articleId];
+            localStorage.setItem(lsKey, JSON.stringify(lsSaves));
             // 再読み込み
             loadSaved(user.id);
           } catch(e) {
