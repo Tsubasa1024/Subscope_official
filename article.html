@@ -485,74 +485,72 @@
     /* ===== プレミアムモーダル ===== */
     .premium-modal-overlay {
       position: fixed; inset: 0; z-index: 9999;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.35);
       display: flex; align-items: center; justify-content: center;
       padding: 16px;
       opacity: 0; visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
     }
-    .premium-modal-overlay.open {
-      opacity: 1; visibility: visible;
-    }
+    .premium-modal-overlay.open { opacity: 1; visibility: visible; }
     .premium-modal {
-      background: #1c1c1e; color: #f5f5f7;
-      border-radius: 24px; width: 100%; max-width: 400px;
-      padding: 32px 28px 28px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-      transform: translateY(20px) scale(0.97);
-      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      background: #fff;
+      border-radius: 20px; width: 100%; max-width: 380px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      overflow: hidden;
+      transform: translateY(12px);
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .premium-modal-overlay.open .premium-modal {
-      transform: translateY(0) scale(1);
+    .premium-modal-overlay.open .premium-modal { transform: translateY(0); }
+    .premium-modal-header {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
-    .premium-modal-icon {
-      width: 52px; height: 52px; border-radius: 14px;
-      background: linear-gradient(135deg, #f7c948, #e8a000);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 20px;
+    .premium-modal-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #c8880a; margin-bottom: 8px;
     }
     .premium-modal-title {
-      font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #fff;
+      font-size: 1.05rem; font-weight: 700; color: #1d1d1f; margin-bottom: 4px;
     }
     .premium-modal-sub {
-      font-size: 0.875rem; color: #98989d; margin-bottom: 24px;
+      font-size: 0.85rem; color: #86868b;
     }
     .premium-modal-features {
-      display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px;
+      padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     .premium-modal-feature {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.875rem; color: #1d1d1f;
     }
-    .premium-modal-feature-icon {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: rgba(52, 199, 89, 0.15);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+    .premium-modal-feature::before {
+      content: '✓';
+      font-size: 0.8rem; font-weight: 700;
+      color: #c8880a; flex-shrink: 0;
     }
-    .premium-modal-feature-text {
-      font-size: 0.9rem; font-weight: 500; color: #e5e5ea;
+    .premium-modal-actions {
+      padding: 16px 24px 20px;
+      display: flex; flex-direction: column; gap: 8px;
     }
     .premium-modal-upgrade-btn {
-      display: block; width: 100%; padding: 15px;
-      background: linear-gradient(135deg, #f7c948, #e8a000);
-      color: #1d1d1f; border: none; border-radius: 14px;
-      font-size: 0.95rem; font-weight: 700; font-family: var(--font-family);
-      cursor: pointer; text-align: center; text-decoration: none;
-      transition: opacity 0.2s, transform 0.15s;
-      margin-bottom: 10px;
-    }
-    .premium-modal-upgrade-btn:hover { opacity: 0.88; }
-    .premium-modal-upgrade-btn:active { transform: scale(0.98); }
-    .premium-modal-cancel-btn {
       display: block; width: 100%; padding: 13px;
-      background: transparent; color: #98989d;
-      border: none; border-radius: 14px;
-      font-size: 0.9rem; font-weight: 500; font-family: var(--font-family);
-      cursor: pointer; text-align: center;
-      transition: color 0.2s, background 0.2s;
+      background: #1d1d1f; color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600; font-family: var(--font-family);
+      cursor: pointer; text-align: center; text-decoration: none;
+      transition: opacity 0.2s;
     }
-    .premium-modal-cancel-btn:hover { background: rgba(255,255,255,0.06); color: #e5e5ea; }
+    .premium-modal-upgrade-btn:hover { opacity: 0.8; }
+    .premium-modal-cancel-btn {
+      display: block; width: 100%; padding: 11px;
+      background: none; color: #86868b;
+      border: none; border-radius: 12px;
+      font-size: 0.875rem; font-family: var(--font-family);
+      cursor: pointer; text-align: center;
+      transition: color 0.2s;
+    }
+    .premium-modal-cancel-btn:hover { color: #1d1d1f; }
   </style>
 </head>
 
@@ -1403,50 +1401,26 @@
   <!-- プレミアムモーダル -->
   <div class="premium-modal-overlay" id="premiumModalOverlay">
     <div class="premium-modal" role="dialog" aria-modal="true" aria-labelledby="premiumModalTitle">
-      <div class="premium-modal-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="#1d1d1f" stroke="none">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
+      <div class="premium-modal-header">
+        <p class="premium-modal-label">プレミアム会員限定</p>
+        <p class="premium-modal-title" id="premiumModalTitle">保存数の上限に達しました</p>
+        <p class="premium-modal-sub">プレミアム会員になるともっと便利に使えます</p>
       </div>
-      <p class="premium-modal-title" id="premiumModalTitle">保存数の上限に達しました</p>
-      <p class="premium-modal-sub">プレミアム会員になるともっと便利に</p>
       <div class="premium-modal-features">
-        <div class="premium-modal-feature">
-          <div class="premium-modal-feature-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <span class="premium-modal-feature-text">保存無制限</span>
-        </div>
-        <div class="premium-modal-feature">
-          <div class="premium-modal-feature-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-            </svg>
-          </div>
-          <span class="premium-modal-feature-text">広告非表示</span>
-        </div>
-        <div class="premium-modal-feature">
-          <div class="premium-modal-feature-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-          </div>
-          <span class="premium-modal-feature-text">サブスク管理機能</span>
-        </div>
+        <div class="premium-modal-feature">保存無制限</div>
+        <div class="premium-modal-feature">広告非表示</div>
+        <div class="premium-modal-feature">サブスク管理機能</div>
       </div>
-      <a class="premium-modal-upgrade-btn"
-         href="https://buy.stripe.com/test_7sYaEX5QJdJg75Oeha4ko00"
-         target="_blank" rel="noopener noreferrer">
-        プレミアムにアップグレード（月額480円）
-      </a>
-      <button class="premium-modal-cancel-btn" id="premiumModalCancel" type="button">
-        キャンセル
-      </button>
+      <div class="premium-modal-actions">
+        <a class="premium-modal-upgrade-btn"
+           href="https://buy.stripe.com/test_7sYaEX5QJdJg75Oeha4ko00"
+           target="_blank" rel="noopener noreferrer">
+          プレミアムにアップグレード — 月額480円
+        </a>
+        <button class="premium-modal-cancel-btn" id="premiumModalCancel" type="button">
+          キャンセル
+        </button>
+      </div>
     </div>
   </div>
 
