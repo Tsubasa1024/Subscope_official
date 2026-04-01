@@ -134,7 +134,12 @@
         if (!isPremium) {
           const currentCount = Object.keys(getSavesMap()).length;
           if (currentCount >= 3) {
-            alert('保存はプレミアム会員で無制限になります（月額480円）');
+            const upgrade = confirm(
+              '保存できるのは3件までです。\n\n' +
+              'プレミアム会員（月額480円）なら保存数が無制限に！\n' +
+              '今すぐアップグレードしますか？'
+            );
+            if (upgrade) window.open('https://buy.stripe.com/test_7sYaEX5QJdJg75Oeha4ko00', '_blank');
             return { saved: false };
           }
         }
