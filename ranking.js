@@ -148,20 +148,23 @@
         const service = a?.service ? a.service : "PAGE VIEW";
         const img = a?.image ? a.image : FALLBACK_IMG;
 
-        const lead = (a?.description || "").trim();
-
         return `
-          <div class="rank-hero" onclick="location.href='${r.path}'">
-            <div class="rank-badge rank-badge-large ${badgeClass(rank)}">${rank}</div>
-            <div class="rank-hero-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
-
-            <div class="rank-hero-content">
-              <div class="ranking-service">${escapeHtml(service)}</div>
-              <div class="rank-hero-title">${escapeHtml(title)}</div>
-              ${lead ? `<div class="rank-hero-desc">${escapeHtml(lead)}</div>` : ``}
-              <div class="rank-hero-meta"><span>${Number(r.views || 0).toLocaleString()} views</span></div>
+          <article class="ranking-card" onclick="location.href='${r.path}'">
+            <div class="card-image-wrap">
+              <img src="${escapeHtml(img)}" alt="${escapeHtml(title)}" loading="lazy">
+              <span class="rank-badge ${badgeClass(rank)}">${rank}</span>
             </div>
-          </div>
+            <div class="card-body">
+              <div class="card-service">${escapeHtml(service)}</div>
+              <div class="card-title">${escapeHtml(title)}</div>
+            </div>
+            <div class="card-footer">
+              <span class="card-date">${Number(r.views || 0).toLocaleString()} views</span>
+              <div class="card-arrow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </div>
+            </div>
+          </article>
         `;
       })
       .join("");
@@ -177,12 +180,11 @@
 
         return `
           <div class="ranking-row" onclick="location.href='${r.path}'">
-            <div class="ranking-row-rank">${rank}</div>
-            <div class="ranking-row-thumb" style="background-image:url('${escapeHtml(img)}')"></div>
-
-            <div class="ranking-row-main">
+            <span class="ranking-row-num">${rank}</span>
+            <img class="ranking-row-thumb" src="${escapeHtml(img)}" alt="${escapeHtml(title)}" loading="lazy">
+            <div class="ranking-row-info">
               <div class="ranking-row-title">${escapeHtml(title)}</div>
-              <div class="ranking-row-meta"><span>${Number(r.views || 0).toLocaleString()} views</span></div>
+              <div class="ranking-row-meta">${Number(r.views || 0).toLocaleString()} views</div>
             </div>
           </div>
         `;
