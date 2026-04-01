@@ -94,16 +94,6 @@
       return _currentUser;
     },
 
-    /** Apple でログイン */
-    loginWithApple: async function () {
-      var provider = new firebase.auth.OAuthProvider('apple.com');
-      provider.addScope('email');
-      provider.addScope('name');
-      var cred = await fbAuth.signInWithPopup(provider);
-      _currentUser = _makeSession(cred.user);
-      return _currentUser;
-    },
-
     logout: function () {
       return fbAuth.signOut().then(function () {
         _currentUser = null;
