@@ -324,12 +324,6 @@
 
       <button class="save-btn" id="saveBtn" type="button">変更を保存</button>
 
-      <!-- いいねした記事 -->
-      <p class="section-title" style="margin-top:8px">いいねした記事</p>
-      <div id="likedSection">
-        <div class="card"><div class="saved-loading">読み込み中...</div></div>
-      </div>
-
       <!-- 保存した記事 -->
       <p class="section-title" style="margin-top:8px">保存した記事</p>
       <div id="savedSection">
@@ -451,8 +445,7 @@
       }) : [];
       providerDisplay.textContent = providers.join(' / ') || '不明';
 
-      // いいね・保存記事・プレミアム状態を読み込む
-      loadLiked(user.id);
+      // 保存記事・プレミアム状態を読み込む
       loadSaved(user.id);
       loadPremiumStatus(user.id);
     });

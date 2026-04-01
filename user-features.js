@@ -46,6 +46,18 @@
     return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
   }
 
+  // ── isPremium チェック（RTDB） ────────────────────────────────────
+  function checkIsPremium(uid) {
+    if (typeof firebase === 'undefined') return Promise.resolve(false);
+    try {
+      return firebase.database().ref('users/' + uid + '/isPremium').once('value')
+        .then(function (snap) { return snap.val() === true; })
+        .catch(function () { return false; });
+    } catch (e) {
+      return Promise.resolve(false);
+    }
+  }
+
   // ── 公開 API ─────────────────────────────────────────────────────
   window.UserFeatures = {
     // --- いいね ---
@@ -102,26 +114,41 @@
 
     toggleSave(articleId, articleSnapshot) {
       if (!getUser()) throw new Error('ログインが必要です');
-      const saves = getSavesMap();
-      const wasSaved = !!saves[articleId];
+      const user = getUser();
+      const wasSaved = !!getSavesMap()[articleId];
 
+      // 保存解除は制限なし
       if (wasSaved) {
+        const saves = getSavesMap();
         delete saves[articleId];
-      } else {
-        // 記事の基本情報をスナップショットとして保存
+        saveSavesMap(saves);
+        if (window.FirebaseSaves) {
+          return window.FirebaseSaves.decrement(articleId)
+            .then(() => ({ saved: false })).catch(() => ({ saved: false }));
+        }
+        return Promise.resolve({ saved: false });
+      }
+
+      // 新規保存：isPremium を確認してから件数制限チェック
+      return checkIsPremium(user.id).then(function (isPremium) {
+        if (!isPremium) {
+          const currentCount = Object.keys(getSavesMap()).length;
+          if (currentCount >= 3) {
+            alert('保存はプレミアム会員で無制限になります（月額480円）');
+            return { saved: false };
+          }
+        }
+
+        const saves = getSavesMap();
         saves[articleId] = articleSnapshot || { id: articleId, savedAt: new Date().toISOString() };
-      }
-      saveSavesMap(saves);
+        saveSavesMap(saves);
 
-      // Firebase が使える場合は保存数をアトミック更新（失敗してもローカル状態は返す）
-      if (window.FirebaseSaves) {
-        const op = wasSaved
-          ? window.FirebaseSaves.decrement(articleId)
-          : window.FirebaseSaves.increment(articleId);
-        return op.then(() => ({ saved: !wasSaved })).catch(() => ({ saved: !wasSaved }));
-      }
-
-      return Promise.resolve({ saved: !wasSaved });
+        if (window.FirebaseSaves) {
+          return window.FirebaseSaves.increment(articleId)
+            .then(() => ({ saved: true })).catch(() => ({ saved: true }));
+        }
+        return { saved: true };
+      });
     },
 
     getSavedArticles() {
