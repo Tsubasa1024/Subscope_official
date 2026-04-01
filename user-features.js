@@ -58,6 +58,18 @@
     }
   }
 
+  // ── 保存件数をRTDBから取得（localStorageはフォールバック） ────────
+  function getSaveCount(uid) {
+    if (typeof firebase !== 'undefined' && window.FirebaseUserSaves) {
+      try {
+        return firebase.database().ref('userSaves/' + uid).once('value')
+          .then(function (snap) { return snap.numChildren(); })
+          .catch(function () { return Object.keys(getSavesMap()).length; });
+      } catch (e) { /* fall through */ }
+    }
+    return Promise.resolve(Object.keys(getSavesMap()).length);
+  }
+
   // ── 公開 API ─────────────────────────────────────────────────────
   window.UserFeatures = {
     // --- いいね ---
@@ -127,10 +139,11 @@
         return Promise.resolve({ saved: false });
       }
 
-      // 新規保存：isPremium を確認してから件数制限チェック
-      return checkIsPremium(user.id).then(function (isPremium) {
+      // 新規保存：isPremium と保存件数をRTDBから並列取得してチェック
+      return Promise.all([checkIsPremium(user.id), getSaveCount(user.id)]).then(function (results) {
+        const isPremium = results[0];
+        const currentCount = results[1];
         if (!isPremium) {
-          const currentCount = Object.keys(getSavesMap()).length;
           if (currentCount >= 3) {
             const upgrade = confirm(
               '保存できるのは3件までです。\n\n' +
