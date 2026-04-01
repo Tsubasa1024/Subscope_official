@@ -602,6 +602,12 @@
           btn.disabled = true;
           try {
             await window.FirebaseUserSaves.unsave(user.id, articleId);
+            if (window.FirebaseSaves) window.FirebaseSaves.decrement(articleId);
+            if (window.UserFeatures) {
+              var saves = JSON.parse(localStorage.getItem('ss_saves_' + user.id) || '{}');
+              delete saves[articleId];
+              localStorage.setItem('ss_saves_' + user.id, JSON.stringify(saves));
+            }
             // 再読み込み
             loadSaved(user.id);
           } catch(e) {
