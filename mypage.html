@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>マイページ | SUBSCOPE</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+
+  <style>
+    :root {
+      --color-bg: #fff;
+      --color-bg-secondary: #f5f5f7;
+      --color-text-main: #1d1d1f;
+      --color-text-gray: #86868b;
+      --color-border: rgba(0,0,0,0.1);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100vh; }
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg-secondary);
+      color: var(--color-text-main);
+      -webkit-font-smoothing: antialiased;
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== ヘッダー ===== */
+    .site-header {
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 0 24px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .site-header-logo { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em; }
+    .site-header-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.875rem; color: var(--color-text-gray);
+      transition: color 0.15s;
+    }
+    .site-header-back:hover { color: var(--color-text-main); }
+
+    /* ===== メイン ===== */
+    .page-main {
+      flex: 1; display: flex; justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .profile-wrap {
+      width: 100%; max-width: 480px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    .section-title {
+      font-size: 0.75rem; font-weight: 600; color: var(--color-text-gray);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0 4px; margin-bottom: 4px;
+    }
+
+    .card {
+      background: #fff; border-radius: 20px;
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      overflow: hidden;
+      animation: cardIn 0.4s var(--ease-out-expo) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== アバターカード ===== */
+    .avatar-card {
+      padding: 32px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+
+    .avatar-wrap {
+      position: relative; width: 96px; height: 96px;
+      cursor: pointer; border-radius: 50%;
+    }
+    .avatar-wrap:hover .avatar-overlay { opacity: 1; }
+
+    .avatar-circle {
+      width: 96px; height: 96px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; font-weight: 700; color: #fff;
+      overflow: hidden; flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .avatar-wrap:hover .avatar-circle { transform: scale(0.96); }
+
+    .avatar-circle img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    .avatar-overlay {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .avatar-overlay svg { color: #fff; }
+
+    #avatarInput { display: none; }
+
+    .avatar-hint {
+      font-size: 0.8rem; color: var(--color-text-gray); text-align: center;
+    }
+
+    /* ===== フォームカード ===== */
+    .form-card { padding: 0; }
+
+    .form-row {
+      display: flex; align-items: center;
+      padding: 16px 20px; gap: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .form-row:last-child { border-bottom: none; }
+
+    .form-row-label {
+      font-size: 0.85rem; font-weight: 600;
+      min-width: 90px; flex-shrink: 0;
+    }
+    .form-row-value {
+      flex: 1; font-size: 0.9rem; color: var(--color-text-gray);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .form-input-inline {
+      flex: 1; font-size: 0.9rem; font-family: var(--font-family);
+      border: none; outline: none; background: transparent;
+      color: var(--color-text-main);
+      -webkit-appearance: none; appearance: none;
+    }
+    .form-input-inline::placeholder { color: #c0c0c5; }
+
+    /* ===== ボタン ===== */
+    .save-btn {
+      width: 100%; padding: 15px; border-radius: 14px;
+      background: #1d1d1f; color: #fff; border: none;
+      font-size: 0.95rem; font-weight: 600; font-family: var(--font-family);
+      cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .save-btn:hover { opacity: 0.85; }
+    .save-btn:active { transform: scale(0.98); }
+    .save-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .logout-btn {
+      width: 100%; padding: 15px; border-radius: 14px;
+      background: transparent; color: #c0392b; border: 1.5px solid rgba(192,57,43,0.25);
+      font-size: 0.95rem; font-weight: 600; font-family: var(--font-family);
+      cursor: pointer; transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .logout-btn:hover { background: #fff0f0; }
+
+    /* ===== アラート ===== */
+    .alert {
+      padding: 12px 16px; border-radius: 12px; font-size: 0.875rem;
+      display: none;
+    }
+    .alert-error   { background: #fff0f0; color: #c0392b; border: 1px solid rgba(192,57,43,0.15); }
+    .alert-success { background: #f0faf5; color: #0f6e56; border: 1px solid rgba(15,110,86,0.15); }
+    .alert.show { display: block; }
+
+    /* ===== アップロード進捗 ===== */
+    .upload-progress {
+      display: none; height: 3px; border-radius: 99px;
+      background: #f0f0f0; overflow: hidden; margin-top: -8px;
+    }
+    .upload-progress.show { display: block; }
+    .upload-progress-bar {
+      height: 100%; border-radius: 99px;
+      background: #1d1d1f; width: 0%;
+      transition: width 0.3s;
+    }
+
+    /* ===== フッター ===== */
+    .site-footer {
+      padding: 24px; text-align: center;
+      font-size: 0.8rem; color: var(--color-text-gray);
+    }
+
+    /* ===== モバイル ===== */
+    @media (max-width: 480px) {
+      .avatar-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="site-header-back" href="/index.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      トップ
+    </a>
+    <span class="site-header-logo">SUBSCOPE</span>
+    <span style="width:56px"></span>
+  </header>
+
+  <main class="page-main">
+    <div class="profile-wrap" id="profileWrap" style="display:none">
+
+      <!-- アバター -->
+      <p class="section-title">プロフィール画像</p>
+      <div class="card avatar-card">
+        <div class="avatar-wrap" id="avatarWrap" title="画像を変更">
+          <div class="avatar-circle" id="avatarCircle"></div>
+          <div class="avatar-overlay">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+        </div>
+        <input type="file" id="avatarInput" accept="image/*">
+        <p class="avatar-hint">タップして画像を変更</p>
+      </div>
+
+      <div class="upload-progress" id="uploadProgress">
+        <div class="upload-progress-bar" id="uploadProgressBar"></div>
+      </div>
+
+      <!-- プロフィール情報 -->
+      <p class="section-title">アカウント情報</p>
+      <div class="card form-card">
+        <div class="form-row">
+          <span class="form-row-label">ニックネーム</span>
+          <input
+            class="form-input-inline"
+            type="text"
+            id="nameInput"
+            placeholder="ニックネームを入力"
+            maxlength="30"
+            autocomplete="nickname"
+          />
+        </div>
+        <div class="form-row">
+          <span class="form-row-label">メール</span>
+          <span class="form-row-value" id="emailDisplay"></span>
+        </div>
+        <div class="form-row">
+          <span class="form-row-label">ログイン方法</span>
+          <span class="form-row-value" id="providerDisplay"></span>
+        </div>
+      </div>
+
+      <div class="alert alert-error"   id="errorAlert"></div>
+      <div class="alert alert-success" id="successAlert"></div>
+
+      <button class="save-btn" id="saveBtn" type="button">変更を保存</button>
+
+      <!-- ログアウト -->
+      <p class="section-title" style="margin-top:8px">アカウント</p>
+      <div class="card" style="padding:20px">
+        <button class="logout-btn" id="logoutBtn" type="button">ログアウト</button>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a href="/privacy.html">プライバシーポリシー</a> &nbsp;·&nbsp;
+    <a href="/terms.html">利用規約</a>
+  </footer>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="/auth.js"></script>
+
+  <script>
+    // ── 要素取得 ──────────────────────────────────────────────────
+    var profileWrap      = document.getElementById('profileWrap');
+    var avatarWrap       = document.getElementById('avatarWrap');
+    var avatarCircle     = document.getElementById('avatarCircle');
+    var avatarInput      = document.getElementById('avatarInput');
+    var nameInput        = document.getElementById('nameInput');
+    var emailDisplay     = document.getElementById('emailDisplay');
+    var providerDisplay  = document.getElementById('providerDisplay');
+    var saveBtn          = document.getElementById('saveBtn');
+    var logoutBtn        = document.getElementById('logoutBtn');
+    var errorAlert       = document.getElementById('errorAlert');
+    var successAlert     = document.getElementById('successAlert');
+    var uploadProgress   = document.getElementById('uploadProgress');
+    var uploadProgressBar = document.getElementById('uploadProgressBar');
+
+    var _pendingPhotoURL = null; // アップロード済みの新しい photoURL
+
+    // ── アバター描画 ──────────────────────────────────────────────
+    function renderAvatar(user) {
+      if (user.photoURL) {
+        avatarCircle.style.background = 'transparent';
+        avatarCircle.innerHTML =
+          '<img src="' + esc(user.photoURL) + '" alt="" ' +
+          'onerror="this.style.display=\'none\'">';
+      } else {
+        avatarCircle.style.background = user.color;
+        avatarCircle.textContent = (user.name || '?')[0].toUpperCase();
+      }
+    }
+
+    function esc(s) {
+      return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ── 認証状態が確定してから初期化 ─────────────────────────────
+    Auth.onReady(function(user) {
+      if (!user) {
+        window.location.replace('/login.html?next=' + encodeURIComponent('/mypage.html'));
+        return;
+      }
+      profileWrap.style.display = 'flex';
+
+      renderAvatar(user);
+      nameInput.value     = user.name || '';
+      emailDisplay.textContent = user.email || '';
+
+      // ログイン方法の表示
+      var firebaseUser = firebase.auth().currentUser;
+      var providers = firebaseUser ? firebaseUser.providerData.map(function(p) {
+        if (p.providerId === 'google.com') return 'Google';
+        if (p.providerId === 'password')   return 'メール+パスワード';
+        return p.providerId;
+      }) : [];
+      providerDisplay.textContent = providers.join(' / ') || '不明';
+    });
+
+    // ── アバター画像を選択 ────────────────────────────────────────
+    avatarWrap.addEventListener('click', function() { avatarInput.click(); });
+
+    avatarInput.addEventListener('change', async function() {
+      var file = avatarInput.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showError('画像サイズは5MB以下にしてください');
+        return;
+      }
+
+      clearAlerts();
+      saveBtn.disabled = true;
+      uploadProgress.classList.add('show');
+      uploadProgressBar.style.width = '0%';
+
+      try {
+        var firebaseUser = firebase.auth().currentUser;
+        var storageRef = firebase.storage().ref('avatars/' + firebaseUser.uid + '/avatar');
+        var task = storageRef.put(file);
+
+        task.on('state_changed',
+          function(snapshot) {
+            var pct = (snapshot.bytesTransferred / snapshot.totalBytes * 100).toFixed(0);
+            uploadProgressBar.style.width = pct + '%';
+          },
+          function(err) {
+            showError('アップロードに失敗しました: ' + err.message);
+            uploadProgress.classList.remove('show');
+            saveBtn.disabled = false;
+          },
+          async function() {
+            var url = await task.snapshot.ref.getDownloadURL();
+            _pendingPhotoURL = url;
+
+            // プレビュー
+            avatarCircle.style.background = 'transparent';
+            avatarCircle.innerHTML = '<img src="' + esc(url) + '" alt="">';
+
+            uploadProgress.classList.remove('show');
+            saveBtn.disabled = false;
+            showSuccess('画像を選択しました。「変更を保存」で確定されます。');
+          }
+        );
+      } catch (err) {
+        showError('アップロードに失敗しました: ' + err.message);
+        uploadProgress.classList.remove('show');
+        saveBtn.disabled = false;
+      }
+    });
+
+    // ── 保存 ─────────────────────────────────────────────────────
+    saveBtn.addEventListener('click', async function() {
+      clearAlerts();
+      var name = nameInput.value.trim();
+      if (!name) { showError('ニックネームを入力してください'); return; }
+      if (name.length > 30) { showError('ニックネームは30文字以内にしてください'); return; }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = '保存中...';
+
+      try {
+        var upd = { name: name };
+        if (_pendingPhotoURL !== null) upd.photoURL = _pendingPhotoURL;
+        await Auth.updateProfile(upd);
+
+        _pendingPhotoURL = null;
+        showSuccess('プロフィールを保存しました');
+
+        // アバター再描画
+        renderAvatar(Auth.getCurrentUser());
+      } catch (err) {
+        showError(err.message || '保存に失敗しました');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '変更を保存';
+      }
+    });
+
+    // ── ログアウト ────────────────────────────────────────────────
+    logoutBtn.addEventListener('click', function() {
+      if (confirm('ログアウトしますか？')) Auth.logout();
+    });
+
+    // ── アラート ──────────────────────────────────────────────────
+    function showError(msg) {
+      errorAlert.textContent = msg;
+      errorAlert.classList.add('show');
+      successAlert.classList.remove('show');
+    }
+    function showSuccess(msg) {
+      successAlert.textContent = msg;
+      successAlert.classList.add('show');
+      errorAlert.classList.remove('show');
+    }
+    function clearAlerts() {
+      errorAlert.classList.remove('show');
+      successAlert.classList.remove('show');
+    }
+  </script>
+
+</body>
+</html>

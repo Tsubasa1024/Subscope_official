@@ -1,7 +1,7 @@
 /**
  * SUBSCOPE Authentication Module
  * Firebase Authentication ベースの認証システム
- * Google / Apple / メール+パスワード に対応
+ * Google / メール+パスワード に対応
  * 複数端末から同じアカウントでログイン可能
  */
 (function () {
@@ -23,11 +23,11 @@
       register:        function() { return Promise.reject(new Error('Firebase 未設定')); },
       login:           function() { return Promise.reject(new Error('Firebase 未設定')); },
       loginWithGoogle: function() { return Promise.reject(new Error('Firebase 未設定')); },
-      loginWithApple:  function() { return Promise.reject(new Error('Firebase 未設定')); },
       logout:          function() {},
       getCurrentUser:  function() { return null; },
       isLoggedIn:      function() { return false; },
-      onReady:         function(cb) { cb(null); }
+      onReady:         function(cb) { cb(null); },
+      updateProfile:   function() { return Promise.reject(new Error('Firebase 未設定')); }
     };
     return;
   }
@@ -38,16 +38,26 @@
   var fbAuth = firebase.auth(app);
 
   // ── 認証状態キャッシュ ────────────────────────────────────────────
-  var _currentUser   = null;
-  var _ready         = false;
+  var _currentUser    = null;
+  var _ready          = false;
   var _readyCallbacks = [];
+
+  // UIDから一貫した色を生成
+  function _avatarColor(uid) {
+    var palette = ['#5B8DEF','#E8685A','#4CAF82','#9B72CF','#E8A23A','#4CB8C4','#E86891','#7CB56C'];
+    var h = 0;
+    for (var i = 0; i < (uid || '').length; i++) { h = Math.imul(31, h) + uid.charCodeAt(i) | 0; }
+    return palette[Math.abs(h) % palette.length];
+  }
 
   function _makeSession(user) {
     if (!user) return null;
     return {
-      email: user.email || '',
-      name:  user.displayName || (user.email ? user.email.split('@')[0] : 'ユーザー'),
-      id:    user.uid
+      email:    user.email || '',
+      name:     user.displayName || (user.email ? user.email.split('@')[0] : 'ユーザー'),
+      id:       user.uid,
+      photoURL: user.photoURL || null,
+      color:    _avatarColor(user.uid)
     };
   }
 
@@ -73,7 +83,8 @@
 
       var cred = await fbAuth.createUserWithEmailAndPassword(e, password);
       await cred.user.updateProfile({ displayName: n });
-      _currentUser = { email: e, name: n, id: cred.user.uid };
+      _currentUser = _makeSession(cred.user);
+      _currentUser.name = n;
       return _currentUser;
     },
 
@@ -92,6 +103,21 @@
       var cred = await fbAuth.signInWithPopup(provider);
       _currentUser = _makeSession(cred.user);
       return _currentUser;
+    },
+
+    /** プロフィール更新（ニックネーム・アイコン） */
+    updateProfile: async function (data) {
+      var user = fbAuth.currentUser;
+      if (!user) throw new Error('ログインしていません');
+      var upd = {};
+      if (data.name     !== undefined) upd.displayName = data.name;
+      if (data.photoURL !== undefined) upd.photoURL    = data.photoURL;
+      await user.updateProfile(upd);
+      if (_currentUser) {
+        if (data.name     !== undefined) _currentUser.name     = data.name;
+        if (data.photoURL !== undefined) _currentUser.photoURL = data.photoURL;
+      }
+      _reinitHeader();
     },
 
     logout: function () {
@@ -117,11 +143,24 @@
     return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  // ── アバター HTML を生成 ─────────────────────────────────────────
+  function _avatarHtml(user, size) {
+    size = size || 36;
+    if (user.photoURL) {
+      return '<img src="' + escHtml(user.photoURL) + '" alt="" ' +
+        'style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;display:block;"' +
+        ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+        '<span class="auth-avatar-initial" style="display:none;background:' + escHtml(user.color) + '">' + escHtml(user.name[0].toUpperCase()) + '</span>';
+    }
+    return '<span class="auth-avatar-initial" style="background:' + escHtml(user.color) + '">' +
+      escHtml((user.name || '?')[0].toUpperCase()) + '</span>';
+  }
+
   // ── ヘッダーにログインボタン / アバターを注入 ───────────────────
   function injectHeader() {
     var navRight = document.querySelector('.nav-right');
     if (!navRight) return;
-    if (document.querySelector('.auth-header-wrap')) return; // 二重注入防止
+    if (document.querySelector('.auth-header-wrap')) return;
 
     navRight.style.display    = 'flex';
     navRight.style.alignItems = 'center';
@@ -132,15 +171,15 @@
     wrap.className = 'auth-header-wrap';
 
     if (user) {
-      var initial = user.name ? user.name[0].toUpperCase() : '?';
       wrap.innerHTML =
         '<button class="auth-avatar-btn" id="authAvatarBtn" aria-label="アカウントメニュー" type="button">' +
-          '<span class="auth-avatar-initial">' + escHtml(initial) + '</span>' +
+          _avatarHtml(user, 36) +
         '</button>' +
         '<div class="auth-dropdown" id="authDropdown">' +
           '<div class="auth-dropdown-name">'  + escHtml(user.name)  + '</div>' +
           '<div class="auth-dropdown-email">' + escHtml(user.email) + '</div>' +
           '<hr class="auth-dropdown-hr">' +
+          '<a class="auth-dropdown-link" href="/mypage.html">マイページ</a>' +
           '<button class="auth-dropdown-link auth-logout-btn" id="authLogoutBtn" type="button">ログアウト</button>' +
         '</div>';
     } else {
@@ -165,24 +204,26 @@
   function injectNavOverlay() {
     var navList = document.querySelector('.nav-overlay .nav-list');
     if (!navList) return;
-    if (document.querySelector('.auth-nav-item')) return; // 二重注入防止
+    if (document.querySelector('.auth-nav-item')) return;
 
     var user = Auth.getCurrentUser();
     var li = document.createElement('li');
     li.className = 'auth-nav-item';
 
     if (user) {
-      var btn = document.createElement('button');
-      btn.type      = 'button';
-      btn.className = 'nav-link auth-nav-logout';
-      btn.textContent = 'ログアウト (' + user.name + ')';
-      btn.addEventListener('click', function () { Auth.logout(); });
-      li.appendChild(btn);
+      li.innerHTML =
+        '<a href="/mypage.html" class="nav-link">マイページ</a>' +
+        '<button type="button" class="nav-link auth-nav-logout" id="authNavLogout">ログアウト (' + escHtml(user.name) + ')</button>';
     } else {
       li.innerHTML = '<a href="/login.html" class="nav-link">ログイン / 会員登録</a>';
     }
 
     navList.appendChild(li);
+
+    if (user) {
+      var lb = document.getElementById('authNavLogout');
+      if (lb) lb.addEventListener('click', function () { Auth.logout(); });
+    }
   }
 
   // ── ヘッダーを再描画（認証状態変化時） ─────────────────────────
@@ -203,7 +244,6 @@
     style.textContent = [
       '.auth-header-wrap { position: relative; flex-shrink: 0; }',
 
-      /* ログインボタン（未ログイン） */
       '.auth-login-btn {',
       '  display: inline-flex; align-items: center; padding: 9px 20px;',
       '  border-radius: 999px; background: #1d1d1f; color: #fff !important;',
@@ -212,17 +252,20 @@
       '}',
       '.auth-login-btn:hover { opacity: 0.75; }',
 
-      /* アバターボタン（ログイン済み） */
       '.auth-avatar-btn {',
       '  width: 36px; height: 36px; border-radius: 50%; border: none;',
-      '  background: #1d1d1f; color: #fff; font-size: 0.85rem; font-weight: 700;',
+      '  background: transparent; color: #fff; font-size: 0.85rem; font-weight: 700;',
       '  cursor: pointer; display: flex; align-items: center; justify-content: center;',
-      '  flex-shrink: 0; transition: opacity 0.2s; padding: 0;',
+      '  flex-shrink: 0; transition: opacity 0.2s; padding: 0; overflow: hidden;',
       '  -webkit-tap-highlight-color: transparent;',
       '}',
       '.auth-avatar-btn:hover { opacity: 0.75; }',
+      '.auth-avatar-initial {',
+      '  width: 36px; height: 36px; border-radius: 50%;',
+      '  display: flex; align-items: center; justify-content: center;',
+      '  font-size: 0.85rem; font-weight: 700; color: #fff; flex-shrink: 0;',
+      '}',
 
-      /* ドロップダウン */
       '.auth-dropdown {',
       '  position: absolute; top: calc(100% + 8px); right: 0; min-width: 200px;',
       '  background: rgba(255,255,255,0.97); backdrop-filter: blur(20px);',
@@ -240,15 +283,15 @@
       '  display: block; width: 100%; padding: 9px 12px; border-radius: 10px;',
       '  font-size: 0.88rem; font-weight: 500; color: #1d1d1f;',
       '  transition: background 0.18s; cursor: pointer; text-align: left;',
-      '  background: none; border: none; font-family: inherit;',
+      '  background: none; border: none; font-family: inherit; text-decoration: none;',
       '}',
       '.auth-dropdown-link:hover { background: #f5f5f7; }',
       '.auth-logout-btn { color: #c0392b !important; }',
 
-      /* ナビオーバーレイ */
       '.auth-nav-item {',
       '  margin-top: 12px; padding-top: 12px;',
       '  border-top: 1px solid rgba(0,0,0,0.06);',
+      '  display: flex; flex-direction: column; gap: 4px;',
       '}',
       '.auth-nav-logout {',
       '  display: block; width: 100%; padding: 10px 16px; border-radius: 12px;',
@@ -258,7 +301,6 @@
       '}',
       '.auth-nav-logout:hover { background: #fff5f5; }',
 
-      /* モバイルではヘッダーのauth-wrapを非表示（nav-overlayのみ） */
       '@media (max-width: 767px) {',
       '  .auth-header-wrap { display: none; }',
       '}'
