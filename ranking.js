@@ -196,6 +196,11 @@
     top3.innerHTML = top;
     rest.innerHTML = others;
 
+    requestAnimationFrame(() => {
+      top3.classList.remove("is-switching");
+      rest.classList.remove("is-switching");
+    });
+
     if (!firstRenderDone) {
       firstRenderDone = true;
       window.hideLoader?.();
@@ -247,9 +252,12 @@
   // ボタン切り替え
   btns.forEach((b) => {
     b.addEventListener("click", () => {
+      if (b.classList.contains("active")) return;
       btns.forEach((x) => x.classList.remove("active"));
       b.classList.add("active");
-      render(b.dataset.period || "all");
+      top3.classList.add("is-switching");
+      rest.classList.add("is-switching");
+      setTimeout(() => render(b.dataset.period || "all"), 220);
     });
   });
 

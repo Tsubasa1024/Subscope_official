@@ -105,6 +105,16 @@
     /* ===== Ranking section ===== */
     .ranking-section { padding: 8px 0 80px; }
 
+    /* ===== Period switch animation ===== */
+    #ranking-top3, #ranking-rest {
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    #ranking-top3.is-switching, #ranking-rest.is-switching {
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+
     /* ===== Top 3 grid ===== */
     .ranking-top3 {
       display: grid;
