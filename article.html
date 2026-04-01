@@ -654,6 +654,7 @@
 
   <!-- Firebase SDK (Realtime Database) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="/firebase-likes.js"></script>
 
@@ -1038,8 +1039,14 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // defer スクリプト（auth.js, user-features.js）はここで参照可能
-      ACTION_IS_LOGGED_IN = (typeof Auth !== "undefined") && Auth.isLoggedIn();
+      // Firebase Auth の状態確定を待ってから認証フラグをセット
+      await new Promise(function(resolve) {
+        if (typeof Auth !== "undefined") {
+          Auth.onReady(function(user) { ACTION_IS_LOGGED_IN = !!user; resolve(); });
+        } else {
+          resolve();
+        }
+      });
 
       try {
         const kv             = document.getElementById("article-kv");
