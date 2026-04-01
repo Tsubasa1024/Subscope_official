@@ -786,19 +786,7 @@
         const snapshot = window._currentArticleSnapshot || { id };
         const user = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
 
-        if (window.FirebaseUserSaves && user) {
-          // Firebase: 個人保存リストを更新（楽観的 UI 更新）
-          const willSave = !_saved;
-          _saved = willSave;
-          syncActionUI(false, true);
-          if (willSave) {
-            window.FirebaseUserSaves.save(user.id, id, snapshot);
-            if (window.FirebaseSaves) window.FirebaseSaves.increment(id);
-          } else {
-            window.FirebaseUserSaves.unsave(user.id, id);
-            if (window.FirebaseSaves) window.FirebaseSaves.decrement(id);
-          }
-        } else if (typeof UserFeatures !== "undefined") {
+        if (typeof UserFeatures !== "undefined") {
           const result = await UserFeatures.toggleSave(id, snapshot);
           _saved = result.saved;
           syncActionUI(false, true);

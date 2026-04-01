@@ -122,10 +122,8 @@
         const saves = getSavesMap();
         delete saves[articleId];
         saveSavesMap(saves);
-        if (window.FirebaseSaves) {
-          return window.FirebaseSaves.decrement(articleId)
-            .then(() => ({ saved: false })).catch(() => ({ saved: false }));
-        }
+        if (window.FirebaseUserSaves) window.FirebaseUserSaves.unsave(user.id, articleId);
+        if (window.FirebaseSaves) window.FirebaseSaves.decrement(articleId);
         return Promise.resolve({ saved: false });
       }
 
@@ -145,13 +143,11 @@
         }
 
         const saves = getSavesMap();
-        saves[articleId] = articleSnapshot || { id: articleId, savedAt: new Date().toISOString() };
+        const snapshot = articleSnapshot || { id: articleId, savedAt: new Date().toISOString() };
+        saves[articleId] = snapshot;
         saveSavesMap(saves);
-
-        if (window.FirebaseSaves) {
-          return window.FirebaseSaves.increment(articleId)
-            .then(() => ({ saved: true })).catch(() => ({ saved: true }));
-        }
+        if (window.FirebaseUserSaves) window.FirebaseUserSaves.save(user.id, articleId, snapshot);
+        if (window.FirebaseSaves) window.FirebaseSaves.increment(articleId);
         return { saved: true };
       });
     },
