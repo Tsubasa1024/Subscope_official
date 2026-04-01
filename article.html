@@ -752,17 +752,34 @@
     let _unsubscribeLikeCount = null;
     let _unsubscribeSaveCount = null;
     let _unsubscribeComments = null;
+    let _unsubscribeSaveState = null;
 
     async function handleSave() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
       const id = _getArticleId();
-      if (!id || typeof UserFeatures === "undefined") return;
+      if (!id) return;
       _triggerBtnAnim(["save-btn", "fab-save-btn"], "save-animate");
       try {
         const snapshot = window._currentArticleSnapshot || { id };
-        const result = await UserFeatures.toggleSave(id, snapshot);
-        _saved = result.saved;
-        syncActionUI(false, true);
+        const user = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
+
+        if (window.FirebaseUserSaves && user) {
+          // Firebase: 個人保存リストを更新（楽観的 UI 更新）
+          const willSave = !_saved;
+          _saved = willSave;
+          syncActionUI(false, true);
+          if (willSave) {
+            window.FirebaseUserSaves.save(user.id, id, snapshot);
+            if (window.FirebaseSaves) window.FirebaseSaves.increment(id);
+          } else {
+            window.FirebaseUserSaves.unsave(user.id, id);
+            if (window.FirebaseSaves) window.FirebaseSaves.decrement(id);
+          }
+        } else if (typeof UserFeatures !== "undefined") {
+          const result = await UserFeatures.toggleSave(id, snapshot);
+          _saved = result.saved;
+          syncActionUI(false, true);
+        }
       } catch(e) { console.warn(e); }
     }
 
@@ -1227,11 +1244,24 @@
           }).join("");
         }
 
-        // いいね・保存の状態を UserFeatures から取得
-        if (typeof UserFeatures !== "undefined" && article) {
-          _liked = UserFeatures.isLiked(article.id);
-          _saved = UserFeatures.isSaved(article.id);
-          _likeCount = UserFeatures.getLikeCount(article.id);
+        // いいね・保存の状態を取得
+        if (article) {
+          const _user = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
+          if (typeof UserFeatures !== "undefined") {
+            _liked = UserFeatures.isLiked(article.id);
+            _likeCount = UserFeatures.getLikeCount(article.id);
+          }
+
+          // 保存状態: Firebase 優先（クロスデバイス）、なければ localStorage
+          if (window.FirebaseUserSaves && _user) {
+            if (_unsubscribeSaveState) _unsubscribeSaveState();
+            _unsubscribeSaveState = window.FirebaseUserSaves.onSaved(_user.id, article.id, function (isSaved) {
+              _saved = isSaved;
+              syncActionUI();
+            });
+          } else if (typeof UserFeatures !== "undefined") {
+            _saved = UserFeatures.isSaved(article.id);
+          }
           // 保存時のスナップショット
           window._currentArticleSnapshot = {
             id: article.id, title: article.title || "",

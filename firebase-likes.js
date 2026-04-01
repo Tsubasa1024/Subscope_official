@@ -143,6 +143,36 @@
     }
   };
 
+  // ── ユーザーの保存リスト（クロスデバイス対応） ──────────────────
+  window.FirebaseUserSaves = {
+    /** 保存状態をリアルタイム購読 */
+    onSaved: function (uid, articleId, callback) {
+      var ref = db.ref('userSaves/' + uid + '/' + articleId);
+      var handler = function (snap) { callback(snap.exists()); };
+      ref.on('value', handler);
+      return function () { ref.off('value', handler); };
+    },
+
+    /** 保存する */
+    save: function (uid, articleId, snapshot) {
+      return db.ref('userSaves/' + uid + '/' + articleId).set(snapshot);
+    },
+
+    /** 保存を解除する */
+    unsave: function (uid, articleId) {
+      return db.ref('userSaves/' + uid + '/' + articleId).remove();
+    },
+
+    /** ユーザーの全保存記事を取得（savedAt の新しい順） */
+    getSaved: function (uid) {
+      return db.ref('userSaves/' + uid).once('value').then(function (snap) {
+        var list = [];
+        snap.forEach(function (child) { var v = child.val(); if (v) list.push(v); });
+        return list.sort(function (a, b) { return (b.savedAt || '') > (a.savedAt || '') ? 1 : -1; });
+      });
+    }
+  };
+
   // ── ユーザープロフィール ─────────────────────────────────────────
   // 名前変更を全コメントに反映するため、users/{uid}/name を正とする
   window.FirebaseUsers = {
