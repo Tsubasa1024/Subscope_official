@@ -37,13 +37,12 @@
       padding: 0 24px; height: 60px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .site-header-logo { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em; }
-    .site-header-back {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.875rem; color: var(--color-text-gray);
-      transition: color 0.15s;
+    .site-header-logo {
+      font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em;
+      color: var(--color-text-main); text-decoration: none;
+      transition: opacity 0.2s;
     }
-    .site-header-back:hover { color: var(--color-text-main); }
+    .site-header-logo:hover { opacity: 0.7; }
 
     /* ===== メイン ===== */
     .page-main {
@@ -249,13 +248,8 @@
 <body>
 
   <header class="site-header">
-    <a class="site-header-back" href="/index.html">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-      トップ
-    </a>
-    <span class="site-header-logo">SUBSCOPE</span>
+    <span style="width:56px"></span>
+    <a class="site-header-logo" href="/index.html">SUBSCOPE</a>
     <span style="width:56px"></span>
   </header>
 
