@@ -738,13 +738,35 @@
     async function handleLike() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
       const id = _getArticleId();
-      if (!id || typeof UserFeatures === "undefined") return;
+      if (!id) return;
       _triggerBtnAnim(["like-btn", "fab-like-btn"], "like-animate");
       try {
-        const result = await UserFeatures.toggleLike(id);
-        _liked = result.liked;
-        _likeCount = result.count;
-        syncActionUI(true);
+        const user = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
+
+        if (window.FirebaseUserLikes && user) {
+          const willLike = !_liked;
+          _liked = willLike;
+          syncActionUI(true);
+          const snapshot = {
+            id, title: (window._currentArticleSnapshot || {}).title || "",
+            image: (window._currentArticleSnapshot || {}).image || "",
+            description: (window._currentArticleSnapshot || {}).description || "",
+            date: (window._currentArticleSnapshot || {}).date || "",
+            likedAt: new Date().toISOString()
+          };
+          if (willLike) {
+            window.FirebaseUserLikes.like(user.id, id, snapshot);
+            if (window.FirebaseLikes) window.FirebaseLikes.increment(id);
+          } else {
+            window.FirebaseUserLikes.unlike(user.id, id);
+            if (window.FirebaseLikes) window.FirebaseLikes.decrement(id);
+          }
+        } else if (typeof UserFeatures !== "undefined") {
+          const result = await UserFeatures.toggleLike(id);
+          _liked = result.liked;
+          _likeCount = result.count;
+          syncActionUI(true);
+        }
       } catch(e) { console.warn(e); }
     }
 
@@ -753,6 +775,7 @@
     let _unsubscribeSaveCount = null;
     let _unsubscribeComments = null;
     let _unsubscribeSaveState = null;
+    let _unsubscribeLikeState = null;
 
     async function handleSave() {
       if (!ACTION_IS_LOGGED_IN) { openLoginModal(); return; }
@@ -1248,8 +1271,18 @@
         if (article) {
           const _user = typeof Auth !== "undefined" ? Auth.getCurrentUser() : null;
           if (typeof UserFeatures !== "undefined") {
-            _liked = UserFeatures.isLiked(article.id);
             _likeCount = UserFeatures.getLikeCount(article.id);
+          }
+
+          // いいね状態: Firebase 優先（クロスデバイス）、なければ localStorage
+          if (window.FirebaseUserLikes && _user) {
+            if (_unsubscribeLikeState) _unsubscribeLikeState();
+            _unsubscribeLikeState = window.FirebaseUserLikes.onLiked(_user.id, article.id, function (isLiked) {
+              _liked = isLiked;
+              syncActionUI();
+            });
+          } else if (typeof UserFeatures !== "undefined") {
+            _liked = UserFeatures.isLiked(article.id);
           }
 
           // 保存状態: Firebase 優先（クロスデバイス）、なければ localStorage

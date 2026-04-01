@@ -311,6 +311,12 @@
 
       <button class="save-btn" id="saveBtn" type="button">変更を保存</button>
 
+      <!-- いいねした記事 -->
+      <p class="section-title" style="margin-top:8px">いいねした記事</p>
+      <div id="likedSection">
+        <div class="card"><div class="saved-loading">読み込み中...</div></div>
+      </div>
+
       <!-- 保存した記事 -->
       <p class="section-title" style="margin-top:8px">保存した記事</p>
       <div id="savedSection">
@@ -396,7 +402,8 @@
       }) : [];
       providerDisplay.textContent = providers.join(' / ') || '不明';
 
-      // 保存記事を読み込む
+      // いいね・保存記事を読み込む
+      loadLiked(user.id);
       loadSaved(user.id);
     });
 
@@ -478,6 +485,41 @@
         saveBtn.textContent = '変更を保存';
       }
     });
+
+    // ── いいね記事 ────────────────────────────────────────────────
+    var likedSection = document.getElementById('likedSection');
+
+    function renderLiked(articles) {
+      if (!articles.length) {
+        likedSection.innerHTML = '<div class="card"><div class="saved-empty">いいねした記事はまだありません。</div></div>';
+        return;
+      }
+      var html = '<div class="saved-list">' + articles.map(function(a) {
+        var date = a.likedAt ? new Date(a.likedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+        var thumb = a.image
+          ? '<img class="saved-thumb" src="' + esc(a.image) + '" alt="" loading="lazy" onerror="this.outerHTML=\'<div class=saved-thumb-placeholder>📄</div>\'">'
+          : '<div class="saved-thumb-placeholder">📄</div>';
+        return '<a class="saved-item" href="/article.html?id=' + esc(a.id) + '">' +
+          thumb +
+          '<div class="saved-info">' +
+            '<div class="saved-title">' + esc(a.title || '（タイトルなし）') + '</div>' +
+            '<div class="saved-date">' + date + ' にいいね</div>' +
+          '</div>' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="#c0392b" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+        '</a>';
+      }).join('') + '</div>';
+      likedSection.innerHTML = html;
+    }
+
+    function loadLiked(uid) {
+      if (!window.FirebaseUserLikes) {
+        likedSection.innerHTML = '<div class="card"><div class="saved-empty">読み込みに失敗しました。</div></div>';
+        return;
+      }
+      window.FirebaseUserLikes.getLiked(uid).then(renderLiked).catch(function() {
+        likedSection.innerHTML = '<div class="card"><div class="saved-empty">読み込みに失敗しました。</div></div>';
+      });
+    }
 
     // ── 保存記事 ──────────────────────────────────────────────────
     var savedSection = document.getElementById('savedSection');

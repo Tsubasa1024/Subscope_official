@@ -143,6 +143,36 @@
     }
   };
 
+  // ── ユーザーのいいねリスト（クロスデバイス対応） ─────────────────
+  window.FirebaseUserLikes = {
+    /** いいね状態をリアルタイム購読 */
+    onLiked: function (uid, articleId, callback) {
+      var ref = db.ref('userLikes/' + uid + '/' + articleId);
+      var handler = function (snap) { callback(snap.exists()); };
+      ref.on('value', handler);
+      return function () { ref.off('value', handler); };
+    },
+
+    /** いいねする */
+    like: function (uid, articleId, snapshot) {
+      return db.ref('userLikes/' + uid + '/' + articleId).set(snapshot);
+    },
+
+    /** いいねを解除する */
+    unlike: function (uid, articleId) {
+      return db.ref('userLikes/' + uid + '/' + articleId).remove();
+    },
+
+    /** ユーザーの全いいね記事を取得（likedAt の新しい順） */
+    getLiked: function (uid) {
+      return db.ref('userLikes/' + uid).once('value').then(function (snap) {
+        var list = [];
+        snap.forEach(function (child) { var v = child.val(); if (v) list.push(v); });
+        return list.sort(function (a, b) { return (b.likedAt || '') > (a.likedAt || '') ? 1 : -1; });
+      });
+    }
+  };
+
   // ── ユーザーの保存リスト（クロスデバイス対応） ──────────────────
   window.FirebaseUserSaves = {
     /** 保存状態をリアルタイム購読 */
