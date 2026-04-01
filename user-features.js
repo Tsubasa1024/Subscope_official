@@ -145,12 +145,17 @@
         const currentCount = results[1];
         if (!isPremium) {
           if (currentCount >= 3) {
-            const upgrade = confirm(
-              '保存できるのは3件までです。\n\n' +
-              'プレミアム会員（月額480円）なら保存数が無制限に！\n' +
-              '今すぐアップグレードしますか？'
-            );
-            if (upgrade) window.open('https://buy.stripe.com/test_7sYaEX5QJdJg75Oeha4ko00', '_blank');
+            if (typeof window.showPremiumModal === 'function') {
+              window.showPremiumModal();
+            } else {
+              // article.html 以外のページ用フォールバック
+              const upgrade = confirm(
+                '保存できるのは3件までです。\n\n' +
+                'プレミアム会員（月額480円）なら保存数が無制限に！\n' +
+                '今すぐアップグレードしますか？'
+              );
+              if (upgrade) window.open('https://buy.stripe.com/test_7sYaEX5QJdJg75Oeha4ko00', '_blank');
+            }
             return { saved: false };
           }
         }
