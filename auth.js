@@ -71,6 +71,14 @@
     _reinitHeader();
   });
 
+  // ── RTDB への書き込み（database SDK がない場合は黙って無視） ────
+  function _writeUserToDb(uid, data) {
+    try {
+      var database = firebase.database(app);
+      database.ref('users/' + uid).update(data);
+    } catch (e) { /* database SDK 未ロードの場合はスキップ */ }
+  }
+
   // ── 公開 API ─────────────────────────────────────────────────────
   var Auth = {
     /** メール + パスワード 新規登録 */
@@ -85,6 +93,7 @@
       await cred.user.updateProfile({ displayName: n });
       _currentUser = _makeSession(cred.user);
       _currentUser.name = n;
+      _writeUserToDb(cred.user.uid, { name: n });
       return _currentUser;
     },
 
@@ -117,6 +126,11 @@
         if (data.name     !== undefined) _currentUser.name     = data.name;
         if (data.photoURL !== undefined) _currentUser.photoURL = data.photoURL;
       }
+      // RTDB に名前を保存 → コメントに自動反映
+      var dbData = {};
+      if (data.name     !== undefined) dbData.name     = data.name;
+      if (data.photoURL !== undefined) dbData.photoURL = data.photoURL;
+      if (Object.keys(dbData).length) _writeUserToDb(user.uid, dbData);
       _reinitHeader();
     },
 

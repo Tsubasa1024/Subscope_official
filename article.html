@@ -965,8 +965,12 @@
           try {
             const u = Auth.getCurrentUser();
             if (window.FirebaseComments) {
+              // RTDB の最新名前を使ってコメントを投稿
+              const latestName = (window.FirebaseUsers
+                ? await window.FirebaseUsers.getNames([u.id]).then(function(m) { return m[u.id]; })
+                : null) || u.name;
               const newComment = await window.FirebaseComments.addComment(articleId, {
-                userId: u.id, userName: u.name,
+                userId: u.id, userName: latestName,
                 text: text, createdAt: new Date().toISOString()
               });
               // リスナーが反映される前に楽観的追加（ルール設定ミスでリスナーが無音失敗しても表示される）
@@ -1008,11 +1012,21 @@
           </div>`;
       }
 
+      // RTDB から最新の名前を取得してコメントに反映
+      async function applyLatestNames(comments) {
+        if (!window.FirebaseUsers || !comments.length) return comments;
+        var uids = [...new Set(comments.map(function(c) { return c.userId; }).filter(Boolean))];
+        var nameMap = await window.FirebaseUsers.getNames(uids);
+        return comments.map(function(c) {
+          return nameMap[c.userId] ? Object.assign({}, c, { userName: nameMap[c.userId] }) : c;
+        });
+      }
+
       // Firebase リアルタイムリスナーでコメント取得
       if (window.FirebaseComments) {
         if (_unsubscribeComments) _unsubscribeComments();
-        _unsubscribeComments = window.FirebaseComments.onComments(articleId, function (comments) {
-          _allComments = comments;
+        _unsubscribeComments = window.FirebaseComments.onComments(articleId, async function (comments) {
+          _allComments = await applyLatestNames(comments);
           renderComments();
         });
       } else {

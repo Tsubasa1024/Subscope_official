@@ -143,4 +143,33 @@
     }
   };
 
+  // ── ユーザープロフィール ─────────────────────────────────────────
+  // 名前変更を全コメントに反映するため、users/{uid}/name を正とする
+  window.FirebaseUsers = {
+    /** ユーザープロフィールを保存 */
+    setProfile: function (uid, data) {
+      return db.ref('users/' + uid).update(data);
+    },
+
+    /**
+     * 複数 UID の名前を一括取得
+     * @param {string[]} uids
+     * @returns {Promise<Object>} { uid: name } のマップ
+     */
+    getNames: function (uids) {
+      if (!uids || !uids.length) return Promise.resolve({});
+      return Promise.all(
+        uids.map(function (uid) {
+          return db.ref('users/' + uid + '/name').once('value').then(function (snap) {
+            return { uid: uid, name: snap.val() };
+          });
+        })
+      ).then(function (results) {
+        var map = {};
+        results.forEach(function (r) { if (r.name) map[r.uid] = r.name; });
+        return map;
+      });
+    }
+  };
+
 })();
